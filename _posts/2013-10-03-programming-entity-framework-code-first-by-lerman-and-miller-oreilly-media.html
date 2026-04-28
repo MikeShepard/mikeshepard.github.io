@@ -1,0 +1,38 @@
+---
+layout: post
+title: 'Programming Entity Framework: Code First by Lerman and Miller; O''Reilly Media'
+date: 2013-10-03 02:49:50.000000000 -05:00
+type: post
+parent_id: '0'
+published: true
+password: ''
+status: publish
+categories:
+- Book Review
+- Books
+tags:
+- Book Review
+meta:
+  _edit_last: '2'
+author:
+  login: mike
+  email: mshepard70@gmail.com
+  display_name: mike
+  first_name: ''
+  last_name: ''
+permalink: "/2013/10/03/programming-entity-framework-code-first-by-lerman-and-miller-oreilly-media/"
+---
+<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
+<html><body>
+<p>[caption id="attachment_534" align="alignright" width="145"]<a href="https://powershellstation.com/wp-content/uploads/2013/10/s1.gif"><img src="{{site.baseurl}}/assets/2013/10/s1.gif" alt="Programming Entity Framework Code First (Cover)" width="145" height="190" class="size-full wp-image-534"></a> Programming Entity Framework Code First[/caption]<br />
+Ok...my first book review.  Programming Entity Framework: Code First is a short book (under 200 pages) by Julia Lerman and Rowan Miller which covers the "Code First" method of developing Entity Framework development.  I'm not really plugged in to the Entity Framework community, but I recognized Julia Lerman's name from the many PluralSight courses and books that she's authored.  I didn't recognize Rowan Miller, but at the time of writing he was the program manager for the Entity Framework team at Microsoft, so I'm sure he brought a lot to the book.  One thing to note is that it was published in 2010 and was written using Visual Studio 2010 and Entity Framework 4.  Working along with the text I was in Visual Studio 2013 Preview and Entity Framework 5.  There were slight differences, but nothing that would really lessen the value of the book.</p>
+<p>Coming from a DBA and development background, I have mixed feelings about ORMs.  First of all, I get the whole object/relational impedance mismatch thing.  Developers in general don't like writing the data-access code for apps.  On the other hand, I don't mind writing SQL or data-access code that much, and often can find performance benefits from hand-coding the SQL.  I have supported developers who have used Entity Framework enough that I know that it does a pretty good job of generating rational SQL under normal circumstances, and have only seen a few cases where it was a contributing factor to a performance "incident".  That being said, having an ORM generate SQL against a database which DBAs designed is not at all the same thing as having the ORM generate the SQL <em>and</em> the database.  My curiosity about this scenario is what leads to this book review.</p>
+<p>As I mentioned in the opening, this is a short book (listed at 194 pages, but my PDF only has 192, including all of the "intentionally left blank" and non-content pages).  The reason that it is so short is that most of the explanation of Entity Framework programming is left to Lerman's earlier "Programming Entity Framework" which is a much heftier tome, at over 900 pages.  The fact that it's a short book is in its favor, however.  The Entity Framework team have done their job well in that the Code First development method is not very complicated (at least to begin).  The material in the book falls into 3 parts:  the introduction (chapters 1 and 2), the catalog of annotations and fluent configurations (chapters 3 through 5), and more advanced topics (chapters 6 through 8).</p>
+<p>The introduction gives you a history of Entity Framework, emphasizing the fact that developers were bound to the database (either an actual database or a logical model of the database) in earlier development models.  It then proceeds to show how the Code First model allows the developer to use POCOs (Plain-Old CLR Objects).  The objects used are taken from the application used in "Programming Entity Framework" and give a realistic baseline for the conversation as the book proceeds.  The tone in this section is very casual and is presented as a kind of a tutorial.  The authors are very good to warn the reader when code they are presenting will cause issues for upcoming steps, which is a nice detail.  Many books aren't careful in this and lead to lots of confusion when code subsequently fails to compile or the results don't match the text.</p>
+<p>In the second section, the authors cover the variety of configurations which can be made using either annotations or fluent configuration.  The presentation here has the feel of a catalog: listing each type of configuration, how it's accomplished, and what options are available.  There is still some tutorial narration alongside the catalog, but reading it didn't make me want to try the code, rather I just took stock of what was available.</p>
+<p>The third section was presented in a topic-by-topic basis, as the methods discussed varied from one to the next.  There were much longer code samples, and the applications were much more advanced.  Again, I really didn't feel the need to try each bit of code.  The discussion was enough for my purposes.</p>
+<p>All in all, I was very impressed.  The book did a great job of making me aware of the capabilities and limitations of Code First development, although I believe most of the limitations had been addressed by the team since the book's publication.  The writing was clear and the examples seemed to be very well chosen.  I would recommend this book without reservation to either developers who are interested in Entity Framework or for DBAs who are skeptical that a tool can generate a database with the complexity that they'd prefer.</p>
+<p>I'm looking forward to watching some of the authors' PluralSight courses to get up to speed on improvements.</p>
+<p>Mike</p>
+<p>Disclosure of Material Connection: I received one or more of the products or services mentioned above for free in the hope that I would mention it on my blog. Regardless, I only recommend products or services I use personally and believe will be good for my readers. I am disclosing this in accordance with the Federal Trade Commission’s 16 CFR, Part 255: “Guides Concerning the Use of Endorsements and Testimonials in Advertising.”</p>
+<p></body></html></p>

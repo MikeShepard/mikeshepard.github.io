@@ -1,0 +1,123 @@
+---
+layout: post
+title: Visio Constants in VisioBot3000
+date: 2018-01-01 21:54:38.000000000 -06:00
+type: post
+parent_id: '0'
+published: true
+password: ''
+status: publish
+categories:
+- Scripts
+- Visio
+tags:
+- COM
+- Constants
+- VisioBot3000
+meta:
+  _edit_last: '2'
+  _yoast_wpseo_focuskw_text_input: VisioBot3000
+  _yoast_wpseo_focuskw: VisioBot3000
+  _yoast_wpseo_linkdex: '82'
+  _yoast_wpseo_content_score: '30'
+  _yoast_wpseo_primary_category: '7'
+  _syntaxhighlighter_encoded: '1'
+author:
+  login: mike
+  email: mshepard70@gmail.com
+  display_name: mike
+  first_name: ''
+  last_name: ''
+permalink: "/2018/01/01/visio-constants-visiobot3000/"
+---
+<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
+<html><body></p>
+<p>One of the great things about doing Office automation (that is, COM automation of Office apps) is that all of the examples are filled with tons of references to constants.  A goal of VisioBot3000 was to make using those constants as easy as possible.</p>
+<p>I mentioned the issue of having so many constants to deal with in <a href="https://powershellstation.com/2016/04/02/powershell-and-visio-part-5-connections/">a post</a> over 18 months ago, but haven't ever gotten around to showing how VisioBot3000 gives you access to some (most?) of the Visio constants.</p>
+<p>First, here's a snippet of code from that post:<br />
+[powershell]<br />
+$connector.CellsSRC(1,23,10) = 16<br />
+$connector.CellsSRC(1,23,19) = 1<br />
+[/powershell]</p>
+<p>which includes the following constants (except that it uses the values rather than the names):</p>
+<ul>
+<li>visSectionObject = 1</li>
+<li>visRowShapeLayout = 23</li>
+<li>visSLORouteStyle = 10</li>
+<li>visLORouteCenterToCenter = 16</li>
+<li>visSLOLineRouteExt = 19</li>
+<li>visLORouteExtStraight = 1</li>
+</ul>
+<h3>VisioBot3000 Constants Take 1</h3>
+<p>So, the straight-forward thing to do would be to define a variable for each of the constants like this:<br />
+[powershell]<br />
+$visSectionObject = 1<br />
+$visRowShapeLayout = 23<br />
+$visSLORouteStyle = 10<br />
+$visLORouteCenterToCenter = 16<br />
+$visSLOLineRouteExt = 19<br />
+$visLORouteExtStraight = 1<br />
+[/powershell]</p>
+<p>With those definitions (in the module, of course), we could re-write the code above like this:<br />
+[powershell]<br />
+$connector.CellsSRC($visSectionObject,$visRowShapeLayout,$visSLORouteStyle) = $visLORouteCenterToCenter<br />
+$connector.CellsSRC($visSectionObject,$visRowShapeLayout,$visSLOLineRouteExt) = $visLORouteExtStraight<br />
+[/powershell]</p>
+<p>That looks a lot less cryptic, or at least the constant names go a long way towards helping explain what's going on.  </p>
+<p>Even better, if we had all of the Visio constants defined this way it would make translating example code (and recorded macro code) a lot easier.</p>
+<p>Wait...there's a problem.</p>
+<p>There are over 2000 constants defined.  Guess how long it takes PowerShell to parse and execute over 2000 assignment statements?  Too long, as in several seconds.</p>
+<h3>VisioBot3000 Constants Take 2</h3>
+<p>\<br />
+So, my original approach was to take a list of Visio constants from a web page which doesn't exist anymore (on PowerShell.com, redirects to an Idera site now).  Some friendly PowerShell person had gone to the trouble of creating PowerShell assignment statements for each of the Visio constants, at least up to a point.  I ended up adding a couple of dozen, but that's a drop in the bucket.  There were a whopping 2637 assignment statements.</p>
+<p>When I added that code to the VisioBot3000 module, importing the module now took a noticeable amount of time.  Another fun issue is that we just added 2637 variables to the session, which causes some fun with tab completion (think $vis<tab>....waiting...waiting).</p>
+<p>Since that wasn't a really good solution, I thought about what would be better.</p>
+<p>My first thought would be an enumeration (enum in PowerShell).  I thought briefly about lots of enumerations (one for each "set" of constants), but quickly discarded that idea as unusable.  </p>
+<p>A single enumeration would be an ok solution, but it would mean that VisioBot3000 only worked on PowerShell 5.0 or above.  No dice (at least at this point).</p>
+<p>I decided instead to create a single object called $Vis that had each constant as a property.</p>
+<p>To do that, I needed a hashtable with 2637 members.  I ended up using an ordered hashtable, but that doesn't really change much.</p>
+<p>The code in question is in the VisioConstants.ps1 file in VisioBot3000.  It looks something like this:<br />
+[powershell]<br />
+$VIS=[Ordered]@{<br />
+#Public Enum VisArcSweepFlags<br />
+ArcSweepFlagConcave = 0<br />
+ArcSweepFlagConvex = 1<br />
+#End Enum </p>
+<p>#Public Enum VisAutoConnectDir<br />
+AutoConnectDirDown = 2<br />
+AutoConnectDirLeft = 3<br />
+AutoConnectDirNone = 0<br />
+AutoConnectDirRight = 4<br />
+AutoConnectDirUp = 1<br />
+#End Enum </p>
+<p># SNIP !!!!</p>
+<p>#Public Enum VisDiagramServices<br />
+ServiceNone = 0<br />
+ServiceAll = -1<br />
+ServiceAutoSizePage = 1<br />
+ServiceStructureBasic = 2<br />
+ServiceStructureFull = 4<br />
+ServiceVersion140 = 7<br />
+ServiceVersion150 = 8</p>
+<p>}<br />
+#End Enum </p>
+<p>$VIS=new-object PSCustomObject -Property $VIS<br />
+[/powershell]</p>
+<p>It turns out that the code runs quite a bit faster than the individual assignments and now there's only one variable exposed.  Intellisense is a bit slow to load the first time you do $Vis.<tab>, but it's pretty quick after that.</p>
+<p>The re-written code above looks like this after this change:<br />
+[powershell]<br />
+$connector.CellsSRC($vis.SectionObject,$vis.RowShapeLayout,$vis.SLORouteStyle) = $vis.LORouteCenterToCenter<br />
+$connector.CellsSRC($vis.SectionObject,$vis.RowShapeLayout,$vis.SLOLineRouteExt) = $vis.LORouteExtStraight<br />
+[/powershell]</p>
+<p>It's a tiny bit less direct, but it's really easy to get used to.</p>
+<p>In the spirit full disclosure, I should mention that a few of the refactored names of constants had to be quoted in order to be valid syntax in PowerShell, like these:<br />
+[powershell]<br />
+'1DBeginX' = 0<br />
+'1DBeginY' = 1<br />
+'1DEndX' = 2<br />
+'1DEndY' = 3<br />
+[/powershell]</p>
+<p>That's enough for now.  I think I'm about to start back to work on VisioBot3000...any ideas on features that would be nice to have (or are clearly missing)?</p>
+<p>--Mike<br />
+</tab></tab><br />
+</body></html></p>

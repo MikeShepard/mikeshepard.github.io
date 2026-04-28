@@ -1,0 +1,71 @@
+---
+layout: post
+title: Flexible Filtering
+date: 2009-09-23 16:21:13.000000000 -05:00
+type: post
+parent_id: '0'
+published: true
+password: ''
+status: publish
+categories:
+- Scripts
+tags: []
+meta:
+  _edit_last: '2'
+  _syntaxhighlighter_encoded: '1'
+author:
+  login: mike
+  email: mshepard70@gmail.com
+  display_name: mike
+  first_name: ''
+  last_name: ''
+permalink: "/2009/09/23/flexible-filtering/"
+---
+<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
+<html><body></p>
+<p>When writing a "get-" function in PowerShell, you often run into the issue of filtering your data.  Do you want to include any filtering parameters?  Do you want to allow lists of values?  Do you want to provide "include" or "exclude" parameters?  What about wildcards?  I got tired of writing the same kind of code over, so I wrote a fairly general-purpose filter-list function.</p>
+<p>Here it is (example usages follow):</p>
+<p>[powershell]<br />
+function filter-list($list, $filterString,$propertyName,[switch]$help ){<br />
+ if ($help)<br />
+ {<br />
+ $msg = @"<br />
+Filter a list using a filterstring and a property name. Wildcards are allowed, as well as<br />
+a prefix of Not:, which means to include values that don't match the pattern.<br />
+If filterString is an array, it lists property values that will remain in the list.</p>
+<p>Usage: filter-list list filterString propertyname [-help]<br />
+"@<br />
+ Write-Host $msg<br />
+ return<br />
+ }<br />
+ if (!$list) {return}<br />
+ if ($filterString -is [Array]){<br />
+ $list = @($list | ?{ $filterString -icontains $_.$propertyName})<br />
+ } else<br />
+ {<br />
+ if (($filterString) -and ($filterString -ne '')){<br />
+ if ($filterString -ilike 'Not:*'){<br />
+ $list = @($list | ? {$_.$propertyName -inotlike $filterString.Replace('Not:','')})<br />
+ } else {<br />
+ $list = @($list | ? {$_.$propertyName -ilike $filterString})<br />
+ }<br />
+ }<br />
+ }<br />
+ return $list<br />
+}<br />
+[/powershell]</p>
+<p>Here's a simple function (not really useful) that uses this:</p>
+<p>[powershell]function new-dir{<br />
+ Param($path, $extension)<br />
+ $list=dir $path<br />
+ $list=filter-list $list $extension Extension</p>
+<p> return $list<br />
+}</p>
+<p>new-dir -path c:temp -ext '.LOG','.TXT'<br />
+new-dir -path c:temp -ext 'Not:.LOG'<br />
+new-dir -path c:temp -ext 'Not:.c*'<br />
+[/powershell]</p>
+<p>Now, without really writing any new code, we have a parameter that can take simple values, lists of values, wildcards, and include/exclude logic.</p>
+<p>Let me know what you think of this.</p>
+<p>Mike</p>
+<p></body></html></p>

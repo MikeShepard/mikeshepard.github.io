@@ -1,0 +1,77 @@
+---
+layout: post
+title: The Two Faces of the ISE Run Button (and a bit of bonus evil)
+date: 2015-11-25 14:55:06.000000000 -06:00
+type: post
+parent_id: '0'
+published: true
+password: ''
+status: publish
+categories:
+- Discussion
+- ISE
+- Scripts
+tags:
+- ISE
+- Scope
+- scripts
+meta:
+  _edit_last: '2'
+  _syntaxhighlighter_encoded: '1'
+author:
+  login: mike
+  email: mshepard70@gmail.com
+  display_name: mike
+  first_name: ''
+  last_name: ''
+permalink: "/2015/11/25/run-button/"
+---
+<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
+<html><body>
+<p>I love the ISE. I've used other "environments", but always end up using the good old ISE. I do use the awesome ISESteroids module by Tobias Weltner (<a href="http://powertheshell.com">powertheshell.com</a>), but most of the time you can find me in the unadorned, vanilla ISE.</p>
+<p>With that bit of disclaimer out of the way, there is something that came to my attention recently. The Run button on the toolbar does two different things, although it doesn't make a big deal about it. The two things are similar enough that it's easy to miss, and subtle enough that the difference isn't important most of the time.</p>
+<p>The two things are, unsurprisingly, both concerned with running what's in the current tab. Since it's the Run button, you'd expect that to be the case.</p>
+<p><strong>Face Number 1</strong><br />
+The first thing that the Run button does, is that it runs the code that's in the current editor tab. It does this by copying the text as input down in the console area. An example is seen in the image below:<br />
+<a href="https://powershellstation.com/wp-content/uploads/2014/10/Screenshot_run_unsaved.png"><img class="alignnone size-full wp-image-761" src="{{site.baseurl}}/assets/2015/11/Screenshot_run_unsaved.png" alt="Screenshot_run_unsaved" width="732" height="250"></a></p>
+<p>You can clearly see that the text in the editor has been copied to the command-line.</p>
+<p><strong>Face Number 2</strong></p>
+<p>The second thing it does it it runs the <em>script</em> that's loaded in the current tab. It doesn't just run the script either, it actually dot-sources it (i.e. runs the script in the global scope).</p>
+<p>The behavior of the Run button depends entirely on whether the tab has been saved as a script file (.ps1) before. If so, it runs (dot-sources) the script. If not, it executes the text that's in the tab. Note in the first screenshot that the tab in the ISE says "Untitled.ps1", which means it has not been saved. In the second, it says "RunButton.ps1", so it obviously has been saved at that point.<a href="https://powershellstation.com/wp-content/uploads/2014/10/screenshot_run_saved.png"><img class="alignnone size-full wp-image-762" src="{{site.baseurl}}/assets/2015/11/screenshot_run_saved.png" alt="screenshot_run_saved" width="822" height="301"></a></p>
+<p>The great thing about this behavior is that you can run stuff without saving it. Once you decide to save it, though (perhaps because you want to debug it), the same button and hotkeys run the script in almost exactly the same way.</p>
+<p>If you remember in my last post <a href="https://powershellstation.com/2015/11/02/blogging-and-rubber-duck-debugging/">Blogging and Rubber Duck Debugging</a>, I discussed how sometimes writing a blog post makes things more clear.  Fortunately I usually realize where my thinking has gone wrong before I hit "publish", but not always.  This post, for instance, has sat in my drafts folder since October of 2014 because I wasn't sure about it.</p>
+<p>I was certain that I had a script which worked differently in the two "modes" of the Run button.  I remember vividly typing the (not very complex) script in my ISE and running it successfully.  I saved the file and gave it to someone else to run "for real", and it failed.  I tracked the failure down to the fact that I was using scope modifiers (script: or global:) and they acted differently in an unsaved editor versus in a file.  I am unable to reproduce the result now, though, so I am doubting my sanity.  It does seem possible, though, that the script: scope in an actual script and in the global scope</p>
+<p>NEWSBREAK!</p>
+<p>Typing the above <del>confession</del> paragraph was enough to dislodge the bad thinking!  Rubber duck debugging to the rescue.</p>
+<p>Here's the simplified code that I started to blog about 13 months ago:</p>
+<p>[powershell]<br />
+$values =<br />
+$processed=@()<br />
+function ProcessValue{<br />
+Param($value)<br />
+ if($processed -contains $value){<br />
+    "$value already processed"<br />
+ } else {<br />
+    "Processing $value"<br />
+    $global:processed+=$value<br />
+ }<br />
+}<br />
+'Value1','Value2','Value3','Value1'| foreach {ProcessValue $_}<br />
+[/powershell]</p>
+<p>The code is pretty simple. It "processes" values as long as they haven't already been "processed" by the function.</p>
+<p>My expectation running the script (and example at the bottom) is that it would show that it processed the first three values and then reported that "value1" was already processed. Pretty simple, and that's what it shows in the ISE when you click run.<br />
+<a href="https://powershellstation.com/wp-content/uploads/2014/10/screenshot_testscope_ISE.ps1_.png"><img class="alignnone size-full wp-image-765" src="{{site.baseurl}}/assets/2015/11/screenshot_testscope_ISE.ps1_.png" alt="screenshot_testscope_ISE.ps1" width="662" height="434"></a></p>
+<p>The problem isn't in fact because the run button works differently if you've saved the file or not. The script failed when the other user ran it because he "ran" it. He didn't load it into the ISE and click the Run button, he executed the script. The issue arises because dot-sourcing a script and running the script are not the same.</p>
+<p>To illustrate, here's what it looks like when you run the function:<br />
+<a href="https://powershellstation.com/wp-content/uploads/2014/10/screenshot_testscope_run.ps1_.png"><img class="alignnone size-full wp-image-766" src="{{site.baseurl}}/assets/2015/11/screenshot_testscope_run.ps1_.png" alt="screenshot_testscope_run.ps1" width="664" height="409"></a></p>
+<p>Notice that it failed to see that value1 had already been processed. Dot-sourcing the script works just like the Run button.<br />
+<a href="https://powershellstation.com/wp-content/uploads/2014/10/screenshot_testscope_dotsource.ps1_.png"><img class="alignnone size-full wp-image-768" src="{{site.baseurl}}/assets/2015/11/screenshot_testscope_dotsource.ps1_.png" alt="screenshot_testscope_dotsource.ps1" width="570" height="75"></a></p>
+<p>The "bug" in the script is that the first statement doesn't include the scope modifier when it initializes the $processed variable. Since when the script is dot-sourced, that first instruction is already in the global scope, the variable is initialized as a list and it all works fine. When you run the script without dot-sourcing it, the initialization runs in the script: scope rather than the global scope and the line in the loop that is supposed to be adding the value to a list is instead concatenating the values as strings. Because of that, the -contains operator never returns true and everything gets processed every time. One more screenshot to confirm that:</p>
+<p><a href="https://powershellstation.com/wp-content/uploads/2014/10/screenshot_testscope_run_variable.ps1_.png"><img class="alignnone size-full wp-image-769" src="{{site.baseurl}}/assets/2015/11/screenshot_testscope_run_variable.ps1_.png" alt="screenshot_testscope_run_variable.ps1" width="544" height="117"></a></p>
+<p><strong>Conclusion</strong><br />
+So apparently the two faces of the Run button aren't so bad. So what's the bit in the title about "bonus evil"? One tiny problem with the Run button. When the run button dot-sources a file, it doesn't use the dot-source syntax in the ISE. If you understand what's going on, it's not a big deal. If you don't understand the difference (between running and dot-sourcing), you can end up beating your head against the wall trying to figure out what's going on.</p>
+<p><strong>Postscript</strong><br />
+I'm starting to think that using scope modifiers is a code smell. Not necessarily bad, but might point out that something could be done better.</p>
+<p>Thanks for sticking with me on this "longer than usual" post. Let me know what you think in the comments!</p>
+<p>-Mike</p>
+<p></body></html></p>

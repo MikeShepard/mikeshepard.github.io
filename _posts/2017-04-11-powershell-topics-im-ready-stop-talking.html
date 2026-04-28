@@ -1,0 +1,62 @@
+---
+layout: post
+title: PowerShell Topics I'm Ready to Stop Talking About
+date: 2017-04-11 19:47:16.000000000 -05:00
+type: post
+parent_id: '0'
+published: true
+password: ''
+status: publish
+categories:
+- Rant
+tags: []
+meta:
+  _yoast_wpseo_is_cornerstone: ''
+  _edit_last: '2'
+  _yoast_wpseo_content_score: '90'
+  _yoast_wpseo_primary_category: '60'
+author:
+  login: mike
+  email: mshepard70@gmail.com
+  display_name: mike
+  first_name: ''
+  last_name: ''
+permalink: "/2017/04/11/powershell-topics-im-ready-stop-talking/"
+---
+<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
+<html><body></p>
+<p>Part of me wants to know every bit of PowerShell there is.  I know that's true about me, so  I don't have much of an input filter.  If the content is PowerShell-related, I'm interested.</p>
+<p>When it comes to sharing, however, there's clearly got to be a point at which I shouldn't be talking about something.  Here are a few items that I've spoken or taught about that I think are going to get pulled from my routine.</p>
+<p> </p>
+<ol>
+<li>The TRAP statement</li>
+<li>Obscure Operators</li>
+<li>Filters</li>
+<li>Tee-Object</li>
+<li>(bonus) Workflows</li>
+</ol>
+<p>Let's go through them one by one and see why.  And yes, I know that I'm talking about them, but this should be the last time (and this time I mean it).</p>
+<h2>The  TRAP statement</h2>
+<p>The trap statement is the error handling statement that made the cut for v1.0 of PowerShell.  If you weren't a PowerShell user at that time you probably haven't ever used it, favoring TRY/CATCH/FINALLY.</p>
+<p>Instead of being a block-structured statement like TRY, TRAP worked in a scope, and functioned like a VB ON ERROR GOTO.  The rules for program flow after a TRAP statement (which I've long forgotten) made understanding code that used TRAP into....a trap.</p>
+<p>The advice I have given students in the past is, "If you stumble upon some code that uses TRAP, look for other code."</p>
+<h2>Obscure Operators</h2>
+<p>PowerShell has a lot of operators, and that's a good thing.  On the other hand, I'm not sure why I need to tell people about every single operator.  Some of the operators, though, are obscure enough that I haven't used them in any language more than a handful of times in the last thirty years.  Candidates for expulsion (from discussion, not from the language) include:</p>
+<ul>
+<li>-SHL, -SHR    (I guess someone does bitwise shifting, but I haven't ever needed this except in machine language)</li>
+<li>*=, /=, %=      (I can see what these do, but I don't ever do much arithmetic so don't find the need for these "shorthand" operators)</li>
+</ul>
+<h2>Filters</h2>
+<p>Filters are another PowerShell 1.0 topic.  They are one of the ways to use the pipeline for input without using advanced functions and parameter attributes.  They're pretty slick, but are easily replaced with an advanced function with a process block.  In the last 5 years, I've only seen filters used once (by Rob Campbell at a user group meeting).</p>
+<h2>Tee-Object</h2>
+<p>I generally consider the -Object cmdlets to be the backbone of PowerShell.  They allow you to deal with pipeline objects "once-and-for-all" and not write a bunch of plumbing code in every function.  For that reason, I like to talk about all of them.  Tee-Object, however, might get sent to an appendix, because I don't see anyone using it and don't use it myself.  This one might be changing as we see (being optimistic) people with more Linux backgrounds submitting PowerShell code.  They use tee, right?  I find that the -outvariable common parameter serves most of the need I would have for Tee-Object, so, it makes this list.</p>
+<p>And finally,</p>
+<h2>Workflows</h2>
+<p>Workflows sound awesome.  When you talk about workflows you get to use adjectives like "robust", and "resilient".  And don't get me wrong Foreach-Object -Parallel is pretty sweet.</p>
+<p>On the other hand, writing PowerShell in the workflow-subset of PowerShell is tricky.  Remembering what needs to be an inlinescript and how to use/access variables in each kind of block is not fun.</p>
+<p>I haven't ever used workflows for anything interesting, and have only heard a few examples of them being used by coworkers.  Those examples could mostly be summed up by "I needed parallel".</p>
+<p>It won't be hard for me to stop talking about workflows, as I've never really talked about them.</p>
+<p> </p>
+<p>Before I get flamed because I included/excluded your favorite topic, these are just for me.  If you like one of these, sell it!  You might convince me to change my mind.  Is there something that you think should fade away?  Let me know what it is.  I might be able to change your mind.</p>
+<p> </p>
+<p>--Mike</body></html></p>

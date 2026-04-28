@@ -1,0 +1,84 @@
+---
+layout: post
+title: 'PowerShell-Specific Code Smells: Building output using +='
+date: 2013-11-03 21:54:21.000000000 -06:00
+type: post
+parent_id: '0'
+published: true
+password: ''
+status: publish
+categories:
+- Scripts
+tags: []
+meta:
+  _edit_last: '2'
+  _syntaxhighlighter_encoded: '1'
+author:
+  login: mike
+  email: mshepard70@gmail.com
+  display_name: mike
+  first_name: ''
+  last_name: ''
+permalink: "/2013/11/03/powershell-specific-code-smells-building-output-using/"
+---
+<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
+<html><body></p>
+<p>Before I cover this specific code smell, I should probably explain one thing. The presence of code smells doesn't necessarily mean that the code in question isn't functional. In the example I gave last time (the extra long method), there's no reason to think that just because a method is a thousand lines long that it doesn't work. There are lots of examples of code that is not optimally coded that works fine nonetheless. The focus here is that you're causing more work: Either up-front work in that the code is longer or more complicated than necessary, or later on, when someone (maybe you?) needs to maintain the code.</p>
+<p>With that said, we should talk about aggregating output using a collection object and the += compound assignment operator. This is such a common pattern in programming languages that it's a hard thing not to do in PowerShell, but there are some good reasons not to. To help understand what I mean, let's look at some sample code.</p>
+<p>[powershell]<br />
+function get-sqlservices {<br />
+param($computers)<br />
+    foreach ($computer in $computers){<br />
+           $output+=get-wmiobject -class Win32_Service -filter "Name like 'SQL%'"<br />
+    }<br />
+    return $output<br />
+}</p>
+<p>$mycomputers='localhost','127.0.0.1',$env:COMPUTERNAME<br />
+measure-command{<br />
+get-sqlservices -computers $mycomputers | select -first 1<br />
+}<br />
+[/powershell]</p>
+<p>Before we discuss this code let me be clear: this is not great code for several reasons. For the purposes of discussion, though, let's just look at how the output is handled. As I mentioned, this is how you'd do something like this in most programming languages and it works fine. On my laptop it ran in 723 milliseconds. If we change the list of computers to a longer list it takes considerably longer:</p>
+<p>[powershell]<br />
+$mycomputers=('localhost','127.0.0.1',$env:COMPUTERNAME) * 100<br />
+[/powershell]</p>
+<blockquote><p>Days : 0<br />
+Hours : 0<br />
+Minutes : 0<br />
+Seconds : 51<br />
+Milliseconds : 486<br />
+Ticks : 514863437<br />
+TotalDays : 0.000595906755787037<br />
+TotalHours : 0.0143017621388889<br />
+TotalMinutes : 0.858105728333333<br />
+TotalSeconds : 51.4863437<br />
+TotalMilliseconds : 51486.3437</p></blockquote>
+<p>Changing the function to send the output to the pipeline looks like this:<br />
+[powershell]<br />
+function get-sqlservices2 {<br />
+param($computers)<br />
+    foreach ($computer in $computers){<br />
+           get-wmiobject -class Win32_Service -filter "Name like 'SQL%'"<br />
+    }<br />
+}</p>
+<p>$mycomputers=('localhost','127.0.0.1',$env:COMPUTERNAME) * 100<br />
+measure-command{<br />
+get-sqlservices2 -computers $mycomputers | select -first 1<br />
+}<br />
+[/powershell]</p>
+<blockquote><p>Days              : 0<br />
+Hours             : 0<br />
+Minutes           : 0<br />
+Seconds           : 0<br />
+Milliseconds      : 478<br />
+Ticks             : 4782609<br />
+TotalDays         : 5.53542708333333E-06<br />
+TotalHours        : 0.00013285025<br />
+TotalMinutes      : 0.007971015<br />
+TotalSeconds      : 0.4782609<br />
+TotalMilliseconds : 478.2609</p></blockquote>
+<p>The code doesn't look much different.  The only changes are that we're not assigning the output of the get-wmiobject cmdlet to anything and we don't have an explicit return.  This is a point of confusion to most people who come to PowerShell from a traditional imperative language (C#, Java, VB, etc.).  In a PowerShell script, any value that isn't "captured" either by assigning it to a variable or piping it somewhere is added to the output pipeline.  The "return value" of the function is the combination of all such values and the value in a return statement (if present).  So in this case, the output of the new function is the same as the output of the second.  Changing it to use the pipeline didn't change the value at all.  So why is this considered a code smell?  The reason is that the second script runs faster than the first did.  In fact, it runs faster with 300 computers (100 copies of the list of 3) than the first did with 3 computers.  Why is it so much faster?  In PowerShell 3.0, the implementation of select-object was changed to stop the pipeline after the number of objects requested in the -first parameter.  In other words, even though we passed 300 servers to the function, it stopped after it got the first result back from get-wmiobject from the first server.<br />
+You're not always going to be using -first, but even when you're not the values in the pipeline are available to downstream cmdlets before the function is done completing (if you don't use +=).  If you're simply sending the output to the console you will begin to see the results immediately rather than having to wait.  Another issue arises when your aggregating function has throws an exception before it's done.  If you didn't hit the return statement, you won't see any results at all.  Being able to see the results up to the point of the error will probably help you track down where the error was.  What if there were thousands of servers (or your dataset was considerably larger for some other reason)?  Your process would eat memory as it built a huge collection.  With pipeline output there's no reason for the process to be using much memory at all.  Finally, with pipeline output there's one less thing to keep track of.  One less variable means one less place to make a mistake (accidentally use = at some point instead of +=, misspell the variable name, etc.).  </p>
+<p>I hope you can see that with PowerShell, following this common pattern is not a good thing.</p>
+<p>Let me know what you think.</p>
+<p>Mike</body></html></p>

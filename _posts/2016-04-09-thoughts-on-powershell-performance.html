@@ -1,0 +1,48 @@
+---
+layout: post
+title: Thoughts on PowerShell Performance
+date: 2016-04-09 12:22:35.000000000 -05:00
+type: post
+parent_id: '0'
+published: true
+password: ''
+status: publish
+categories:
+- Discussion
+- Rant
+- Scripts
+tags:
+- Performance
+meta:
+  _edit_last: '2'
+author:
+  login: mike
+  email: mshepard70@gmail.com
+  display_name: mike
+  first_name: ''
+  last_name: ''
+permalink: "/2016/04/09/thoughts-on-powershell-performance/"
+---
+<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
+<html><body></p>
+<p>Last night Rob Campbell (@mjolinor) and I were talking after his presentation on performance when using Get-Content with -ReadCount and different string matching techniques and I realized it's time to verbalize my thoughts on performance in PowerShell.</p>
+<h2>Part 1 - It doesn't matter</h2>
+<p>When people ask me if PowerShell is fast, my first response is usually either "It doesn't matter" or "I don't care".  It's not so much that I don't care about it being fast (I kind of do) or that it isn't fast (it is), but that when writing PowerShell solutions the primary goal in my mind should always be operator efficiency.  That is, does this make my life as a PowerShell user easier.  The main points for me are:</p>
+<ul>
+<li>Consistency (does it always do the same thing)</li>
+<li>Repeatability (is this something I can use over and over)</li>
+<li>Accountability (does this log, audit, warn, etc.)</li>
+<li>Maintainability (will I be able to change the code easily if I need to)</li>
+</ul>
+<h2>Part 2 - It sometimes does matter</h2>
+<p>With the understanding that the main thing (part 1) is covered, the truth is that sometimes performance does matter.  If you're processing a single file with a dozen lines in it, it would be hard to have a solution that wasn't acceptable performance-wise.  Dealing with a directory full of multi-gigabyte files presents a different challenge.</p>
+<p>When you're dealing with a huge volume of data, or operating under time constraints (near real-time alerts, for instance) it's possible that you might want to think about optimizing your code.  In these instances, considerations like what @mjolinor was talking about (e.g. using read-count to speed things up, using -replace on arrays rather than single strings) make perfect sense.</p>
+<h2>Part 3 - the problem might not be what you think it is</h2>
+<p>When dealing with performance, it's easy to try to squeeze a few milliseconds out of an operation.  If the operation is happening millions (billions?) of times, that will definitely have a measurable effect.  Often though, even more substantial gains can be found by changing to a more efficient agorithm.</p>
+<p>As a (trivial) example, you could spend a lot of time trying to optimize the statements in a bubble-sort routine.  (sidebar...does anyone actually write sort routines anymore?)  You could conceivably double or triple the speed of the routine, but when dealing with a large dataset, you'd still be better off with a better sorting algorithm.</p>
+<h2>Part 4 - The moral of the story</h2>
+<p>Don't stop investigating different approaches to see what's faster.</p>
+<p>Don't just use "technique X" because it's the fastest performing.  Consider code readability, and maintainability along with things like how often the code is run.  No point in optimizing a process that only runs once and takes 10 minutes.  Who cares if it ran in 3 minutes instead?  You probably spent more than 7 minutes "optimizing" the code.</p>
+<p>PowerShell optimizes the user, not the code.  Make sure when you spend time making the code fast, you haven't made the user slow.</p>
+<p>Feel free to disagree in the comments!</p>
+<p>--Mike</body></html></p>

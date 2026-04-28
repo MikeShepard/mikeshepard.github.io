@@ -1,0 +1,75 @@
+---
+layout: post
+title: Is it just me? (Or does PowerShell remind you of SQL?)
+date: 2009-09-16 18:40:39.000000000 -05:00
+type: post
+parent_id: '0'
+published: true
+password: ''
+status: publish
+categories:
+- Discussion
+tags:
+- PowerShell
+meta:
+  _edit_last: '2'
+author:
+  login: mike
+  email: mshepard70@gmail.com
+  display_name: mike
+  first_name: ''
+  last_name: ''
+permalink: "/2009/09/16/is-it-just-me-or-does-powershell-remind-you-of-sql/"
+---
+<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
+<html><body></p>
+<p>When preparing a PowerShell training class for a group of DBAs, I realized that there were some parallels between basic SQL and basic PowerShell commands.</p>
+<p>A (very) basic SQL statement has the form:</p>
+<pre>SELECT &lt;COLUMNS&gt;
+FROM &lt;TABLE&gt;
+WHERE &lt;CONDITION&gt;
+ORDER BY &lt;EXPRESSION&gt;</pre>
+<p>I noticed that a very common idiom for PowerShell pipelines* was:</p>
+<pre>&lt;data source cmdlet&gt; | <strong>select-object</strong> &lt;properties&gt; |<strong> where-object</strong> &lt;CONDITION&gt; |  <strong>sort-object</strong> &lt;EXPRESSION&gt;
+ 
+</pre>
+<p>By "&lt;data source cmdlet&gt;”, I mean some cmdlet that puts a bunch of objects in the pipeline, like get-childitem, get-process, get-task, etc.</p>
+<p>Part of the power of SQL is that it doesn’t matter what kind of data is in the tables, the same form of SQL statement works the same way (predictability).  This is one of the things I love about PowerShell.  It doesn’t matter what kinds of data is returned by a cmdlet.  The same form of PowerShell pipeline* will perform the same kind of predictable operations on it.  I know that this is often mentioned in tutorials and videos about PowerShell, but this was when it really struck me. </p>
+<p>A few other SQL/PowerShell comparisons might be:</p>
+<table border="0" cellspacing="0" cellpadding="2" width="401">
+<tbody>
+<tr>
+<td width="198" align="center" valign="top">
+<p align="center"><strong>SQL</strong></p>
+</td>
+<td width="201" valign="top">
+<p align="center"><strong>PowerShell</strong></p>
+</td>
+</tr>
+<tr>
+<td width="198" valign="top">GROUP BY</td>
+<td width="201" valign="top">group-object</td>
+</tr>
+<tr>
+<td width="198" valign="top">SUM(), AVG(), etc.</td>
+<td width="201" valign="top">measure-object</td>
+</tr>
+<tr>
+<td width="198" valign="top">Cursors</td>
+<td width="201" valign="top">foreach-object loops</td>
+</tr>
+<tr>
+<td width="198" valign="top">SELECT DISTINCT</td>
+<td width="201" valign="top">select-object –unique</td>
+</tr>
+<tr>
+<td width="198" valign="top">SELECT TOP n</td>
+<td width="202" valign="top">select-object –first n</td>
+</tr>
+</tbody>
+</table>
+<p> </p>
+<p>Obviously, this comparison breaks down pretty quickly.  There isn't really a parallel that I can find to JOIN statements, which make SQL so powerful, and clearly there's a lot of powershell scripts that don't fit the pattern I'm describing.  I think, though, that it's a useful comparison and can help get people "over the hump" in their quest to master PowerShell.</p>
+<p>Let me know what you think.</p>
+<p>Mike</p>
+<p>* A Pipeline in PowerShell is a sequence of cmdlets where each takes the output of the previous cmdlet as its input.</body></html></p>

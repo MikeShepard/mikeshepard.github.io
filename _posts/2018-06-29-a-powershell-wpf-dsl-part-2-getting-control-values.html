@@ -1,0 +1,79 @@
+---
+layout: post
+title: A PowerShell WPF DSL (Part 2) - Getting Control Values
+date: 2018-06-29 22:10:45.000000000 -05:00
+type: post
+parent_id: '0'
+published: true
+password: ''
+status: publish
+categories:
+- Scripts
+tags: []
+meta:
+  _edit_last: '2'
+  _syntaxhighlighter_encoded: '1'
+  _yoast_wpseo_content_score: '90'
+  _yoast_wpseo_primary_category: ''
+author:
+  login: mike
+  email: mshepard70@gmail.com
+  display_name: mike
+  first_name: ''
+  last_name: ''
+permalink: "/2018/06/29/a-powershell-wpf-dsl-part-2-getting-control-values/"
+---
+<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
+<html><body></p>
+<h2>Some Background</h2>
+<p>Before I start, I should probably take a minute to explain what a DSL is and why you would want to use one.</p>
+<p>A <strong>DSL</strong> (domain-specific language) is a (usually small) language where the vocabulary comes from a specific problem domain (or subject).  Note that this has nothing to do with Active Directory domains, so that might have been confusing.</p>
+<p>By using words that are naturally used in describing problems in this subject, it is possible to write using the DSL in ways that look less like programming and more like describing the solution.</p>
+<p>For instance, in Pester, you might write part of a unit test like this (3.0 syntax):</p>
+<p>[powershell]<br />
+It "Has a non-negative result" {<br />
+   $result | Should Be GreaterThan 0<br />
+}<br />
+[/powershell]</p>
+<p>There are some aspects of this that look like PowerShell (the $, the | and the {}), but in general it doesn't look much like code. It looks more like a description of the test that we're writing.</p>
+<p>In the WPF DSL that I'm describing in these posts, I want to be able to write PowerShell scripts that create WPF applications in a way that the "WPF" part of the script is easy. At least, a lot easier than trying to generate XAML or automate the WPF classes using brute force. That being said, the code in my DSL is not some sort of magic, it's just PowerShell code.</p>
+<p>One interesting aspect of DSLs is that because they don't look quite like code, they often ignore coding conventions. Note that the Pester example had a PowerShell cmdlet called "It". No verb-noun convention followed there. Also, Using positional parameters is more common in a DSL. Not a problem, just something to be aware of.</p>
+<h2>Getting Control Values</h2>
+<p>One of the problems I listed at the end of the <a href="https://powershellstation.com/2018/06/28/starting-a-powershell-dsl-for-wpf-apps/">previous post</a> (#3) was that reading the text property won't work once we have other controls to think about besides textboxes.</p>
+<p>My solution here has worked out really well. I decided to add a method to any control that I would want to get a value from. The method is called GetControlValue. It is responsible for knowing how to get the values from the control (which, as part of the control object it will have no problem with).</p>
+<p>Here's the updated <strong>Textbox</strong> function:</p>
+<p>[powershell]<br />
+function TextBox {<br />
+    [CmdletBinding()]<br />
+    Param($Name)<br />
+    $Properties = @{ Name = $name ;MinWidth=100}<br />
+    New-Object System.Windows.Controls.TextBox -Property $properties |<br />
+        Add-Member -Name GetControlValue -MemberType ScriptMethod -Value {$this.Text} -PassThru<br />
+}<br />
+[/powershell]</p>
+<p>Since it's a ScriptMethod, we get to use <strong>$this</strong> to refer to the control, so <strong>$this.Text</strong> is the value we want.</p>
+<p>With that in place, we need to update the If statement at the end of the Window function to use the ScriptMethod. Here's what it looks like:</p>
+<p>[powershell]<br />
+if($window.ShowDialog() -or $true){<br />
+if($window.ShowDialog() -or $true){<br />
+  $output=[Ordered]@{}<br />
+  foreach($item in $controls){<br />
+    $output[$item.Name]=$item.GetControlValue()<br />
+  }<br />
+  [PSCustomObject]$output<br />
+}<br />
+[/powershell]</p>
+<h2>Conclusion</h2>
+<p>Here's the checklist now:</p>
+<ol>
+<li>Only textboxes? Need several other controls</li>
+<li>OK/Cancel</li>
+<li><del datetime="2018-06-30T03:08:35+00:00">With other controls, reading the text property won’t be a strategy</del></li>
+<li>Nested controls</li>
+<li>Populating controls</li>
+<li>Events</li>
+<li>ContextMenus</li>
+<li>Setting control properties</li>
+</ol>
+<p>Stay tuned for more...</p>
+<p>--Mike</body></html></p>

@@ -1,0 +1,43 @@
+---
+layout: post
+title: Passing Predicates as Parameters in PowerShell
+date: 2010-05-18 21:30:33.000000000 -05:00
+type: post
+parent_id: '0'
+published: true
+password: ''
+status: publish
+categories: []
+tags: []
+meta:
+  _edit_last: '2'
+  _syntaxhighlighter_encoded: '1'
+author:
+  login: mike
+  email: mshepard70@gmail.com
+  display_name: mike
+  first_name: ''
+  last_name: ''
+permalink: "/2010/05/18/passing-predicates-as-parameters-in-powershell/"
+---
+<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
+<html><body>
+<p>This is just a quick trick that I figured out today.  I had a process that manipulated a dataset, and I needed to be able to change the process to allow me to filter the data that was processed.  Also, it wasn't clear exactly what kind of filter would specifically be needed in any given scenario.</p>
+<p>Normally, I would just filter the data using <strong>where-object</strong> and pass it in to the function in question.  The problem here was that the data retrieval was somewhat cumbersome, and I didn't want to push that complexity outside of the function.  And since the filtering criteria wasn't clear-cut, I couldn't (and didn't want to) use a bunch of switches and parameters along with a nest of if/else conditions.</p>
+<p>What I wanted, was to pass a predicate (an expression that would evaluate to true or false depending on whether I want a row in the dataset) in to the function.  Essentially, I wanted to insert a <strong>where-object</strong> into the middle of the function.</p>
+<p>Amazingly, PowerShell allows me to do that.  The code looks a bit strange to me at first, but it works very well and isn't complicated at all.</p>
+<p>Here's an example:</p>
+<p>[powershell]<br />
+function process-data{<br />
+Param( [scriptblock]$filter = {$true})</p>
+<p>	#retrieve the data</p>
+<p>	#filter the data<br />
+	$data = $data | where-object $filter</p>
+<p>	#process the data<br />
+}</p>
+<p>process-data -filter {$_.UpdatedDateTime -gt (get-date '1/1/2010')}</p>
+<p>[/powershell]</p>
+<p>It's not earth-shattering, but I think this will come in handy in several places for me.</p>
+<p>Let me know what you think.</p>
+<p>-Mike</p>
+<p></body></html></p>

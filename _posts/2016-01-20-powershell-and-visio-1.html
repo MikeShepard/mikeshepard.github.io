@@ -1,0 +1,50 @@
+---
+layout: post
+title: PowerShell and Visio Part 1 - Introduction
+date: 2016-01-20 04:37:36.000000000 -06:00
+type: post
+parent_id: '0'
+published: true
+password: ''
+status: publish
+categories:
+- Scripts
+- Visio
+tags:
+- Visio
+meta:
+  _edit_last: '2'
+  _syntaxhighlighter_encoded: '1'
+author:
+  login: mike
+  email: mshepard70@gmail.com
+  display_name: mike
+  first_name: ''
+  last_name: ''
+permalink: "/2016/01/20/powershell-and-visio-1/"
+---
+<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
+<html><body></p>
+<p>I've been playing around with Visio and PowerShell for quite a while now and the experience is something of a mixed bag.  My first thought was to use PowerShell to build integration diagrams, reading server names, domains, VLANs, and datacenter locations from a database, and adding color-coded connections to show the network connection requirements (e.g. these boxes talk to SQL on these other boxes on port 1433).  While much of the effort was successful, Visio doesn't have the same idea of "arranging" items on the page.  I figured it would make things not overlap.  It seems to only care if things overlap if they are connected.</p>
+<p>I ended up half-automating Visio.  I wrote some functions that did the database lookups and inserted objects (mostly one at a time, but sometimes in sequences), but used it more as an assistant.  I could tell it, for instance, add-server SERVER01-05 and have the script spot the dash, create a range, look up the names of the servers (Server01, for example) and figure out each server's type (web server, SQL Server, etc.) and IP address.  It would then add an appropriate shape (web server) and label it with the name and IP.</p>
+<p>I would share this code, but it's really tied into the environment I work in and not terribly portable.  Instead, I thought I'd try to build a more general-purpose Visio module and share it as I write it.</p>
+<p>My goal is to be able to write a diagram in a PowerShell-based domain specific language (DSL) so that building diagrams will be easier.  They might still need a bit of hand editing, but I'm OK with that.</p>
+<p style="padding-left: 30px;"><em>But what about (insert reference to other PowerShell Visio module here)?</em>  I know there are several well-developed modules out there, but for the most part they didn't seem to focus on the things that I wanted to or were written in C# (which is fine, but harder to tinker with), and even more so, I wanted to learn how to get PowerShell and Visio to work together.</p>
+<p>To give you an idea of what I'm thinking of, here's some code I just got to work:</p>
+<p>[powershell]<br />
+Import-Module myvisio -Force<br />
+New-VisioApplication                                                                         New-VisioDocument   | out-null<br />
+New-VisioContainer "My new container"  {<br />
+    New-VisioRectangle 1 1 5 5<br />
+    New-VisioRectangle 5.5 5.5 6 6<br />
+    New-VisioContainer "Inner Container" {<br />
+        New-VisioRectangle 1 7 8 8<br />
+    }<br />
+} | out-null<br />
+[/powershell]</p>
+<p>The output in Visio looks like this:<br />
+<a href="https://powershellstation.com/wp-content/uploads/2016/01/visio1.png" rel="attachment wp-att-872"><img class="alignnone size-full wp-image-872" src="{{site.baseurl}}/assets/2016/01/visio1.png" alt="visio1" width="355" height="388"></a></p>
+<p>With some appropriate helper functions and some parameters to help with styling, I think this could work.</p>
+<p>I'll share some actual code in the next installment.</p>
+<p>Let me know what you think about this.</p>
+<p>--Mike</body></html></p>

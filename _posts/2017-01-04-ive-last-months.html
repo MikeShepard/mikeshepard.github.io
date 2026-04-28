@@ -1,0 +1,41 @@
+---
+layout: post
+title: Where I've been for the last few months
+date: 2017-01-04 06:30:31.000000000 -06:00
+type: post
+parent_id: '0'
+published: true
+password: ''
+status: publish
+categories:
+- Goals
+- Rant
+tags: []
+meta:
+  _edit_last: '2'
+  _yoast_wpseo_content_score: '60'
+  _yoast_wpseo_primary_category: '60'
+  _yoast_wpseo_focuskw_text_input: Rant
+  _yoast_wpseo_focuskw: Rant
+  _yoast_wpseo_linkdex: '62'
+author:
+  login: mike
+  email: mshepard70@gmail.com
+  display_name: mike
+  first_name: ''
+  last_name: ''
+permalink: "/2017/01/04/ive-last-months/"
+---
+<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
+<html><body></p>
+<p>As I mentioned in my <a href="https://powershellstation.com/2017/01/02/powershellstation-2016-goals-review/">previous</a> <a href="https://powershellstation.com/2017/01/03/powershellstation-2017-goals/">posts</a>, I <a href="https://powershellstation.com/wp-content/uploads/2017/01/swearing-294391_640.png"><img class="size-medium wp-image-1095 alignright" src="{{site.baseurl}}/assets/2017/01/swearing-294391_640-173x300.png" alt="" width="173" height="300"></a> kind of fell off the planet (blog-wise, at least) at the end of August. I had good intentions for finishing the year out strong.  There were three different items that contributed to my downfall.</p>
+<hr>
+<p>First, I've been battling lots of different illnesses (none of them anything major) pretty much continually since early June.  For three entire months, I coughed all the time.  Right now, I can't hear in one ear because of the fluid backed up there.  That ear has only been a problem for a few days, but the other one (which cleared out yesterday) had been full for three weeks.  Like I said, nothing major, no life-threatening conditions, but over time it wears you down.</p>
+<hr>
+<p>Second, I broke down and bought a server.  I have been putting off this purchase, but some book royalty money came through and I pulled the trigger.  Buying it didn't take long.  What has been interesting is learning to do all of the things that most of you sysadmins take for granted.  I've never really been a sysadmin, more of a developer/DBA/toolsmith who happens to really, really like a language which is designed for sysadmins.  So, I've been building hyper-v hosts, lots of guests, building domains, joining domains, and trying to script as much as possible.  I've learned a lot and there's still a lot to learn.  Most of it, though, is not stuff that I'll probably blog about, because it's really basic.  There might be a post or 2 coming, but it's hard to say.</p>
+<hr>
+<p>Third, and this one is the most "fun", is that <a href="https://github.com/MikeShepard/VisioBot3000">VisioBot3000</a> stopped working.  If you haven't read my posts on automating Visio with PowerShell, VisioBot3000 is a module I wrote which allows you (among other things) to define your own PowerShell-based DSL to express diagrams in Visio.  By "stopped working" I mean that sometime around the end of August, trying to use Visio containers always caused the code to hang.</p>
+<p>I am pretty good at debugging, so I tried the usual tricks.  I stepped through the code in the debugger.  The line of code that was hanging was pretty innocent-looking.  All of the variables had appropriate values.  But it caused a hang.  On my work laptop and my home laptop...two different OSes.  I tried reverting to an old commit...No luck.  I even tried copying code out of presentations I had done on VisioBot3000 and the results were the same.  I even <a href="https://www.reddit.com/r/PowerShell/comments/5fn0gg/problems_with_dropcontainer_method/">posted</a> on the PowerShell subreddit asking for ideas on how to debug.  The only suggestion was to use SysInternals process monitor to follow the two processes and see if I could find what was causing the issue.  I tried that a week or two ago (sometime during the holidays) and guess what?  It started working on my work laptop.  Still doesn't work on my home laptop, though, or the VM I built and didn't allow to patch to see if a patch was the culprit.</p>
+<hr>
+<p>Conclusion: I'm mostly better health-wise, am getting comfortable with the server, and VisioBot3000 is working somewhere, so I should be back on track with rambling about PowerShell.</p>
+<p>--Mike</body></html></p>

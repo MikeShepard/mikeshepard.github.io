@@ -1,0 +1,42 @@
+---
+layout: post
+title: Voodoo PowerShell - VisioBot3000 Lives Again!
+date: 2017-07-06 19:39:54.000000000 -05:00
+type: post
+parent_id: '0'
+published: true
+password: ''
+status: publish
+categories:
+- Rant
+- Scripts
+- Visio
+tags:
+- Visio
+- VisioBot3000
+- Voodoo
+meta:
+  _edit_last: '2'
+  _syntaxhighlighter_encoded: '1'
+  _yoast_wpseo_content_score: '30'
+  _yoast_wpseo_primary_category: '7'
+author:
+  login: mike
+  email: mshepard70@gmail.com
+  display_name: mike
+  first_name: ''
+  last_name: ''
+permalink: "/2017/07/06/voodoo-powershell-visiobot3000-lives/"
+---
+<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
+<html><body><br />
+<a href="https://powershellstation.com/2017/01/16/debugging-visiobot3000/">Back in January</a><a href="https://powershellstation.com/2017/01/16/debugging-visiobot3000/"><img class="alignright wp-image-1199 size-medium" src="{{site.baseurl}}/assets/2017/07/visio-stencils-300x231.jpg" alt="" width="300" height="231"></a> I wrote a post about how <a href="https://github.com/MikeShepard/VisioBot3000">VisioBot3000</a> had been broken for a while, and my attempts to debug and/or diagnose the problem.</p>
+<p>In the process of developing a minimal example that illustrated the "breakage", I noticed that accessing certain Visio object properties caused the code to work, even if the values of those properties were not used at all.</p>
+<p>It's been almost six months now, and I have no idea why that code makes any difference. So instead of letting VisioBot3000 die, I decided to take the easy route, and incorporate the "nonsense" code in the VisioBot3000 module.</p>
+<p>If you look at the latest commit (as of this writing), the New-VisioContainer function (in VisioContainer.ps1) starts with the following single line of nonsense:</p>
+<p>[powershell][void]$script:Visio.ActiveDocument.Pages[1][/powershell]</p>
+<p>In that code, I'm using a module-level reference to the Visio application, getting the active document from it, and retrieving the first page. And then I'm throwing away the reference that I just retrieved. The only thing that I can imagine is doing anything is the Pages[1] call. It's possible that the COM object is doing something internally in addition to pulling back the first page, but that's grasping at straws.</p>
+<p>And that's why I call this Voodoo PowerShell. I'm using code that I don't understand because I get what I want from it. It's a meaningless ritual. I hate including it, but I hate that the module has been largely unchanged for a year even worse.</p>
+<p>I will be trying to make more regular updates to VisioBot3000 in the near future, and will be presenting on it at the second SWMO PSUG meeting scheduled for next week.</p>
+<p>Let me know what your thoughts are.</p>
+<p>--Mike</body></html></p>

@@ -1,0 +1,56 @@
+---
+layout: post
+title: SQLPSX Update
+date: 2016-07-31 23:09:48.000000000 -05:00
+type: post
+parent_id: '0'
+published: true
+password: ''
+status: publish
+categories:
+- adolib
+- Discussion
+- Goals
+- SQLPSX
+tags:
+- ADOLib
+- SQL Server
+- SQLPSX
+meta:
+  _edit_last: '2'
+author:
+  login: mike
+  email: mshepard70@gmail.com
+  display_name: mike
+  first_name: ''
+  last_name: ''
+permalink: "/2016/07/31/sqlpsx-update/"
+---
+<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
+<html><body>
+<p>Ok. I finally pulled the trigger on a major update (structurally, at least) to <a href="https://github.com/MikeShepard/SQLPSX">SQLSPX</a>. This is the first big change in about 5 years. If you missed the <a href="https://powershellstation.com/2016/07/13/the-future-of-sqlpsx/">post from a couple of weeks ago</a> warning about this you might want to go back and read it.</p>
+<p>In short, SQLPSX hadn't been updated in a long time. The main downfall (besides not incorporating new SQLServer features) of that delay was that SQLPSX was still trying to load very old SMO DLLs. In the meantime, the SQL Client tools team released an updated PowerShell module for SQL Server as part of the <a href="https://msdn.microsoft.com/en-us/library/mt238290.aspx?f=255&amp;MSPPError=-2147217396">SSMS July 2016 update</a> named SQLServer, which was the name of one of the modules in SQLPSX. So, it was time to do something.</p>
+<p>I could have simply renamed the module (and the two functions in it) that collided with the official MS module.  I've done that, but I also made some other changes which I'll explain now.</p>
+<p><strong>Some new content</strong></p>
+<p>As I mentioned before, Patrick Keisler contributed some code for dealing with mirroring, Central Management Servers, and updated the code to try to load updated SMO assemblies.</p>
+<p><strong>The SQLServer module is now called SQLPSXServer</strong></p>
+<p>I didn't want to change the name much.  I also renamed <strong>Get-SQLDatabase</strong> and <strong>Get-SQLErrorLog</strong> to <strong>Get-SQLPSXDatabase</strong> and <strong>Get-SQLPSXErrorLog</strong> to avoid name collisions with the MS SQLServer module.  I do check to see if the original functions exist, and if they don't I create aliases so you can use the old names if you don't load the SQLServer module.</p>
+<p><strong>The SQLPSX installer is gone.</strong></p>
+<p>In the early days of PowerShell, an installer made a lot more sense.  People didn't exactly know where to put things, what needed to be run, should we modify the profile...lots of questions.  The community is a lot more comfortable with modules now, so I don't think an installer is a benefit to the project.  It also slows the project down because we need to create a "build" of the installer with new code.  Since modules are xcopy installable, there's little benefit in my opinion to having to do a bunch of work every time we make a small change to the code.</p>
+<p><strong>The SQLPSX "super-module" is gone.</strong></p>
+<p>If you've used SQLPSX before, you might remember that there was a "parent" module which loaded all of the other modules, whether you wanted them loaded or not.  Particularly gross (to me, though I see the idea) is that it looked to see if you had Oracle DAC installed, and imported the Oracle tools as well.  And the ISE toools if you were in the ISE.  In my opinion, the community is comfortable enough with modules that simply having a set of modules that you load when you want makes more sense to me.  There's very little overlap between the modules, so it's likely that you will use them one at a time anyway.</p>
+<p><strong>The Oracle, MySQL and ISE Tools are gone.</strong></p>
+<p>This one might make people mad, though I hope not.  First of all, the ISE tools worked fine in 2.0, but not so much after that.  I haven't had time (or interest, to be honest) to look at them, but I also didn't find using the ISE as a SQL Editor to be a great experience.  If you want to grab the module(s) for ISE and update them, more power to you!</p>
+<p>The Oracle and MySQL tools were always kind of fun to me.  They started out as cut/paste from adolib (the ADO.NET wrapper in SQLPSX), replacing the SQLServer data provider with the Oracle and MySQL provider.  Some extra work was done in them, and I don't want to disparage that work.  But at the outset, SQLPSX is a SQLServer-based set of modules.  If you want to take OracleClient and run with it, that's awesome and I hope it helps you.  Let me know, because I'll probably end up using it myself at some point.</p>
+<p><strong>Some of the "odd" modules are gone</strong></p>
+<p>There were a few modules that didn't really fit the SQLServer theme (WPK...copy of a WPF toolkit distributed by Microsoft, PerfCounters).  I've removed them from the main modules list as well.</p>
+<p><strong>TestScripts, Libraries, and Documentation are gone</strong></p>
+<p>The TestScripts were very out of date, I'm not sure how the libraries were used, and the documentation was old documentation for a single module.</p>
+<p><strong>Gone doesn't really mean gone.</strong></p>
+<p>There's a Deprecated folder with all of this stuff in it, so when we find something that I broke by removing it, we can put it back.</p>
+<p><strong>This isn't quite a release yet.</strong></p>
+<p>So first of all, I haven't changed code in most of the modules, so if they don't work, they probably didn't to start with.  If you find something that's broken (or you think might be broken), please add an issue to the project on GitHub or if you feel comfortable with the code, send a pull request with a fix.  I have done some simple testing with adolib (which really is my only code contribution to the project) and SQLPSXServer (which I renamed).  Other than that, it's open season.  I'll probably let this bake for a few weeks before I start updating version numbers in module manifests.</p>
+<p>If you have questions about what's going on or why I made the changes I did, feel free to reach out to me.  If you want to help with the project in any capacity, I'd love to hear from you.</p>
+<p>Hopefully I didn't step on too many toes.  If yours were stepped on, I apologize.  Let me know what I did and I'll try to make it right.  The community works better if it communicates.</p>
+<p>--Mike</p>
+<p></body></html></p>

@@ -1,0 +1,43 @@
+---
+layout: post
+title: 'PowerShell Code Smells: Boolean Parameters'
+date: 2016-01-11 12:42:26.000000000 -06:00
+type: post
+parent_id: '0'
+published: true
+password: ''
+status: publish
+categories:
+- Code Smells
+tags: []
+meta:
+  _edit_last: '2'
+  _syntaxhighlighter_encoded: '1'
+author:
+  login: mike
+  email: mshepard70@gmail.com
+  display_name: mike
+  first_name: ''
+  last_name: ''
+permalink: "/2016/01/11/powershell-code-smells-boolean-parameters/"
+---
+<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
+<html><body>
+<p>This is a real quick one.  In PowerShell, the "native" way to express a two-state variable is with Switch parameters.</p>
+<p>For instance:<br />
+[powershell]<br />
+function Test-Thing{<br />
+Param([switch]$Recurse)<br />
+  #Code goes here<br />
+[/powershell]</p>
+<p>When calling Test-Thing, you can either supply -Recurse or leave it off.  It's a flag.</p>
+<p>This is PowerShell 101.</p>
+<p>Programmers coming from other languages are used to Boolean variables.  Sometimes, one slips through and makes its way into a parameter list. </p>
+<p>It's not incorrect to have a Boolean parameter.  It works just fine, but when I see one it makes me wonder what other PowerShell idioms the writer is not aware of.  To me, a Boolean parameter is a code smell.</p>
+<p>I mention this because I spotted one in Invoke-SQLCmd this week.  [<em>And no, I'm not piling on Invoke-SQLCmd.  A co-worker was having problems with Invoke-SQLCmd and asked me to take a look.  This was one of the problems</em>]</p>
+<p>The -OutputSqlErrors parameter for Invoke-SQLCmd is a Boolean.  That means if you want to see SQL errors, you need to pass -OutputSQLErrors $true, rather than just -OutputSQLErrors.</p>
+<p>Interestingly enough, there are 8 switch parameters on this cmdlet.  This is the only Boolean.</p>
+<p>What do you think?  Do you ever see parameters like this?</p>
+<p>Let me know in the comments.</p>
+<p>--Mike</p>
+<p></body></html></p>

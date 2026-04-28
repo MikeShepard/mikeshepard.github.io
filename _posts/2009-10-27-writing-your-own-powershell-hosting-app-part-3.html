@@ -1,0 +1,52 @@
+---
+layout: post
+title: Writing your own PowerShell Hosting App (Part 3)
+date: 2009-10-27 18:46:16.000000000 -05:00
+type: post
+parent_id: '0'
+published: true
+password: ''
+status: publish
+categories:
+- Writing a Host
+tags:
+- PowerShell
+- VB.NET
+meta:
+  _edit_last: '2'
+  _syntaxhighlighter_encoded: '1'
+author:
+  login: mike
+  email: mshepard70@gmail.com
+  display_name: mike
+  first_name: ''
+  last_name: ''
+permalink: "/2009/10/27/writing-your-own-powershell-hosting-app-part-3/"
+---
+<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
+<html><body>
+<p>In the <a title="last post" href="https://powershellstation.com/2009/10/12/writing-your-own-powershell-hosting-app-part-1-introduction/">last post</a> we started building the app, but ran into a problem with output.   We were able to get output from some scripts (dir, for example, gave incomplete output), but others didn't give us anything useful at all (get-service, returned "System.ServiceProcess.ServiceController" over and over).</p>
+<p>The reason for this is simple.  PowerShell cmdlets (and by extension, scripts) return objects,  not strings.  To get string output, we need to tell the script to output strings rather than ask each object that is output to give us its string representation by calling ToString() on them.</p>
+<p>To do this, we could try to do something like surround the script that's passed in with parentheses, and add "| out-string", but there's an easier solution.  The object we're using to run our scripts is called a Pipeline.  As such, it has a method to append commands.  The "corrected" code is this:<br />
+[vbnet highlight="5"]<br />
+Sub RunToolStripMenuItem1Click(sender As Object, e As EventArgs)<br />
+        Dim r As Runspace=RunspaceFactory.CreateRunspace<br />
+        r.Open<br />
+        Dim p As Pipeline=r.CreatePipeline(txtScript.Text)<br />
+        p.Commands.add(new Command("out-string"))<br />
+        Dim output As Collection(Of psobject)<br />
+        output=p.Invoke()<br />
+        For Each o As PSObject In output<br />
+            txtOutput.AppendText(o.ToString()+vbcrlf)<br />
+        Next<br />
+End Sub<br />
+[/vbnet]<br />
+The only new line is the one that contains the "out-string".  We can even leave the ToString() calls, because we know that string objects' ToString() will just output the string itself, or at least we hope it would.</p>
+<p>With that, here's the output for "get-service" (note: I changed the font to a fixed-width font):</p>
+<p><img class="alignnone size-full wp-image-130" title="Fixed Output" src="{{site.baseurl}}/assets/2009/10/screenshot0012-2009-10-27-20_19_47.jpg" alt="Fixed Output" width="674" height="338"></p>
+<p>That's much nicer and even has column headers like we'd expect.  With that change, cmdlets that output objects directly to the pipeline will work fine.  But what about cmdlets that output text to the host (like the write-* cmdlets other than write-output)?  Simply trying "Write-host 'Hello, World.'" gives us a big fat error, but one that gives us and idea what we need to do to fix it: "System.Management.Automation.CmdletInvocationException: Cannot invoke this function because the current host does not implement it."</p>
+<p>That seems like a pretty good breaking point.  Implementing the host (which pretty much involves inheriting from a couple of classes and implementing some basic methods) will take some time, but most of it's pretty easy.</p>
+<p>One thing that I should mention.  I haven't been specific about what version of PowerShell this series is using.  The reason is that the code so far will work on either 1.0 or 2.0 (and I anticipate that the rest of the code will as well, but I haven't written the rest yet).  In fact, the custom host that I use at work has no problems running on either 1.0 or 2.0.  I've been very impressed with the PowerShell team and their commitment to making PowerShell 2.0 backwards compatible as far as possible.  I expected that this effort would end as soon as I got into the object model, but I have yet to find anything that I've written for 1.0 that hasn't worked in 2.0.  Now there's a lot of stuff that can be written for 2.0 that won't work in 1.0, but that's to be expected.</p>
+<p>Speaking of 2.0, the final release of 2.0 (for XP and Win2k3) showed up today, much to my surprise.  Kudos again to the PowerShell team for a very quick release schedule following last week's Windows 7 release.  If you haven't already, I definitely recommend getting 2.0 downloaded and installed so you can try out all of the neat stuff that's included.  I especially recommend trying the out-gridview cmdlet!</p>
+<p>Mike</p>
+<p></body></html></p>

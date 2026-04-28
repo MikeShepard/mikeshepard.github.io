@@ -1,0 +1,52 @@
+---
+layout: post
+title: PowerShell and MongoDB
+date: 2010-08-10 21:23:31.000000000 -05:00
+type: post
+parent_id: '0'
+published: true
+password: ''
+status: publish
+categories:
+- Scripts
+- Tools
+tags: []
+meta:
+  _edit_last: '2'
+  _wp_old_slug: ''
+  _syntaxhighlighter_encoded: '1'
+author:
+  login: mike
+  email: mshepard70@gmail.com
+  display_name: mike
+  first_name: ''
+  last_name: ''
+permalink: "/2010/08/10/powershell-and-mongodb/"
+---
+<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
+<html><body></p>
+<p>I recently saw <a title="this link" href="http://www.dotnetconvo.com/post/view/2010/8/9/nosql-on-the-microsoft-platform">this link</a> on using NoSQL with Windows.  Now, I'm a SQL Server DBA, so I haven't really had any reason to use NoSQL.  I was curious about how easy it was going to be to set up and if I could get it working with PowerShell.</p>
+<p>I selected MongoDB from the list because it looked more like something that would be used on smaller-scale projects.</p>
+<p>I then googled "MongoDB PowerShell" and found <a title="this link" href="http://www.dougfinke.com/blog/index.php/2009/10/25/how-to-use-mongodb-from-powershell-and-f/">this link</a> from Doug Finke about using MongoDB with PowerShell (and F#, which is another "cool thing" I haven't managed to find a need for).  Doug links to <a title="another article" href="http://odetocode.com/blogs/scott/archive/2009/10/13/experimenting-with-mongodb-from-c.aspx">another article</a> which explains setting up MongoDB and an open-source .Net driver for MongoDB called <a title="mongo-csharp" href="http://github.com/samus/mongodb-csharp">mongo-csharp</a>.  He then follows up with a straight-forward script showing simple usage of MongoDB.  It looks like an almost literal translation of the C# code from the article he references.  With those in hand, I thought it was going to be a slam dunk.</p>
+<p>It was, but I had a few hurdles to get over before I could get it working.  There weren't any problems with the code;  it was written about a year ago, so it was using PowerShell 1.0 and an older version of mongo-csharp.  I had to update the script in a couple of places to make it work.  I probably wouldn't even write it up, given how minor the changes are, but I was somewhat disappointed with the number of hits I got for "MongoDB PowerShell".</p>
+<p>Here's the updated script:<br />
+[powershell]add-type -Path .MongoDB.Driver.dll</p>
+<p>$mongo=new-object mongodb.driver.mongo<br />
+$mongo.connect()<br />
+$db=$mongo.GetDataBase("movieReviews")<br />
+$movies=$db.GetCollection('Movies')</p>
+<p>$movie=new-object Mongodb.driver.document<br />
+$movie['title']='Star Wars'<br />
+$movie['releaseDate']=get-date<br />
+$movies.Insert($movie)</p>
+<p>$spec=new-object Mongodb.driver.document<br />
+$spec['title']='Star Wars'<br />
+$movies.FindOne($spec)<br />
+[/powershell]<br />
+The two changes were</p>
+<ol>
+<li>added the parameter name (-path) to add-type, since the default param is looking for an assembly name, not a path to a DLL</li>
+<li>changed $mongo.GetDB to $mongo.GetDatabase to reflect a change in the driver</li>
+</ol>
+<p>Worked fine.  Not sure how I'll use this, but if I need to, I know I can from PowerShell.</p>
+<p>-Mike</body></html></p>

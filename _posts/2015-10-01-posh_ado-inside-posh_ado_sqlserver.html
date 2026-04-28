@@ -1,0 +1,47 @@
+---
+layout: post
+title: 'POSH_Ado : Inside POSH_Ado_SQLServer'
+date: 2015-10-01 17:24:00.000000000 -05:00
+type: post
+parent_id: '0'
+published: true
+password: ''
+status: publish
+categories:
+- Modules
+- SQL Server
+tags: []
+meta:
+  _edit_last: '2'
+  _syntaxhighlighter_encoded: '1'
+author:
+  login: mike
+  email: mshepard70@gmail.com
+  display_name: mike
+  first_name: ''
+  last_name: ''
+permalink: "/2015/10/01/posh_ado-inside-posh_ado_sqlserver/"
+---
+<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
+<html><body></p>
+<p>In a <a href="https://powershellstation.com/2015/09/14/getting-started-with-posh_ado/">previous post</a> I introduced the POSH_Ado "project" and explained that it is a way to use the same code-base to access several different database platforms.  I illustrated it with some sample calls to a SQL Server database using the POSH_Ado_SQLServer module and promised to show the internals of the module later.  The time has come.  Here's how POSH_Ado_SQLServer works:</p>
+<p>[powershell]<br />
+import-module POSH_Ado -args System.Data.SqlClient -Prefix SQLServer -force</p>
+<p>Export-ModuleMember *-SQLServer*<br />
+[/powershell]</p>
+<p>That's it.  The module simply imports the POSH_Ado module, telling it what ADO.NET provider to use (System.Data.SQLClient) and what prefix to use for the imported cmdlets (SQLServer).  It then, in turn, exports all of the cmdlets with the SQLServer prefix.</p>
+<p>With that tiny bit of effort you get:</p>
+<ul>
+<li>SQL and NT authenticated connections</li>
+<li>Parameterized queries and stored procedures</li>
+<li>Input and output parameters (no in/out parameters yet, though)</li>
+<li>Ad-hoc or stored connections</li>
+</ul>
+<p>What's missing in this list?  I can think of a couple of things (which I need to enter as issues on GitHub):</p>
+<ul>
+<li>In/out parameters</li>
+<li>SQL BulkCopy (it's there in Adolib...just need to copy it to POSH_Ado_SQLServer</li>
+</ul>
+<p>Since the code for POSH_Ado is based on Adolib which targeted SQL Server, it shouldn't be surprising to see that there's not much to do to get POSH_Ado to work with SQL Server.  In the next "episode", I'll connect to MySQL, and the real benefit of POSH_Ado should become apparent.</p>
+<p>Let me know what you think in the comments!</p>
+<p>-Mike</body></html></p>

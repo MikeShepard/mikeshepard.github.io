@@ -1,0 +1,106 @@
+---
+layout: post
+title: Translating Visio VBA to PowerShell
+date: 2016-05-18 22:46:16.000000000 -05:00
+type: post
+parent_id: '0'
+published: true
+password: ''
+status: publish
+categories:
+- Scripts
+- Visio
+tags:
+- VBA
+- Visio
+- VisioBot3000
+meta:
+  _edit_last: '2'
+  _syntaxhighlighter_encoded: '1'
+  _yoast_wpseo_content_score: '30'
+  _yoast_wpseo_primary_category: ''
+author:
+  login: mike
+  email: mshepard70@gmail.com
+  display_name: mike
+  first_name: ''
+  last_name: ''
+permalink: "/2016/05/18/translating-visio-vba-to-powershell/"
+---
+<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
+<html><body></p>
+<p>In working on VisioBot3000, I've spent a lot of time looking at VBA in Visio's macro editor. It's one of the easiest ways to find out how things work. I thought it would be fun to take some VBA and convert it to PowerShell to demonstrate the process.</p>
+<p>We'll start with a basic diagram using flowchart shapes and normal connectors. It doesn't really matter what is on the diagram, though, because we're just using it to make Visio tell us how to do things.</p>
+<p>Here's my diagram:<br />
+<a href="https://powershellstation.com/wp-content/uploads/2016/05/VBAExample.png"><img class="alignnone size-medium wp-image-997" src="{{site.baseurl}}/assets/2016/05/VBAExample-234x300.png" alt="VBAExample" width="234" height="300"></a></p>
+<p>As our first "translation" exercise, let's try setting the page layout to "circular". To do that in the app, we'll go to the <strong>Design</strong> tab, select the <strong>Re-Layout Page</strong> dropdown, and select <strong>Circular</strong>.</p>
+<p>Before we do that, though, let's turn on macro recording. The easiest way to do that is to click the icon on the status bar:<br />
+<a href="https://powershellstation.com/wp-content/uploads/2016/05/MacroRecorder.png"><img class="alignnone size-full wp-image-998" src="{{site.baseurl}}/assets/2016/05/MacroRecorder.png" alt="MacroRecorder" width="85" height="39"></a></p>
+<p>When we do that, a dialog will pop up asking you what to name the new macro. It doesn't matter, just remember what name you use (or leave it alone) because we're going to look at the macro to see what's going on. I named mine circular after I took this screenshot:<br />
+<a href="https://powershellstation.com/wp-content/uploads/2016/05/NameTheMacro.png"><img class="alignnone size-medium wp-image-999" src="{{site.baseurl}}/assets/2016/05/NameTheMacro-300x209.png" alt="NameTheMacro" width="300" height="209"></a><br />
+After you click ok, select the menu item you wanted (Design/Re-Layout Page/Circular).<br />
+<a href="https://powershellstation.com/wp-content/uploads/2016/05/Circular.png"><img class="alignnone size-medium wp-image-1000" src="{{site.baseurl}}/assets/2016/05/Circular-154x300.png" alt="Circular" width="154" height="300"></a><br />
+When you did that, it applied the new layout to the page, just as expected. Now, click the "stop" button on the status bar (which replaced the "record a macro" button on the status bar) to stop recording.<br />
+<a href="https://powershellstation.com/wp-content/uploads/2016/05/StopRecording.png"><img class="alignnone size-full wp-image-1001" src="{{site.baseurl}}/assets/2016/05/StopRecording.png" alt="StopRecording" width="57" height="35"></a><br />
+Now, you want to look at the macro, and to do that you need to go to the developer tab on the ribbon. If you don't have a developer tab, you need to go to the file tab, select Options, Advanced, and under General, select "Run in Developer Mode".<br />
+<a href="https://powershellstation.com/wp-content/uploads/2016/05/DeveloperMode.png"><img class="alignnone size-medium wp-image-1002" src="{{site.baseurl}}/assets/2016/05/DeveloperMode-300x47.png" alt="DeveloperMode" width="300" height="47"></a></p>
+<p>Whew...that's a lot of work just to get a macro recorded. Next time it will be easier since you know how to do it.</p>
+<p>Let's look at the macro. On the developer tab, click the macros button, bringing up the list of macros that have been recorded in this document, and select the macro you just recorded. Click the <strong>Edit</strong> button to see the source.<br />
+<a href="https://powershellstation.com/wp-content/uploads/2016/05/ListOfMacros.png"><img class="alignnone size-medium wp-image-1006" src="{{site.baseurl}}/assets/2016/05/ListOfMacros-269x300.png" alt="ListOfMacros" width="269" height="300"></a></p>
+<p>Here's what Visio recorded when we made that single formatting change:</p>
+<p>[vb]<br />
+Sub Circular()</p>
+<p>    'Enable diagram services<br />
+    Dim DiagramServices As Integer<br />
+    DiagramServices = ActiveDocument.DiagramServicesEnabled<br />
+    ActiveDocument.DiagramServicesEnabled = visServiceVersion140 + visServiceVersion150</p>
+<p>    Dim UndoScopeID1 As Long<br />
+    UndoScopeID1 = Application.BeginUndoScope("Lay Out Shapes")<br />
+    Application.ActiveWindow.Ptage.PageSheet.CellsSRC(visSectionObject, visRowPageLayout, visPLOPlaceStyle).FormulaForceU = "6"<br />
+    Application.ActiveWindow.Page.PageSheet.CellsSRC(visSectionObject, visRowPageLayout, visPLORouteStyle).FormulaForceU = "16"<br />
+    Application.ActiveWindow.Page.Layout<br />
+    Application.EndUndoScope UndoScopeID1, True</p>
+<p>    'Restore diagram services<br />
+    ActiveDocument.DiagramServicesEnabled = DiagramServices</p>
+<p>End Sub<br />
+[/vb]</p>
+<p>I see the following basic steps:</p>
+<ol>
+<li>Save the current DiagramServicesEnabled setting (line 4-5)</li>
+<li>Set the DiagramServicesEnabled property to a new value (line 6)</li>
+<li>Set a checkpoint for "undo" (line 9)</li>
+<li>Do the layout that we asked for (line 10-12)</li>
+<li>End the "undo" checkpoint (line 13)</li>
+<li>Put the DiagramServicesEnabled property back how we found it (line 16)</li>
+</ol>
+<p>The DiagramServicesEnabled property belongs to a document, so in our code we could use the <strong>Get-VisioDocument</strong> cmdlet to get the current one. The <a href="https://msdn.microsoft.com/en-us/library/office/ff765437.aspx">reference page</a> on that property has a handy list of values for the different levels of diagram services (we need <strong>visServiceVersion140</strong> and <strong>visServiceVersion150</strong>, which are 7 and 8, respectively).</p>
+<p>It's completely up to you if you want to provide the ability to undo operations. I haven't included this "feature" in <a href="https://github.com/MikeShepard/VisioBot3000" target="_blank">VisioBot3000</a>, but it seems like it would be pretty easy.</p>
+<p>The actual layout operation uses the current page, so now we could use <strong>Get-VisioPage</strong> to get the current page as an object. There are 2 calls to CellSRC (which stands for Section, Row, Column, btw) with a bunch of constants.<br />
+There are 2 different ways to handle these:<br />
+First, you can google the constants and replicate the lines verbatim (yuck). That works, but leaves the code full of "magic numbers".<br />
+Alternatively, you can look at the last constant (visPLOPlaceStyle, visPLORouteStyle) and google them. Let's look at the first (visPLOPlaceStyle). One of the first links is to the VisCellIndices page <a href="https://msdn.microsoft.com/en-us/library/office/ff767991.aspx">here</a>. You probably want to bookmark that page if you're dealing with the Visio API. You will use it all the time. Anyway, searching on the page for visPLOPlaceStyle tells you that this is the "PlaceStyle" cell. That means you can replace that huge call with:<br />
+<strong>$Page.Cells('PlaceStyle')=6</strong>. You don't really need the formula to set it, but if you want you can do <strong>$Page.Cells('PlaceStyle').Formula='=6'</strong>. Since it's just a number (with no units), this works fine.</p>
+<p>Similarly, the other CellSRC call can be replaced by <strong>$Page.Cells('RouteStyle')=16</strong>.</p>
+<p>Putting all of that together into a function with VisioBot3000 looks like this:</p>
+<p>[powershell]<br />
+Import-Module VisioBot3000</p>
+<p>function Set-VisioCircularLayout{</p>
+<p>    $Visio=Get-VisioApplication</p>
+<p>    $document=Get-VisioDocument<br />
+    #or $document=$Visio.ActiveDocument</p>
+<p>    #save the document setting<br />
+    $SaveSetting=$document.DiagramServicesEnabled<br />
+    $document.DiagramServicesEnabled=(7+8)</p>
+<p>    $UndoScope=$Visio.BeginUndoScope("Lay Out Shapes")</p>
+<p>    $page=Get-VisioPage</p>
+<p>    #Make the layout change<br />
+    $Page.Cells('PlaceStyle')=6<br />
+    $Page.Cells('RouteStyle')=16</p>
+<p>    $Page.Layout()</p>
+<p>    $Visio.EndUndoScope($UndoScope,1)</p>
+<p>    #put the setting back<br />
+    $document.DiagramServicesEnabled=$SaveSetting<br />
+}<br />
+[/powershell]</p>
+<p>Hope that made sense. Next time I'll talk about how I deal with all of the Visio constants.</p>
+<p>--Mike</body></html></p>

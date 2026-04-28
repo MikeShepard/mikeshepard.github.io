@@ -1,0 +1,51 @@
+---
+layout: post
+title: Module Structure Preferences (and my module history)
+date: 2016-08-30 22:36:33.000000000 -05:00
+type: post
+parent_id: '0'
+published: true
+password: ''
+status: publish
+categories:
+- Discussion
+- Modules
+- Scripts
+tags:
+- Modules
+meta:
+  _edit_last: '2'
+  _yoast_wpseo_primary_category: '47'
+  _yoast_wpseo_content_score: '90'
+author:
+  login: mike
+  email: mshepard70@gmail.com
+  display_name: mike
+  first_name: ''
+  last_name: ''
+permalink: "/2016/08/30/module-structure-preferences-and-my-module-history/"
+---
+<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
+<html><body></p>
+<h2>Modules in the Olden Days</h2>
+<p>Back in PowerShell 1.0 days, there were no modules.  Uphill both ways.  In 1.0, we only had script files.  That means you had a couple of choices when it came to deploying functions.  Either you put a bunch of functions in a .ps1 file and dot-sourced it, or you used parameterized scripts in place of functions.  I guess you could have put a function in a .ps1 file, but you'd still need to dot-source it, right?  Personally (at work), I had a bunch of .ps1 files, each devoted to a single "subject".  I had one that dealt with db access (db_utils), one that interfaced with PeopleSoft (ps_utils), a module for scheduled tasks (schtasks_utils), and so on.  You get the idea.</p>
+<h2>PowerShell 2.0 - The Dawn of Modules</h2>
+<p>One of the easiest features to love in PowerShell 2.0 was support for modules (although remoting and advanced functions are cool, they're not quite as easy).  There's a $PSModulePath pointing to places to put modules in named folders, and in the folders you have .psm1 or .psd1 files.  There are other options (like .dll), but for scripts, these are what you run into.</p>
+<p>Transitioning into modules for me started easy:  I just changed the extensions of the .ps1 files to .psm1.  I had written functions (require and reload) which knew where the files were stored, and handled dot-sourcing them.  You had to dot-source require and reload, but it was clear what was going on.  When modules were introduced, I changed the functions to look for psm1 files and import with Import-Module if they existed, and just carry on as before otherwise.</p>
+<h2>That's Kind of Gross</h2>
+<p>Yep.  No module manifests, and dozens of .psm1 files in the same folder.  To make it worse, I wasn't even using the PSModulePath, because the .psm1 files weren't in proper named folders.  The benefit for me was that I didn't have to change any code.  I let that go for several years.  Finally I broke down and put the files in proper folders and changed the code to stop using the obsolete require/reload functions and use Import-Module directly.  I still haven't written module manifests for them.  I'm so bad.</p>
+<h2>What about new modules?</h2>
+<p>Good question!  For new stuff (written after 2.0 was introduced), I started with the same module structure:  single .psm1 file with a bunch of functions in it.  Probably put an <strong><a href="http://stackoverflow.com/questions/6032344/how-to-hide-helper-functions-in-powershell-modules/6032855#6032855">Export-ModuleMember *-*</a></strong> in there to make sure that any helper functions don't "leak", but that was about it.  To be fair, I didn't do a lot of module writing for quite a while, so this wasn't a real hindrance.</p>
+<h2>Is there a problem with that?</h2>
+<p>No...there's no problem with having a simple .psm1 script module containing functions.  At least from a technical standpoint.  Adding a module manifest is nice because you can document dependencies and speed up intellisense by listing public functions, but that's extra.</p>
+<p>The problem came when I wrote a module with a bunch of functions.  <a href="https://github.com/MikeShepard/VisioBot3000">VisioBot3000</a> isn't huge, but it has 38 functions so far.  At one point, the .psm1 file was over 1300 lines long.  That's too much scrolling and searching in the file to be useful in my opinion.</p>
+<h2>What's the recommended solution?</h2>
+<p>I've seen several posts recommending that each function should be broken out into a single .ps1 file and the .psm1 file should dot-source them all.  That definitely gets past the problem of having a big file.  But in my mind it creates a different problem.  The module directory (or sub-folder where the .ps1 files live) gets really big and it takes some work to find things.  Lots of opening and closing of files.  And the dot-sourcing operation isn't free...it takes time to dot-source a large set of files.  Not a showstopper, but noticeable.</p>
+<h2>My tentative approach</h2>
+<p>How I've started organizing my modules is similar to how I organized "modules" in the 1.0 era.  Back then, each file was subject-specific.  In VisioBot3000, I split the functions out based on noun.</p>
+<p><a href="https://powershellstation.com/wp-content/uploads/2016/08/VisioBotPS1Files.png"><img class="alignnone size-full wp-image-1072" src="{{site.baseurl}}/assets/2016/08/VisioBotPS1Files.png" alt="VisioBotPS1Files" width="158" height="266"></a></p>
+<p>I still have relatively short source files, but now each file generally has a get/set pair, and if other functions use the same noun they're there too.</p>
+<p>I've found that I often end up editing several functions in the same file to address issues, enhancements, etc.  I think it makes sense from a discoverability standpoint as well.  If I was looking at the source, I'd find functions which were related in the same file, rather than having to look through the directory for files with similar filenames.</p>
+<p>Anyway, it's what I'm doing.  You might be writing all scripts (no functions) and liking that.  More power to you.</p>
+<p>Let me know what you think.</p>
+<p>--Mike</body></html></p>

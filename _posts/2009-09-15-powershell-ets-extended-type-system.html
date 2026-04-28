@@ -1,0 +1,78 @@
+---
+layout: post
+title: PowerShell ETS (Extended Type System)
+date: 2009-09-15 19:12:28.000000000 -05:00
+type: post
+parent_id: '0'
+published: true
+password: ''
+status: publish
+categories:
+- Discussion
+- Scheduled Tasks
+- Scripts
+tags:
+- add-member
+- ETS
+- PowerShell
+- Script
+meta:
+  _edit_last: '2'
+author:
+  login: mike
+  email: mshepard70@gmail.com
+  display_name: mike
+  first_name: ''
+  last_name: ''
+permalink: "/2009/09/15/powershell-ets-extended-type-system/"
+excerpt: |-
+  In a recent post , I showed how to get a list of Scheduled Tasks as objects using PowerShell and Import-CSV.   In that, I included the following line of code:
+
+  $task.PSObject.TypeNames.Insert(0,"DBA_ScheduledTask")
+
+  In this post, I'll try to explain why I did that.
+---
+<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
+<html><body></p>
+<p>In a <a href="https://powershellstation.com/2009/09/10/getting-scheduled-tasks-in-powershell/">recent post</a> , I showed how to get a list of Scheduled Tasks as objects using PowerShell and Import-CSV.   In that, I included the following line of code:</p>
+<pre class="brush: powershell; gutter: false">$task.PSObject.TypeNames.Insert(0,"DBA_ScheduledTask")</pre>
+<p>In this post, I'll try to explain why I did that.</p>
+<p>There are several approaches to making objects in PowerShell.</p>
+<ul>
+<li>Use new-object to create an object from an existing <em>class</em> (.NET, COM, ADSI, WMI)</li>
+<li>Use add-member to add properties and methods to an existing <em>object</em>
+</li>
+<li>Use ETS (the Extended Type System) to add properties and methods to an existing <em>class</em>
+</li>
+</ul>
+<p>Obviously, the first approach (new-object)  makes sense if there is an existing class that you know fits the purposes you have in mind.  It helps if there's a constructor that takes arguments that you have lying around, too.  For example:</p>
+<pre class="brush: powershell; gutter: false"> $conn=new-object data.sqlclient.sqlconnection "Server=laptopsqlexpress;Integrated Security=True"</pre>
+<p>But often, you're working with a domain-specific object that doesn't exist in the .NET framework or anything else.</p>
+<p>The second approach (using add-member) is useful, for example,  if you need to create a record from a collection of properties.  You can also add methods using add-member.   One thing that you'll run into with using add-member is that you have to remember to add the same members (the same set of properties and methods) to each similar object that you're dealing with.  This is a lot different than when you create a class definition and instantiate objects from the class.</p>
+<p>The third approach is similar to the second, in that you specify properties and methods to add, but in this case, you specify them in a configuration file ( *.ps1xml) that is added with the update-typedata cmdlet.   In this file, you name the class that you want to extend, and list the property and method definitions that you want to add.  After the update-typedata cmdlet is issued, all objects of the type listed will have the new properties and methods.</p>
+<p>One especially nice feature of the third approach is that the name of the class you want to extend does not have to be the actual name of the type of the objects.  What it really does is match the values in the object's PSObject.TypeNames property.  For most objects, this property is a list of the inheritance chain for the object, going back to System.Object.  However, as in the above example, you are free to add (or remove) items from this list.  Above, I added "DBA_ScheduledTask" to the list.  That means that if I have a .ps1xml configuration file that has ETS info in it for the type "DBA_ScheduledTask", that set of properties and methods would be available from the objects I create.</p>
+<p>I often use functions that return data out of a database.  PowerShell is nice enough that it acts like DataRows are objects, using column names for properties.  This makes it very easy to use the data in PowerShell without doing much to it.  By adding a specific "type name" to the TypeNames collection, I can instantly make the DataRow records into full-fledged objects (by including an appropriate update-typdata command in my profile).  In the post about Scheduled Tasks, it would make sense to use ETS to specify the Run and Delete methods.  Here's what that would look like:</p>
+<pre class="brush: xml">&lt;?xml version="1.0" encoding="utf-8" ?&gt;
+&lt;Types&gt;
+ &lt;Type&gt;
+ &lt;Name&gt;DBA_ScheduledTask&lt;/Name&gt;
+ &lt;Members&gt;
+ &lt;ScriptMethod&gt;
+ &lt;Name&gt;Run&lt;/Name&gt;
+ &lt;Script&gt;
+ schtasks.exe /RUN /TN $this.TaskName /S $this.HostName
+ &lt;/Script&gt;
+ &lt;/ScriptMethod&gt;
+ &lt;ScriptMethod&gt;
+ &lt;Name&gt;Delete&lt;/Name&gt;
+ &lt;Script&gt;
+ schtasks.exe /DELETE /TN $this.TaskName /S $this.HostName
+ &lt;/Script&gt;
+ &lt;/ScriptMethod&gt;
+ &lt;/Members&gt;
+ &lt;/Type&gt;
+&lt;/Types&gt;</pre>
+<p>With this in a file (for instance c:typesscheduledTasks_type.ps1xml), you would issue the command "update-typedata c:typesscheduledTasks_type.ps1xml", and the Run and Delete methods would be added to items of that type.  Of course, you'd want to modify the code in the previous post to not add those methods with add-member.</p>
+<p>I tend to use a mix of add-member and ETS to create the objects I want.  You have to be careful when using ETS to remember that if you want the extra properties, you have to have loaded the ps1xml file in the session you're running.  This often isn't the case if you're remoted into a server troubleshooting something.  For that reason, it's usually preferrable (in my opinion) to use add-member most of the time.  I use a custom PowerShell host that allows me to use ETS data to specify context menus for different types of objects and customize them through the ps1xml files.  Since I don't expect to find those context menus when I'm in the text console on a server, it doesn't get me into trouble.</p>
+<p>Let me know if you have any questions, comments, or complaints.</p>
+<p>Mike</body></html></p>

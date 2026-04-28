@@ -1,0 +1,55 @@
+---
+layout: post
+title: When the PowerShell pipeline doesn't line up
+date: 2017-04-04 19:54:37.000000000 -05:00
+type: post
+parent_id: '0'
+published: true
+password: ''
+status: publish
+categories:
+- Scripts
+tags:
+- Pipeline
+meta:
+  _edit_last: '2'
+  _yoast_wpseo_content_score: '90'
+  _yoast_wpseo_primary_category: '7'
+  _syntaxhighlighter_encoded: '1'
+author:
+  login: mike
+  email: mshepard70@gmail.com
+  display_name: mike
+  first_name: ''
+  last_name: ''
+permalink: "/2017/04/04/powershell-pipeline-doesnt-line/"
+---
+<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
+<html><body></p>
+<h2>The PowerShell Pipeline</h2>
+<p>One of the defining features of PowerShell is the object-oriented pipeline.  The ability to "wire-up" parameters to the pipeline and allow objects (or properties) to be automatically assigned to them allows us to write code that is often variable-free.</p>
+<p>By "variable-free", I mean that instead of doing something like this:</p>
+<p>[powershell] $services=Get-Service *SQL*<br />
+foreach($service in $services){<br />
+    Stop-Service -Name $Service.Name<br />
+} [/powershell]</p>
+<p>we can write things like this:</p>
+<p>[powershell]Get-Service *SQL* | Stop-Service[/powershell]</p>
+<p>There's nothing wrong with the first script. It is logically laid out, it is clear what's going on, and accomplishes the same goal. On the other hand, by introducing more variables (and more statements), we have added many more places where we can make mistakes.</p>
+<blockquote><p>When possible, you should write your functions so that they allow pipeline input wherever it makes sense.</p></blockquote>
+<h2>When it doesn't work</h2>
+<p>I was helping a co-worker with a script the other day and we found something unusual.  The module he was using (open-source) allowed pipeline input, but it didn't work quite right.  The library (which dealt with processes running on specified computers) allowed you to pipe objects into the Stop function, but instead of using the objects as-is, it only used the PID from each object.  The problem with that was that the Stop function then prompted for a computername for each object, although the incoming objects had properties which contained that value.</p>
+<p>The solution was to hand-wire the pipeline like this:</p>
+<p>[powershell]<br />
+Get-RemoteProcess &amp;lt;criteria&amp;gt; | foreach {<br />
+           Stop-RemoteProcess &amp;nbsp;-ID $_.PID -ComputerName $_.ComputerName<br />
+}<br />
+[/powershell]</p>
+<p>(note that these are not the actual function/parameter names...I'm not writing this to shame the original module author)</p>
+<p>If the pipeline support had been implemented more reasonably, that could have been written like this:</p>
+<p>[powershell]<br />
+Get-RemoteProcess &lt;criteria&gt; | Stop-RemoteProcess<br />
+[/powershell]</p>
+<p>As I said before, not supporting the pipeline (correctly) introduces places where we can make mistakes.  And if you're like me,<br />
+you will make mistakes in those places.</p>
+<p>--Mike</body></html></p>

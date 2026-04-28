@@ -1,0 +1,43 @@
+---
+layout: post
+title: Why Adolib (and POSH_Ado)?
+date: 2015-10-26 03:33:55.000000000 -05:00
+type: post
+parent_id: '0'
+published: true
+password: ''
+status: publish
+categories:
+- adolib
+- Discussion
+- POSH_Ado
+tags:
+- ADOLib
+- POSH_ADO
+- SQLPSX
+meta:
+  _edit_last: '2'
+  _syntaxhighlighter_encoded: '1'
+author:
+  login: mike
+  email: mshepard70@gmail.com
+  display_name: mike
+  first_name: ''
+  last_name: ''
+permalink: "/2015/10/26/why-adolib-and-posh_ado/"
+---
+<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
+<html><body>
+<p>I've realized that in my explanations of Adolib and POSH_Ado, I left something important out.  Why in the world am I spending all of this time and effort writing database access modules when there are already tools out there (SQLPS, for instance) which work.</p>
+<p>The simple answer is SQLPS is not good enough for several reasons.</p>
+<p>First, SQLPS is part of the SQL Server install, which is a big download.  That's quite a burden to place on a user just to get access to <strong>Invoke-SQLCmd</strong>.</p>
+<p>Second, when I started writing Adolib (and the predecessor which is used at my company), SQLPS was still a snap-in rather than a module.  This was in PowerShell 1.0 days, so it was the normal distribution method, but snap-ins were not fun to work with and that made SQLPS even more of a burden.</p>
+<p>Third, although <strong>Invoke-SQLCmd</strong> has a lot of flexibility, it does not allow you to re-use the same connection for multiple commands.  You connect (and authenticate) each time you want to run a SQL command.  This seems wasteful to me.</p>
+<p>Fourth, <strong>Invoke-SQLCmd</strong> uses strings for variable substitution rather than real parameters, so it's vulnerable to SQL injection.  While the other problems in this list can be overlooked, I have a harder time with this one.  I realize that <strong>Invoke-SQLCmd</strong> is modeled to work like the command-line SQL tools, and that explains the string subsitution, there's no good reason not to also support T-SQL parameters in statements.</p>
+<p>Finally, the code in Adolib (and to some extent POSH_Ado) is pretty simple.  It's a good, easy to understand example of using .NET classes in PowerShell code.  A friend at work who saw Adolib for the first time (reading <a href="https://powershellstation.com/2015/09/01/getting-started-with-adolib/">this post</a>) said that it seemed too easy.  Adolib is very easy to use and easy enough to understand that you might find yourself adding features.</p>
+<p>I work with SQL Server a lot, and most of the modules I use at work involve reading and or writing values to SQL.  Adolib doesn't have all of the flexibility that SQLPS gives, but it does use parameters and allows connection re-use.  It's been with me for a long time (8 years?) and the more I use it the more I can't imagine using anything else.</p>
+<p>POSH_Ado is a natural progression from Adolib.  If you need to work with multiple database platforms, it's really nice to have a consistent interface to work with them all.  The times I've needed this kind of functionality POSH_Ado has been very handy and saved a lot of time.</p>
+<p>Have you used Adolib or POSH_Ado?  Anything you think needs to be added or changed with either?</p>
+<p>I look forward to hearing your opinions.</p>
+<p>--Mike</p>
+<p></body></html></p>

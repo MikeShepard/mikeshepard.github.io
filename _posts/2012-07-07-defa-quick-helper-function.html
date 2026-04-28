@@ -1,0 +1,55 @@
+---
+layout: post
+title: 'Def: A Quick Helper Function'
+date: 2012-07-07 03:11:51.000000000 -05:00
+type: post
+parent_id: '0'
+published: true
+password: ''
+status: publish
+categories:
+- Scripts
+tags:
+- function
+- metadata
+- PowerShell
+- Script
+meta:
+  _edit_last: '2'
+  _syntaxhighlighter_encoded: '1'
+author:
+  login: mike
+  email: mshepard70@gmail.com
+  display_name: mike
+  first_name: ''
+  last_name: ''
+permalink: "/2012/07/07/defa-quick-helper-function/"
+---
+<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
+<html><body></p>
+<p>Did you ever find yourself knowing that you had written a function but you couldn't remember which module you put it in? If you have the module imported, you can find out with this:<br />
+[powershell]dir function:functionname | select Name,ModuleName[/powershell]<br />
+Note that I am <em>defiantly</em> using the "dir" alias for get-childitem even though everyone says not to.  I'll be a rulebreaker again later on in this post as you'll see.</p>
+<p>If you ever wanted to know the definition of a function you can use the "definition" property:<br />
+[powershell]dir function:functionname | select -expand Definition[/powershell]</p>
+<p>I recently put these 2 together in a helper function I call "def"</p>
+<p>[powershell]<br />
+function def{<br />
+param($funcname)<br />
+    $func=dir function:$funcname<br />
+    if($func.ModuleName){<br />
+      Write-host "$func is defined in module $($func.ModuleName)"<br />
+    }<br />
+    write-host $Func.definition<br />
+}<br />
+[/powershell]<br />
+Here you'll see my rebellious ways in 2 different strains:</p>
+<ul>
+<li>I defined a function without using the verb-noun convention</li>
+<li>I used write-host to provide output from a function</li>
+</ul>
+<p>For what it's worth, I am very fond of the verb-noun naming convention.  I was tempted to name the function "show-commanddefinition" and give it an alias of "def", but I doubt I'd ever use the full name.</p>
+<p>Also, I <em>completely</em> agree with not using write-host to provide output from functions.  Doing so makes the function in question a dead-end as far as PowerShell goes.  In this case, I used it because I was providing 2 different kinds of output (the module name and the definition of the function) and writing those to the output stream wouldn't help much.  I could have defined an object with those 2 properties, or even just used select-object to whittle down the command object to those 2, but then the default display would have made presented a tabular view which probably would have truncated the definition.  This function wasn't meant to be consumed by other functions, it was meant for me to look at the output.  Thus, <code>write-host</code> was the right choice.  Jeff Hicks is correct, though, every time you use write-host in a function (let's say a "real function"), %deity% kills a puppy.</p>
+<p>Fortunately for everyone I know, that's about as rebellious as I get.</p>
+<p>Let me know what you think.<br />
+Mike</body></html></p>

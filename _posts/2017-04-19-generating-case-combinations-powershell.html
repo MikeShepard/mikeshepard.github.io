@@ -1,0 +1,50 @@
+---
+layout: post
+title: Generating All Case Combinations in PowerShell
+date: 2017-04-19 22:22:35.000000000 -05:00
+type: post
+parent_id: '0'
+published: true
+password: ''
+status: publish
+categories:
+- Scripts
+tags: []
+meta:
+  _yoast_wpseo_is_cornerstone: ''
+  _edit_last: '2'
+  _yoast_wpseo_content_score: '60'
+  _yoast_wpseo_primary_category: ''
+  _syntaxhighlighter_encoded: '1'
+author:
+  login: mike
+  email: mshepard70@gmail.com
+  display_name: mike
+  first_name: ''
+  last_name: ''
+permalink: "/2017/04/19/generating-case-combinations-powershell/"
+---
+<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
+<html><body>
+<p>At work, a software package that I'm dealing with requires that lists of file extensions for whitelisting or blacklisting be case-sensitive.  I'm not sure why this is the case (no pun intended), but it is not the only piece of software that I've used with this issue.</p>
+<p>What that means is that if you want to block .EXE files, you need to include 8 different variations of EXE (exe, exE, eXe, eXE, Exe, ExE, EXe, EXE).  It wasn't too hard to come up with those, but what about ps1xml?  64 variations.</p>
+<p>For fun, I wrote a small PowerShell function to generate a list of the different possibilities.  It does this by looking at all of the binary numbers with the same number of bits as the extension, interpreting a 0 as lower-case and 1 as upper case.</p>
+<p>Here it is:<br />
+[powershell]<br />
+function Get-ExtensionCases{<br />
+param([string]$ext= 'exe')</p>
+<p>  $vars=$ext.ToLower() ,$ext.ToUpper() </p>
+<p>  $powers=0..$ext.length | foreach {  [math]::pow(2,$_) }<br />
+  foreach($i in 0..([math]::Pow(2,$ext.length)-1)){<br />
+      (0..($ext.length-1)|foreach {$vars[($i -band $powers[$_])/$powers[$_]][$_]}) -join ''<br />
+  }<br />
+}<br />
+[/powershell]</p>
+<p>I pre-calculate the relevant powers of two in $powers, since we use them over and over again.  I also do the upper/lower once at the beginning and do some (gross) indexing to get the proper one.</p>
+<p>Here's the output for exe:<br />
+<a href="https://powershellstation.com/wp-content/uploads/2017/04/Extensions.png"><img src="{{site.baseurl}}/assets/2017/04/Extensions-300x154.png" alt="" width="300" height="154" class="alignnone size-medium wp-image-1166"></a></p>
+<p>It was a fun few minutes.  Watching longer output scroll by can even be somewhat mesmerizing.</p>
+<p>Let me know what you think</p>
+<p>--Mike</p>
+<p>P.S.  PowerShellStation was named one of the top <a href="http://blog.feedspot.com/powershell_blogs/">50 PowerShell blogs</a>!  Thanks to everyone for stopping by and listening to my rambling.</p>
+<p></body></html></p>

@@ -1,0 +1,131 @@
+---
+layout: post
+title: Importing Modules using -AsCustomObject
+date: 2012-02-08 04:46:26.000000000 -06:00
+type: post
+parent_id: '0'
+published: true
+password: ''
+status: publish
+categories:
+- Scripts
+tags: []
+meta:
+  _edit_last: '2'
+  _syntaxhighlighter_encoded: '1'
+author:
+  login: mike
+  email: mshepard70@gmail.com
+  display_name: mike
+  first_name: ''
+  last_name: ''
+permalink: "/2012/02/08/importing-modules-using-ascustomobject/"
+---
+<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
+<html><body>
+<p>I recently got thinking about the -AsCustomObject switch for the Import-Module cmdlet. I have seen it several times in discussions of implementing "classes" in PowerShell. Here's a typical (i.e. trivial) example:<br />
+[powershell]<br />
+#module adder.psm1<br />
+function add-numbers($x,$y){<br />
+   return $x+$y<br />
+}<br />
+[/powershell]<br />
+With that module, we can do the standard module stuff:<br />
+[powershell]<br />
+PS&gt; import-module adder<br />
+PS&gt; add-numbers 1 2<br />
+3<br />
+[/powershell]<br />
+Ok, that was way too basic. Here's something a lot closer to the topic at hand:<br />
+[powershell]<br />
+PS&gt; $adder=import-module adder -ascustomobject<br />
+PS&gt; $adder | gm</p>
+<p>   TypeName: System.Management.Automation.PSCustomObject</p>
+<p>Name        MemberType   Definition<br />
+----        ----------   ----------<br />
+Equals      Method       bool Equals(System.Object obj)<br />
+GetHashCode Method       int GetHashCode()<br />
+GetType     Method       type GetType()<br />
+ToString    Method       string ToString()<br />
+add-numbers ScriptMethod System.Object add-numbers(); </p>
+<p>PS&gt; $adder.add-numbers(1,2)<br />
+Unexpected token '-numbers' in expression or statement.<br />
+At line:1 char:11<br />
+PS&gt;  $adder."add-numbers"( 1, 2)<br />
+3<br />
+[/powershell]<br />
+There are a several interesting things to notice about this example. First of all, note that the add-numbers function has become a scriptmethod on the $adder object. As the help topic for import-module states, the members of the custom object are the (exported) members of the module. When we try to call the add-numbers method, we find that our decision to use the <em>noun-verb</em> naming convention has bitten us. To use the method, we need to enclose the offending method name in quotes (both single and double work fine). Note that since this is a method we need to use commas to separate the arguments to the function.</p>
+<p>A second thing to note is since this is a method, not a function, we can't skip arguments.<br />
+[powershell]PS&gt; $adder.add-numbers(,2)[/powershell]<br />
+Note that we could definitely do<br />
+[powershell]add-numbers -y 2[/powershell]<br />
+if we had used a normal import-module. Granted that in this case there would be no need to.</p>
+<p>What if we try to fix the quotation issue by including an alias (say, AddNumbers) to the module and exporting it?<br />
+[powershell]<br />
+function add-numbers($x,$y){<br />
+   return $x+$y<br />
+}<br />
+new-alias addNumbers add-numbers<br />
+export-modulemember -Function * -Variable * -alias *<br />
+[/powershell]<br />
+Here's what we find:<br />
+[powershell]<br />
+PS&gt; $adder=import-module adder -ascustomobject -force<br />
+PS&gt; $adder | gm</p>
+<p>   TypeName: System.Management.Automation.PSCustomObject</p>
+<p>Name        MemberType   Definition<br />
+----        ----------   ----------<br />
+Equals      Method       bool Equals(System.Object obj)<br />
+GetHashCode Method       int GetHashCode()<br />
+GetType     Method       type GetType()<br />
+ToString    Method       string ToString()<br />
+add-numbers ScriptMethod System.Object add-numbers(); </p>
+<p>PS&gt; get-alias AddNumbers</p>
+<p>Capability      Name                             ModuleName<br />
+----------      ----                             ----------<br />
+Script          addNumbers -&gt; add-numbers        adder</p>
+<p>[/powershell]<br />
+Hey! Our alias is missing. Unfortunately, it got imported into the global scope (possibly hiding another function).  Note that I used the -force switch to make sure that we re-import it if it was already loaded.</p>
+<p>When I first read about the -asCustomObject switch, I could see myself using this to import modules that had conflicting function names, and using the custom objects to call the methods in question.  However, consider a function with a large number of switches or parameters.  With an "-ascustomobject" object, you would need to specify all of the switches or parameters. Again, what about a function which used parametersets? As it turns out, scriptmethods don't seem to use parametersets.  Here's function to demonstrate:<br />
+[powershell]<br />
+function test-psets{<br />
+param([Parameter(ParameterSetName="Set1")]$x,<br />
+      [Parameter(ParameterSetName="Set2")]$y)<br />
+      switch ($PsCmdlet.ParameterSetName){<br />
+         "Set1" {write-host "we're using Set1"}<br />
+         "Set2"  {write-host "we're using Set2"}<br />
+         default {write-host "don't know what parameter set we're in"}<br />
+      }<br />
+      Write-host "we had better be using $($PsCmdlet.ParameterSetName)"<br />
+}<br />
+[/powershell]<br />
+Calling that function on a custom object looks like this:<br />
+[powershell]<br />
+PS&gt; $adder=import-module adder -ascustomobject -force<br />
+PS&gt; $adder."test-psets"(1)   #should use pset 1, since we're only using the first parameter<br />
+don't know what parameter set we're in<br />
+we had better be using<br />
+PS&gt; $adder."test-psets"(1,2)  #shouldn't be valid, since they're different parametersets<br />
+don't know what parameter set we're in<br />
+we had better be using<br />
+PS&gt; #Sanity check to make sure the function works<br />
+PS&gt; import-module adder<br />
+PS&gt; test-psets -x 1<br />
+we're using Set1<br />
+we had better be using Set1</p>
+<p>PS&gt; test-psets -y 1<br />
+we're using Set2<br />
+we had better be using Set2</p>
+<p>PS&gt; test-psets -x 1 -y 2<br />
+test-psets : Parameter set cannot be resolved using the specified named parameters.<br />
+At line:1 char:1<br />
++ test-psets -x 1 -y 2<br />
++ ~~~~~~~~~~~~~~~~~~~~<br />
+    + CategoryInfo          : InvalidArgument: (:) [test-psets], ParameterBindingException<br />
+    + FullyQualifiedErrorId : AmbiguousParameterSet,test-psets</p>
+<p>[/powershell]<br />
+So it seems that functions that utilize parametersets are going to be a lot less useful with -AsCustomObject imports.</p>
+<p>As I mentioned, there are several examples floating around concerning creating new objects (or classes, depending on your perspective) using modules and this option.  Given the drawbacks I've noted in this article, I think I'm going to stay away from that particular use case.</p>
+<p>What do you think?  Did I miss something important?  Please let me know what your opinion is.</p>
+<p>-Mike</p>
+<p></body></html></p>

@@ -1,0 +1,36 @@
+---
+layout: post
+title: Executing SQL the right way in PowerShell (revisited)
+date: 2015-08-31 18:19:24.000000000 -05:00
+type: post
+parent_id: '0'
+published: true
+password: ''
+status: publish
+categories:
+- Scripts
+tags:
+- ADO.NET
+- POSH_ADO
+- SQL
+- SQLPSX
+meta:
+  _edit_last: '2'
+author:
+  login: mike
+  email: mshepard70@gmail.com
+  display_name: mike
+  first_name: ''
+  last_name: ''
+permalink: "/2015/08/31/executing-sql-in-powershell-revisited/"
+---
+<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
+<html><body>
+<p>Almost 6 years ago I wrote <a href="https://powershellstation.com/2009/09/15/executing-sql-the-right-way-in-powershell/">this post</a> about how I thought you should go about executing SQL statements and queries in PowerShell. It included a function which allowed you to pass a hashtable of parameter names and values.  This post has been one of the most popular on the site.</p>
+<p>I submitted a module to the SQLPSX project called adolib which included a greatly expanded version of this function, along with others that let you invoke commands, stored procedures, and queries, as well as use the .NET SQLBulkCopy class to do high-performance data manipulation.</p>
+<p>The SQLPSX has seen a lot of contributors come and go, but unfortunately there hasn't been a release in several years and behind the scenes, not even very much activity.  At the recommendation of members of the PowerShell community (and after discussing with Chad Miller, the founder of SQLPSX) I copied the project to GitHub.  The repository can be found <a href="https://github.com/MikeShepard/SQLPSX">here</a>.  I've opened a few issues for some "low-hanging fruit", and welcome input from anyone.</p>
+<p>One interesting facet of working in SQLPSX on adolib was that it was copied and modified to create MySQLLib and OracleClient modules.  These modules were based on the same code, except instead of using the SQLClient namespace they used the Oracle.DataAccess.Client and MySql.<span class="pl-k">Data</span>.MySqlClient namespaces.  Because ADO.NET works much the same no matter which provider you use, this worked fine.</p>
+<p>I wasn't really satisfied with copy-paste programming, though, and wrote a new version of adolib which allows you to specify the provider as a parameter when importing the module.  I've tested the approach with several different providers (SQL Server, MySQL, DB2, Oracle, FireBird, and even Paradox).  The code sat untouched as a fork on the SQLPSX project, so when I moved SQLPSX to GitHub, I decided to remove that fork and create a separate repository for it as <a href="https://github.com/MikeShepard/POSH_ADO">POSH_ADO</a>.  Watch for a post or two on using POSH_ADO in the next week or so.</p>
+<p>-Mike</p>
+<p> </p>
+<p></body></html></p>

@@ -1,0 +1,46 @@
+---
+layout: post
+title: A Modest Proposal about PowerShell Strings
+date: 2018-06-27 22:09:59.000000000 -05:00
+type: post
+parent_id: '0'
+published: true
+password: ''
+status: publish
+categories:
+- Discussion
+- Rant
+tags: []
+meta:
+  _edit_last: '2'
+  _yoast_wpseo_focuskw_text_input: strings
+  _yoast_wpseo_focuskw: strings
+  _yoast_wpseo_linkdex: '16'
+  _yoast_wpseo_content_score: '90'
+  _yoast_wpseo_primary_category: '5'
+author:
+  login: mike
+  email: mshepard70@gmail.com
+  display_name: mike
+  first_name: ''
+  last_name: ''
+permalink: "/2018/06/27/string-proposal/"
+---
+<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
+<html><body><br />
+<img class="alignright size-medium wp-image-1324" src="{{site.baseurl}}/assets/2018/06/certificate-154169_640-278x300.png" alt="" width="278" height="300"></p>
+<p>If you've used the PowerShell Script Analyzer before you are probably aware that you shouldn't be using double-quoted strings if there aren't any escape characters, variables, or subexpressions in them.  The analyzer will flag unnecessary double-quotes as problems.  That is because double-quoted strings are essentially expressions that PowerShell needs to evaluate.</p>
+<p>Let me repeat that...</p>
+<h1 style="padding-left: 30px;">Double-quoted strings are expressions that PowerShell needs to evaluate.</h1>
+<p>Single-quoted strings, on the other hand, are just strings.  There's nothing (aside from doubled single-quotes being replaced by a single single-quote) that needs to be done with them.</p>
+<p>When I teach about PowerShell, I usually say something along the lines of "double quotes are an indication to PowerShell that there's some work to do here".  I was thinking about this the other day and I think a shift in terminology will be helpful.  Calling them double- and single-quoted strings is descriptive, but not very helpful.</p>
+<p>My proposal is simply this:</p>
+<h3>Single-quoted strings will henceforth be called "strings".</h3>
+<h3>Double-quoted strings will henceforth be called "string expressions".</h3>
+<p>"String expression" gives me the idea that it is going to be evaluated.  Which fits double-quoted strings perfectly.  It's also shorter than saying "double-quoted string", which is a bonus.</p>
+<p>"String" sounds (to me, at least), like something static.  Matches the situation again.</p>
+<p>For those that think "why not just use double-quoted strings all the time?", I would counter: Would you use <strong>Resolve-Path</strong> against C:\?  Probably not, because it would be a waste of time.  There's nothing to do.  <strong>Resolve-Path</strong> expands wildcards and there are no wildcards there.  I guess you could use <strong>Resolve-Path</strong> with every path just to be safe...but you get the point.</p>
+<p>What do you think of this proposal?  Do "string" and "string expression" convey enough that they should be used?  Let me know in the comments.</p>
+<p>FWIW, I'm going to be using them whether you agree.  :-)</p>
+<p> </p>
+<p>--Mike</body></html></p>

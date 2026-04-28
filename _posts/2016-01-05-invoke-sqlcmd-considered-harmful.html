@@ -1,0 +1,45 @@
+---
+layout: post
+title: Invoke-SQLCmd considered harmful
+date: 2016-01-05 22:16:53.000000000 -06:00
+type: post
+parent_id: '0'
+published: true
+password: ''
+status: publish
+categories:
+- adolib
+- Discussion
+- POSH_Ado
+- SQL Server
+tags: []
+meta:
+  _edit_last: '2'
+  _syntaxhighlighter_encoded: '1'
+author:
+  login: mike
+  email: mshepard70@gmail.com
+  display_name: mike
+  first_name: ''
+  last_name: ''
+permalink: "/2016/01/05/invoke-sqlcmd-considered-harmful/"
+---
+<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
+<html><body></p>
+<p>I mentioned <a href="https://powershellstation.com/2015/10/26/why-adolib-and-posh_ado/">here</a> that <strong>Invoke-SQLCmd</strong> (included in the SQLPS module for SQL Server) was susceptible to SQL-Injection attacks, but I haven't demonstrated that or ever seen anyone show it.</p>
+<p>To do so, I'll start with code out of the help for <strong>Invoke-SQLCmd</strong>.  Here's the code (taken from <a href="https://msdn.microsoft.com/en-us/library/cc281720.aspx">here</a>)</p>
+<p>[powershell]$MyArray = "MyVar1 = 'String1'", "MyVar2 = 'String2'"<br />
+Invoke-Sqlcmd -Query "SELECT `$(MyVar1) AS Var1, `$(MyVar2) AS Var2;" -Variable $MyArray[/powershell]</p>
+<p>Notice that the parameters are encoded in a string. This is a easy-to-see red flag that SQL-Injection might be possible.  To see the problem, let's replace 'String1' with a SQL statement:</p>
+<p>[powershell]$MyArray = "MyVar1 = (select top 1 name from msdb.sys.databases)", "MyVar2 = 'String2'"<br />
+Invoke-Sqlcmd -Query "SELECT `$(MyVar1) AS Var1, `$(MyVar2) AS Var2;" -Variable $MyArray[/powershell]</p>
+<p><a href="https://powershellstation.com/wp-content/uploads/2016/01/sqlcmd_injection.png" rel="attachment wp-att-820"><img class="alignnone size-full wp-image-820" src="{{site.baseurl}}/assets/2016/01/sqlcmd_injection.png" alt="sqlcmd_injection" width="780" height="102"></a></p>
+<p>So even though our select statement (the <strong>-Query</strong> parameter to <strong>Invoke-SQLCmd</strong>) wasn't looking at any tables, the result we got was a value out of a table. I did have to remove the single quotes, but the command which was in a parameter was executed.</p>
+<p>A couple of minor problems with SQLPS which are unrelated to <strong>Invoke-SQLCmd</strong> but bother me nonetheless are:</p>
+<ul>
+<li>
+<strong>Encode-SQLName</strong> and <strong>Decode-SQLName</strong> both use unapproved verbs.  Cmdlets with these names were present in the SQLPS Snap-In, so I can understand them being here now.  A better solution would be to rename them (<strong>ConvertTo-SQLName</strong>/<strong>ConvertFrom-SQLName</strong>?) and provide aliases with the legacy Encode/Decode names.</li>
+<li>Importing the module changes the current location.  The module does implement the <strong>SQLServer</strong> provider and <strong>SQLServer:</strong> drive, but it should not do a <strong>Set-Location</strong> when the module is imported.  Especially with automatic importing, this could cause some strange unexpected results if someone isn't paying attention.</li>
+</ul>
+<p>There are a lot of cmdlets in the SQLPS module which are very well implemented, so don't think that I'm saying you should avoid it altogether.  Also, the parameter interface for <strong>Invoke-SQLCmd</strong> was implemented the way it was to stay compatible with the command-line tools that ship with SQL Server, so I understand where they are coming from.  I would have preferred that they also provide a solution using real parameters (SQL language parameters, that is).  I would recommend that you look at <strong><a href="https://github.com/RamblingCookieMonster/PowerShell/blob/master/Invoke-Sqlcmd2.ps1">Invoke-SQLCmd2</a></strong>, <strong><a href="https://github.com/MikeShepard/SQLPSX/tree/master/Modules/adoLib">Adolib</a></strong>, or <strong><a href="https://github.com/MikeShepard/POSH_Ado">POSH_Ado</a></strong> for examples of parameterized implementations.</p>
+<p> </body></html></p>

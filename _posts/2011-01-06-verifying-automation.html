@@ -1,0 +1,66 @@
+---
+layout: post
+title: Verifying Automation
+date: 2011-01-06 18:59:16.000000000 -06:00
+type: post
+parent_id: '0'
+published: true
+password: ''
+status: publish
+categories:
+- Discussion
+- Scheduled Tasks
+- Scripts
+- Tools
+tags: []
+meta:
+  _edit_last: '2'
+  _wp_old_slug: ''
+author:
+  login: mike
+  email: mshepard70@gmail.com
+  display_name: mike
+  first_name: ''
+  last_name: ''
+permalink: "/2011/01/06/verifying-automation/"
+---
+<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
+<html><body></p>
+<p>If you're anything like me, you've been bitten by the PowerShell bug and are using it among other automation sources to make you life in IT much more enjoyable.  If this is not the case...you need to get started!  There's no time like the present, and a PowerShell New Year's resolution should be something to consider.</p>
+<p>For those of you that are with me in the PowerShell camp, I have something that I'd like to discuss.  You probably have hundreds (dozens?) of scripts scheduled on multiple servers, possibly in multiple domains or geographical locations to perform things like these:</p>
+<ul>
+<li>Gather information about servers</li>
+<li>Generate reports about application usage</li>
+<li>Copy information from one place to another</li>
+<li>Validate security setup</li>
+<li>Start and Stop processes</li>
+<li>Scan log files for error conditions</li>
+<li>Lots of other things (you get the point)</li>
+</ul>
+<p>How do you know that the scripts that you have written carefully and scheduled are actually running successfully?  At first, this seems like a silly question.  When you deployed the script, surely you ran it once to make sure it worked.  What could have gone wrong?</p>
+<p>Here are some examples that come to mind:</p>
+<ul>
+<li>A policy was pushed which set the execution policy to Restricted</li>
+<li>The credentials you scheduled the script with have been revoked</li>
+<li>A file share that the scripts depend on is unavailable</li>
+<li>Firewall rules change and now WMI queries aren't working</li>
+<li>The Task Scheduler service is stopped</li>
+</ul>
+<p>You can probably think of a lot more examples of things that would keep scripts from working, but you get the idea.  I've given some thought to how to do this, but haven't come to any real conclusions.  Obviously, having your scripts log results is helpful, but only if you monitor the logs for success/failure.  Also, if you have a script which is supposed to run every 10 minutes, it doesn't help if you don't get alerted when it only runs once in a day, even if  it runs successfully.  Also, if there is more than one person writing scripts, how do you make sure that everyone is using the same techniques to log progress?</p>
+<p>Here are some of my thoughts:</p>
+<ul>
+<li>Use a "launcher" to run scripts (see below)</li>
+<li>Keep a database of processes with an expected # of runs per day</li>
+<li>Monitor matching start/end of scripts</li>
+<li>Log all output streams (<a title="example" href="http://www.nivot.org/2009/08/19/PowerShell20AConfigurableAndFlexibleScriptLoggerModule.aspx">example</a>)</li>
+</ul>
+<p>The first item in the list (the launcher) has been something I've been considering because it's not trivial to run a PowerShell script in a scheduled task.  Even with the -file parameter which was added in PowerShell 2.0, it can involve a fairly long command-line.  With the added difficulty of trying to capture output streams (most of which are not exposed to the command shell) it becomes a process that is almost hard to get right every time.  Some features I'm planning for the launcher are:</p>
+<ul>
+<li>Load appropriate profiles</li>
+<li>Log all output streams (with timestamps) to file or database</li>
+<li>Log application start/end times</li>
+<li>Email owner of script if there are unhandled exceptions</li>
+</ul>
+<p>I know this topic is not specific to PowerShell, but as Windows administrators get more used to scripting solutions to their automation problems with PowerShell (which I am confident that they are doing), it's something that every organization will need to consider.  I'll try to follow up with some posts that have some actual code to address some of these points.</p>
+<p>Mike</p>
+<p>P.S.  I'm specifically not discussing "enterprise job scheduling" solutions like JAMS because of the high cost involved.  I'd like to see the community come up with something a little more budget-friendly.</body></html></p>

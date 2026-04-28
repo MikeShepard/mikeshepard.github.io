@@ -1,0 +1,37 @@
+---
+layout: post
+title: PowerShell-Specific Code Smells
+date: 2013-10-23 04:04:45.000000000 -05:00
+type: post
+parent_id: '0'
+published: true
+password: ''
+status: publish
+categories:
+- Scripts
+tags: []
+meta:
+  _edit_last: '2'
+author:
+  login: mike
+  email: mshepard70@gmail.com
+  display_name: mike
+  first_name: ''
+  last_name: ''
+permalink: "/2013/10/23/powershell-specific-code-smells/"
+---
+<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
+<html><body></p>
+<p>A <a href="http://en.wikipedia.org/wiki/Code_smell" title="Code Smell">code smell</a> is something you find in source code that <em>may</em> indicate that there's something wrong with the code.  For instance, seeing a function that is over a thousand lines gives you a clue that something is probably wrong even without looking at the specific code in question.  You could think of code smells as anti-"Best Practices".  I've been thinking about these frequently as I've been looking through some old PowerShell code.</p>
+<p>I'm going to be writing posts about each of these, explaining why they probably happen and how the code can be rewritten to avoid these "smells".</p>
+<p>A few code smells that are specific to PowerShell that I've thought of so far are:</p>
+<ol>
+<li>Missing Param() statements</li>
+<li>Artificial "Common" Parameters</li>
+<li>Unapproved Verbs</li>
+<li>Building output using +=</li>
+<li>Lots of assignment statements</li>
+<li>Using [object] parameters to allow different types</li>
+</ol>
+<p>Let me know if you think of others.  I'll probably expand the list as time goes on.</p>
+<p>-Mike</body></html></p>

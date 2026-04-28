@@ -1,0 +1,68 @@
+---
+layout: post
+title: PowerShell and Visio Part 3 - Drawing Shapes
+date: 2016-03-10 03:41:52.000000000 -06:00
+type: post
+parent_id: '0'
+published: true
+password: ''
+status: publish
+categories:
+- Scripts
+- Visio
+tags:
+- Visio
+meta:
+  _edit_last: '2'
+  _syntaxhighlighter_encoded: '1'
+author:
+  login: mike
+  email: mshepard70@gmail.com
+  display_name: mike
+  first_name: ''
+  last_name: ''
+permalink: "/2016/03/10/powershell-and-visio-part-3-drawing-shapes/"
+---
+<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
+<html><body></p>
+<p>This is part 3...if you haven't read <a href="https://powershellstation.com/2016/01/20/powershell-and-visio-1/">part 1</a> or <a href="https://powershellstation.com/2016/02/04/powershell-and-visio-part-2-first-steps/">part 2</a> you probably want to go back and read those.</p>
+<p>Now that we're all up to speed, I promised I'd talk about drawing shapes in Visio.</p>
+<p>We'll start with an easy one.</p>
+<h2>Drawing Circles and Rectangles</h2>
+<p>Remember that you have to open Visio with PowerShell in order to access it from a script.</p>
+<p>[powershell]$Visio= New-Object -ComObject Visio.Application[/powershell]</p>
+<p>We can open a new (blank) document using the same technique we saw last time to open a document, except we will pass an empty string:</p>
+<p>[powershell]$Doc=$Visio.Documents.Add('')[/powershell]</p>
+<p>Now, we can get a reference to the active (only) page in the document by accessing the <strong>ActivePage</strong> property of <strong>$Visio</strong>.  We could also have looked at the <strong>Pages</strong> collection on <strong>$Doc</strong> and referenced it either by ID (1) or name (Page-1)</p>
+<p>[powershell]$Page=$Visio.ActivePage<br />
+#Or<br />
+#$Page=$Doc.Pages(1)<br />
+#$Page=$Doc.Pages('Page-1')[/powershell]<br />
+Now that we've got a page, let's see what Draw methods we have:</p>
+<p>[powershell]$Page | get-member Draw*[/powershell]</p>
+<p><a href="https://powershellstation.com/wp-content/uploads/2016/03/Page_Draw.png" rel="attachment wp-att-901"><img class="alignnone size-medium wp-image-901" src="{{site.baseurl}}/assets/2016/03/Page_Draw-300x106.png" alt="Draw methods" width="300" height="106"></a><br />
+<strong>DrawOval</strong> and <strong>DrawRectangle</strong> sound pretty straightforward.  Let's try them:</p>
+<p>[powershell]$Page.DrawRectangle(1,1,5,5)<br />
+$Page.DrawOval(6,6,8,8)[/powershell]</p>
+<p>Here's what it looks like in Visio (note that my diagrams are using US measurements, so the numbers correspond to inches):</p>
+<p><a href="https://powershellstation.com/wp-content/uploads/2016/03/Visio_Rect_Circle.png" rel="attachment wp-att-903"><img class="alignnone size-medium wp-image-903" src="{{site.baseurl}}/assets/2016/03/Visio_Rect_Circle-236x300.png" alt="Visio_Rect_Circle" width="236" height="300"></a></p>
+<p>The functions also returned the objects that were drawn to the console (which we could have saved in variables if we were paying attention).<br />
+<a href="https://powershellstation.com/wp-content/uploads/2016/03/Visio_Rect_Circle_Objects.png" rel="attachment wp-att-904"><img src="{{site.baseurl}}/assets/2016/03/Visio_Rect_Circle_Objects-300x148.png" alt="Visio_Rect_Circle_Objects" width="300" height="148" class="alignnone size-medium wp-image-904"></a></p>
+<h2>Drawing Shapes</h2>
+<p>Notice that there weren't any methods for drawing shapes, which is what you really want to do in Visio.  Shapes in Visio are stored in what Visio calls stencils, and are typically separate files.  To open a stencil and not show it in Visio you can use the <strong>OpenEx</strong> method of the application object (which we are calling <strong>$Visio</strong>) and pass the filename and the constant 64 (which means "open hidden").  Here, I'm opening a stencil which contains a bunch of shapes for different kinds of servers.  The _U at the end of the filename means that it uses US measurements rather than metric.<br />
+[powershell]$stencilPath='C:\Program Files (x86)\Microsoft Office\Office15\Visio Content\1033\SERVER_U.VSSX'<br />
+$stencil=$Visio.Documents.OpenEx($stencilPath,64)<br />
+[/powershell]</p>
+<p>I've stored the loaded stencil in a variable because we want to work with it.</p>
+<p>The shapes in the stencil are stored in a collection called <strong>Masters</strong>.<br />
+<a href="https://powershellstation.com/wp-content/uploads/2016/03/Masters.png" rel="attachment wp-att-906"><img src="{{site.baseurl}}/assets/2016/03/Masters-300x127.png" alt="Masters" width="300" height="127" class="alignnone size-medium wp-image-906"></a></p>
+<p>Let's put an FTP Server somewhere on the page:<br />
+[powershell]$Master=$stencil.Masters('FTP Server')<br />
+$Page.Drop($Master,4,4)<br />
+[/powershell]<br />
+<a href="https://powershellstation.com/wp-content/uploads/2016/03/DropppedMaster.png" rel="attachment wp-att-907"><img src="{{site.baseurl}}/assets/2016/03/DropppedMaster-300x194.png" alt="DropppedMaster" width="300" height="194" class="alignnone size-medium wp-image-907"></a><br />
+And here's the output:<br />
+<a href="https://powershellstation.com/wp-content/uploads/2016/03/FTP_Server.png" rel="attachment wp-att-908"><img src="{{site.baseurl}}/assets/2016/03/FTP_Server-229x300.png" alt="FTP_Server" width="229" height="300" class="alignnone size-medium wp-image-908"></a></p>
+<p>That's enough for today.  Next time we'll think about connecting objects together.</p>
+<p>Let me know what you think in the comments!</p>
+<p>--Mike</body></html></p>

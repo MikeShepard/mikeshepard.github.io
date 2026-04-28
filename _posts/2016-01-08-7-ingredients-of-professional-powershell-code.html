@@ -1,0 +1,76 @@
+---
+layout: post
+title: 7 Ingredients of Professional PowerShell Code
+date: 2016-01-08 14:00:00.000000000 -06:00
+type: post
+parent_id: '0'
+published: true
+password: ''
+status: publish
+categories:
+- Discussion
+- Scripts
+tags: []
+meta:
+  _edit_last: '2'
+  _syntaxhighlighter_encoded: '1'
+author:
+  login: mike
+  email: mshepard70@gmail.com
+  display_name: mike
+  first_name: ''
+  last_name: ''
+permalink: "/2016/01/08/7-ingredients-of-professional-powershell-code/"
+---
+<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
+<html><body></p>
+<p>If you've been using PowerShell for any amount of time you've probably written a lot of code. Here are some guidelines I've come up with for what I consider "Professional" code. I should note that I'm assuming some basic things like correct verb-noun naming, commented code, reasonable variable names, etc. Also, the code should work! Once you've got that going, try to make sure you've got these as well.</p>
+<ol>
+<h3> </h3>
+<li>Output objects
+<p>This should go without saying, but it's vitally important. Write objects to the output stream. Each object should be a self-contained a "record" of output. If you're creating custom objects, consider including some of the parameter values that led to the object being output. If possible, It should contain enough information to let you know why it was output. For instance, if your parameters filter the output based on properties, including those properties will be very helpful in validating that the output is correct.</p>
+<h3> </h3>
+</li>
+<li>Advanced functions (or script)
+<p>Changing a function into an advanced function can be as simple as adding <strong>[CmdletBinding()]</strong> before the <strong>Param()</strong> statement. It does take a bit more if you need to support <strong>-WhatIf</strong> and <strong>-Confirm</strong>, but even then it's not much effort. In return you get:</p>
+<ul>
+<li>Common Parameter Support (Verbose, ErrorAction, etc.)  </li>
+<li>Parameter Name and Position Checking  </li>
+<li>Access to $PSCmdlet methods and properties  </li>
+<li>Ability to use pipeline input (in a nice way) </li>
+</ul>
+<p>If you need help getting started with writing advanced functions (or scripts), see <a href="https://technet.microsoft.com/en-us/library/hh847872.aspx">about_Functions_CmdletBindingAttribute</a></p>
+<h3> </h3>
+</li>
+<li>Comment-based help
+<p>This one takes a bit more work, but is a key to getting other people to use your function or script effectively. It's simple to write up a code snippet for ISE (or your editor of choice) to include the help elements you like. Most people will start by skipping to the examples, so <strong>always include multiple examples!</strong> Examples which show different use-cases (parameter sets, if you use them, for instance) are especially helpful so that users understand the full range of how your code can be used. Refer to <a href="https://technet.microsoft.com/en-us/library/hh847834.aspx">get-help about_Comment_Based_Help</a> to get you started.</p>
+<h3> </h3>
+</li>
+<li>Pipeline input
+<p>Pipeline input isn't always necessary, but it really makes using a function easier. You've got to have an advanced function to do this, but you did that already, right? I'd much rather have this:</p>
+<p>[powershell]Get-Thing | Stop-Thing[/powershell]</p>
+<p>Than this:</p>
+<p>[powershell]Get-Thing | foreach-object {Stop-Thing $_}[/powershell]</p>
+<p>If you've used cmdlets that didn't allow pipeline input you've undoubtedly written some code like this.</p>
+<h3> </h3>
+</li>
+<li>Error Handling
+<p>This is pretty basic. You need to use <a href="https://technet.microsoft.com/en-us/library/hh847793.aspx">try/catch/finally</a> in your code to deal with exceptions that you can predict. You should use Write-Error and Throw to emit errors and exceptions that arise. If you use Write-Error, supply a -TargetObject if possible, <a href="https://powershellstation.com/2016/01/07/write-error-and-targetobject/">it makes the error record much more useful</a>. While we're talking about errors, <strong>Write-Warning</strong>, <strong>Write-Verbose</strong>, and <strong>Write-Debug</strong> should be used to help provide useful output</p>
+<h3> </h3>
+</li>
+<li>Parameter Attributes for validation
+<p>Here's a good rule of thumb:</p>
+<h2><font style="background-color: #ffff00"><br />
+<blockquote>Code that you don't write is code that you don't have to debug!</p></blockquote>
+<p></font></h2>
+<p>If you use parameter attributes to validate argument values, you don't have to write code to do it. Ensuring that arguments are valid will make users happier (because they don't have unexpected results when they pass in bad values) and makes your code simpler because you don't have to write a bunch of if/then statements to check values. Finally, and this benefit is not as obvious, error messages for parameter attribute-based validation will be localized, so users around the world can benefit even more from your code as they see validation messages in their own language..</p>
+<h3> </h3>
+</li>
+<li>Publish it!
+<p>If you've put this much time into polishing your code, you should take the extra step of sharing it with the community. This might take a bit of extra effort to make sure it doesn't contain anything proprietary. Sharing on your blog (you do have one, right?), <a href="https://github.com/">GitHub</a>, <a href="https://technet.microsoft.com/en-us/scriptcenter/bb410849.aspx">Technet</a>, <a href="http://poshcode.org/">PoshCode</a>, or the <a href="https://www.powershellgallery.com/">PowerShell Gallery</a><br>are all options, so there's very little stopping you.</p>
+</li>
+</ol>
+<p>How does your code fare against this list? I know most of mine has some room for improvements.</p>
+<p>What do you think of this list? Did I miss something important? Let me know in the comments!</p>
+<p>--Mike</p>
+<p></body></html></p>

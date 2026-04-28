@@ -1,0 +1,150 @@
+---
+layout: post
+title: Git - The 5 Percent that I Always Use
+date: 2020-08-25 22:29:30.000000000 -05:00
+type: post
+parent_id: '0'
+published: true
+password: ''
+status: publish
+categories:
+- Discussion
+- get-learning
+- git
+tags:
+- git
+- source-control
+meta:
+  _edit_last: '2'
+  _yoast_wpseo_content_score: '60'
+  _syntaxhighlighter_encoded: '1'
+  _yoast_wpseo_focuskw: Git
+  _yoast_wpseo_linkdex: '44'
+  _yoast_wpseo_primary_category: '125'
+author:
+  login: mike
+  email: mshepard70@gmail.com
+  display_name: mike
+  first_name: ''
+  last_name: ''
+permalink: "/2020/08/25/git-the-5-percent-that-i-always-use/"
+---
+<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
+<html><body></p>
+<p><img class="size-medium wp-image-1435 alignright" src="{{site.baseurl}}/assets/2020/08/320px-Git-logo.svg_-300x126.png" alt="" width="300" height="126">One of the reasons I got into IT was that I really enjoy learning new things. Unfortunately, there are so many things to learn that it's easy to get overwhelmed. Does it make sense to do a deep-dive into each technology that you use, or does it sometimes make sense to skim the cream off the top and move on to the next technology?</p>
+<p>In this post, I'm talking about git, the distributed source control system that is used in GitHub, Azure DevOps Repos, GitLab, and countless other places.  Git can be really complicated, and intimidating, so I'm going to try to convey the tiny fragment of git which allows me to get my work done.</p>
+<h2>Just Eight Commands</h2>
+<p>Here are the commands I regularly use:</p>
+<ul>
+<li>git clone</li>
+<li>git checkout</li>
+<li>git add</li>
+<li>git commit</li>
+<li>git push</li>
+<li>git pull</li>
+<li>git branch</li>
+<li>(occasionally) git stash</li>
+</ul>
+<p>That's it.  Eight commands.</p>
+<p>Here's how I do things.  If you're a git guru and see ways to improve this simple workflow, let me know.  Also, know that I'm usually working on projects by myself, but I try to work like I would on a team.</p>
+<h2>Starting Off</h2>
+<p>To start, I clone the repository that I'm going to be working on.  For instance, if I wanted to work on WPFBot, I'd go to the github repo for it and get the URL:</p>
+<p><!-- wp:image {"id":1426,"sizeSlug":"large"} --></p>
+<figure class="wp-block-image size-large"><img class="wp-image-1426" src="{{site.baseurl}}/assets/2020/08/image.png" alt=""></figure>
+<p><!-- /wp:image --></p>
+<p>With that, I can issue the command: </p>
+<p><strong>git clone https://github.com/MikeShepard/WPFBot3000</strong></p>
+<p>and git will copy the remote repository into a local directory called WPFBot3000 ready for me to edit.</p>
+<p>If I'm starting a new project, I would create a repo (Github, AzureDevops, etc.) and clone it locally. </p>
+<p>I could create it locally and push it up, but this way I only have one method to remember.</p>
+<h2>Preparing for changes</h2>
+<p>Before I make any changes, I need to make sure I'm on a branch dedicated to my changes. </p>
+<p>If this is a new set of changes I'm working on, I can create the branch and switch to it with the command:</p>
+<p><strong>git checkout -b BranchName</strong></p>
+<p>(where <em>BranchName</em> is a descriptive label for the changes I'm making.</p>
+<p>If the branch already exists,</p>
+<p><strong>git checkout BranchName</strong></p>
+<p> will switch me to the existing branch.</p>
+<h2>Making Changes</h2>
+<p>Making changes is easy.  I just make the changes.  I can edit files, move things around, delete files, create folders, etc.</p>
+<p>As long as the changes are in the repo (the WPFBot3000 folder, in this case), git will find them. </p>
+<p>There are no git commands necessary for this to happen.</p>
+<h2>Staging the Changes</h2>
+<p>I tell git that I've made changes that I like using the command</p>
+<p><strong>git add .</strong></p>
+<p>This says to "stage" any changes that I've made anywhere in the repo. </p>
+<p>Staging changes isn't "final" in any way.  It just says that these changes are ones I'm interested in.</p>
+<p>As before, I could use sophisticated wildcards and parameters to pick what to stage, but by working on short-lived branches I almost always want to stage everything I've changed.</p>
+<h2>Committing the Changes</h2>
+<p>Committing the changes is like setting a milestone.  This is a point-in-time where the state of these files is "interesting".</p>
+<p>I do this using the command: <strong>git commit -m 'A descriptive message about what changes I made'</strong></p>
+<p>A few things to note about commits:</p>
+<ol>
+<li>Interesting doesn't always mean finished. I can commit several times without pushing the code anywhere.</li>
+<li>"descriptive" is subjective.  There has been a lot written about good commit messages.  Mine probably are bad.</li>
+</ol>
+<h2>Repeat the Cycle</h2>
+<p>If I'm not done with the changes, I can continue the last 3 steps:</p>
+<ul>
+<li>Making Changes</li>
+<li>Staging the Changes</li>
+<li>Committing the Changes</li>
+</ul>
+<p>All of these steps are happening locally, but by committing often I have chances to roll-back to different places in time if I feel like it (I rarely do).</p>
+<h2>Completing the Changes</h2>
+<p>The next step is a bit of a cheat.</p>
+<p>I hate remembering long git commands, so rather than remembering how to link my local branch with the remote repo, I simply say</p>
+<p><strong>git push</strong></p>
+<p>Git will reply with an error message because it doesn't know what remote branch to push it to.</p>
+<p>In the error message, though, it tells me how to do what I want:</p>
+<p> </p>
+<p><img class="alignnone size-medium wp-image-1433" src="{{site.baseurl}}/assets/2020/08/gitpush-1-300x57.png" alt="" width="300" height="57"></p>
+<p>In this case, it's </p>
+<p><strong>git push --set upstream origin TEst </strong>   (and yes, branch names are case-sensitive)</p>
+<h2>Pull Request</h2>
+<p>At this point, I go to Azure DevOps or GitHub (I don't use GitLab much) and browse to the repo.</p>
+<p>It will usually have a notice that a branch was just changed and will give me the opportunity to create a pull request.</p>
+<p>A pull request is a request to merge (or pull) changes from one branch into another.  </p>
+<p>Typically, you're merging (or pulling) changes from your branch into master.</p>
+<p>Once you've created the pull request, this is the time for your team members to review the changes, make suggestions, and approve or deny the request.</p>
+<p>If you're working alone, you can approve the request yourself.</p>
+<p>I also select the "delete the branch after merge" option so I don't have a bunch of old branches hanging around.</p>
+<p>If the merge is successful, then the changes are now part of the master branch on the remote repo.</p>
+<p>They are only in my feature branch locally, though.</p>
+<h2>Pulling Changes Down</h2>
+<p>To get the updated master branch, I have to first switch to it:</p>
+<p><strong>git checkout master<br></strong><br><br>Once I'm on the branch, I can</p>
+<p><strong>git pull </strong></p>
+<p>to pull the changes down.</p>
+<h2>Cleaning up and Starting over</h2>
+<p>Now that our changes are in master, I can remove the local branch with:</p>
+<p><strong>git branch -d BranchName</strong></p>
+<p>At this point, I don't usually know what I'm going to work on next.</p>
+<p>I have a bad habit of accidentally making changes in master locally, though so my next step helps me avoid that.</p>
+<p>I simply check out a new branch called Next like this:</p>
+<p><strong>git checkout -b Next</strong></p>
+<p>Note: This is exactly what we did at the beginning, just with a temporary branch name of Next.</p>
+<p>When I'm ready to work on a real set of changes, I can rename the branch with</p>
+<p> <strong>git branch -m NewBranchName</strong></p>
+<p> </p>
+<h2>Summary</h2>
+<p>That probably seemed like a lot, but here are all of the commands (with some obvious placeholders)</p>
+<ul>
+<li><strong>git clone &lt;url&gt;</strong></li>
+<li><strong>git checkout -b BranchName</strong></li>
+<li><strong>git add .</strong></li>
+<li><strong>git commit -m 'Fantastic commit message'</strong></li>
+<li><strong>&lt;repeat add/commit until ready to push&gt;</strong></li>
+<li><strong>git push    (followed by copy/paste from the error message)</strong></li>
+<li><strong>&lt;proceed to create and complete the pull request&gt;</strong></li>
+<li><strong>git checkout master</strong></li>
+<li><strong>git pull</strong></li>
+<li><strong>git branch -d BranchName</strong></li>
+<li><strong>git checkout -b Next</strong></li>
+</ul>
+<h2>Bonus command - git stash</h2>
+<p>If I find I've made changes in master,<strong> git stash</strong> will shelve the changes.  I can then get on the right branch and do a<strong> git stash pop</strong> to get the changes back.</p>
+<p>With the adoption of the <strong>git checkout -b Next</strong> protocol, though, I don't find myself needing this very often.</p>
+<p> </p>
+<p>What do you think?  Does this help you get your head around using git?</p>
+<p></body></html></p>

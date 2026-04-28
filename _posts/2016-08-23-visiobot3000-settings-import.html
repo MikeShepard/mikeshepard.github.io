@@ -1,0 +1,93 @@
+---
+layout: post
+title: VisioBot3000 Settings Import
+date: 2016-08-23 22:36:43.000000000 -05:00
+type: post
+parent_id: '0'
+published: true
+password: ''
+status: publish
+categories:
+- Discussion
+- Scripts
+- Visio
+tags:
+- VisioBot3000
+meta:
+  _edit_last: '2'
+  _syntaxhighlighter_encoded: '1'
+author:
+  login: mike
+  email: mshepard70@gmail.com
+  display_name: mike
+  first_name: ''
+  last_name: ''
+permalink: "/2016/08/23/visiobot3000-settings-import/"
+---
+<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
+<html><body>
+<p>It's been a while since I last spoke about <a href="https://github.com/MikeShepard/VisioBot3000" target="_blank">VisioBot3000</a>.  I've got the project to a reasonably stable point...not quite feature complete but I don't see a lot of big changes.</p>
+<p>One of the things I found even as I wrote sample diagram scripts was that quite a bit of the script was taken up by things that wold probably be done exactly the same way in most diagrams.  For instance, if you're doing a lot of server diagrams, you will probably be using the exact same stencils and the same shapes on those stencils, with the same nicknames.  Doing so makes it a lot easier to write your diagram scripts because you're developing a "diagram language" which you're familiar with.</p>
+<p>For reference, here's an example script from the project (without some "clean up" at the beginning):</p>
+<p>[powershell]<br />
+Diagram C:\temp\TestVisio3.vsdx  </p>
+<p># Define shapes, containers, and connectors for the diagram<br />
+Stencil Containers -From C:\temp\MyContainers.vssx<br />
+Stencil Servers -From SERVER_U.vssx<br />
+Shape WebServer -From Servers -MasterName 'Web Server'<br />
+Container Location -From Containers -MasterName 'Location'<br />
+Container Domain -From Containers -MasterName 'Domain'<br />
+Container Logical -From Containers -MasterName 'Logical'<br />
+Connector SQL -Color Red -arrow </p>
+<p>#this is the diagram<br />
+Set-NextShapePosition -x 3.5 -y 7<br />
+Logical MyFarm {<br />
+    Location MyCity {<br />
+        Domain MyDomain  {<br />
+            WebServer PrimaryServer<br />
+            WebServer HotSpare</p>
+<p>        }<br />
+    }<br />
+    Location DRSite {<br />
+        Domain MyDomain -name SiteB_MyDomain {<br />
+            Set-RelativePositionDirection Vertical<br />
+		    WebServer BackupServer </p>
+<p>	    }<br />
+    }<br />
+}<br />
+SQL -From PrimaryServer -To BackupServer<br />
+Hyperlink $BackupServer -link http://google.com</p>
+<p>Complete-Diagram<br />
+[/powershell]</p>
+<p>Lines 3-10 are all about setting up the standard shapes and stencils. The rest of the script is directly involved in the specific diagram I'm trying to build.</p>
+<p>As an aside, one of the things I love about PowerShell is how much of the code I write is directly involved in solving the problem I'm working on. You don't have to "code around PowerShell" very often.</p>
+<p>Anyway, back to Visio.  Since a lot of the code is duplicated, I thought...how can I get that out of the diagram script?</p>
+<p>My first thought was to write a function which took the name of an "include script" and somehow run the script.  The problem there is scoping.  Since the function is called (not dot-sourced) it couldn't easily affect the global state, so shape, container, and connection functions wouldn't get created.  That's not useful.</p>
+<p>My second thought was to allow an "include" script and have the user dot-scope the include script, but that wouldn't be very obvious to someone looking at the diagram script.  Also, they could put anything in that, and it would seem to be "hidden" (for instance, if they put code unrelated to stencils, shapes, etc.).</p>
+<p>I finally decided that a .psd1 file (like a module manifest) would be the best approach.  I could structure the hashtable in it to have the information I needed to set up the stencils, shapes, and connections, and read it in using PowerShell.  I would just need to write a "dispatch" function which transformed the items in the hashtable into the correct function calls.</p>
+<p>So...reading in a .psd1 file is interesting.  I'm using PowerShell 5.0, so a choice (which I hadn't heard of) is <strong>Import-PowerShellData</strong>.  This cmdlet is specifically created for this instance.  It has a -path parameter which points to the .psd1 file and returns a hashtable.  Nothing could be easier.  But....I really don't want to pin the project to 5.0, especially just for this function.</p>
+<p>Another option is <strong>Import-LocalizedData</strong>.  This one is a bit trickier, since it's meant to read psd1 files in language-specific folders for purposes of localization.  To make it do what I want, I needed to split the path into a directory and filename, but then it does the trick.  This is a 4.0 cmdlet, which I guess I'm ok with.</p>
+<p><a href="http://stackoverflow.com/questions/25408815/how-to-read-powershell-psd1-files-safely">There are other options</a> for reading .psd1 files.  Most of them involve using Invoke-Expression, which I don't like to use unless  I can avoid it.</p>
+<p>And now that I read those, I see the <strong>ArgumentToConfigurationDataTransformation</strong> parameter attribute, which is a 4.0 feature added for DSC.  It's even better than what I wrote (using <strong>Import-LocalizedData</strong>).</p>
+<p><a href="https://github.com/MikeShepard/VisioBot3000/issues/64">Time to re-write</a> that function.</p>
+<p>Any way you implement it, the function call in VisioBot3000 would look like this:</p>
+<p>[powershell]<br />
+Import-VisioSettings -path &lt;path to settings file&gt;<br />
+[/powershell]</p>
+<p>and the settings file would look something like this:</p>
+<p>[powershell]<br />
+@{<br />
+StencilPaths='c:\temp'</p>
+<p>Stencils=@{Containers='C:\temp\MyContainers.vssx';<br />
+           Servers='SERVER_U.vssx'}</p>
+<p>Shapes=@{WebServer='Servers','Web Server';<br />
+         DBServer='Servers','Database Server'<br />
+        }<br />
+Containers=@{Domain='Containers','Domain'<br />
+            }</p>
+<p>Connectors=@{SQL=@{Color='Red';Arrow=$true}}</p>
+<p>}<br />
+[/powershell]</p>
+<p>What do you think? Do you have anywhere you can use psd1 files to streamline your scripts?<br />
+--Mike</p>
+<p></body></html></p>

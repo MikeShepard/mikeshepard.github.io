@@ -1,0 +1,78 @@
+---
+layout: post
+title: A few functions for working with SQL Agent Job data
+date: 2011-05-09 21:04:39.000000000 -05:00
+type: post
+parent_id: '0'
+published: true
+password: ''
+status: publish
+categories: []
+tags: []
+meta:
+  _edit_last: '2'
+  _syntaxhighlighter_encoded: '1'
+author:
+  login: mike
+  email: mshepard70@gmail.com
+  display_name: mike
+  first_name: ''
+  last_name: ''
+permalink: "/2011/05/09/a-few-functions-for-working-with-sql-agent-job-data/"
+---
+<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
+<html><body></p>
+<p>If you’ve ever looked at sysjobhistory, you know that the way SQL Server stores datetimes and durations in this table are not very friendly. Well, that’s not quite true. They are human-readable if they are small, but if you’ve got a job that runs for hours (days?), it becomes more and more difficult.<br />
+For example, a job which started at 9:05AM today (5/9/2011) would have a run_time of 905 and a run_date of 20110905. Both of those are recognizable, but since they are integers, it’s complicated to get them into a datetime variable in PowerShell in order to manipulate them. I have seen several posts on how to create a UDF (user-defined function) to convert these values to a datetime, and that’s usually a good solution. Unfortunately, it’s not always possible (politically) to create a UDF on a SQL instance. For example, if you are simply monitoring a box to make sure that backups are run, and don’t have much control over the box besides that function, you might not be allowed to create the necessary UDFs. Similarly, a SQL solution involving a select statement that kneads the data into the value you want is not a great solution because it’s not reusable, except in the cut-paste sense.<br />
+For that reason, I have written 4 different functions to assist with managing job data.<br />
+[powershell]<br />
+function convertfrom-SqlAgentDuration{<br />
+param($sql_duration)<br />
+    return New-TimeSpan -seconds ($sql_duration % 100) -minutes (($sql_duration / 100) % 100) -hours ($sql_duration /10000)<br />
+}</p>
+<p>function convertfrom-SQLAgentDateTime{<br />
+param($sql_startdate,$sql_starttime)<br />
+    return (get-date -year ($sql_startdate/10000) -month ($sql_startdate/100 % 100) -day ($sql_startdate %100) -hour ($sql_starttime/10000 % 100) -minute ($sql_starttime/100 % 100) -sec ($sql_starttime % 100))<br />
+}</p>
+<p>function convertto-SQLAgentDuration{<br />
+param([System.TimeSpan]$duration)<br />
+    return $duration.seconds+100*$duration.minutes+10000*($duration.hours+24*$duration.days)<br />
+}</p>
+<p>function convertto-SQLAgentDateTime{<br />
+param([datetime]$date)<br />
+    return (new-object PSObject -property @{date=[int](get-date $date -uformat "%Y%m%d");time=[int](get-date $date -uformat "%H%M%S")})<br />
+}<br />
+[/powershell]<br />
+Obviously, these are not high-performance functions, but given the volume of data you would be getting out of the SQL Agent, that shouldn’t pose any kind of problem. Here are some example usages:</p>
+<pre>
+PS&gt;get-date
+
+Monday, May 09, 2011 9:01:58 PM
+_________________________________________________________________________________
+PS&gt;convertto-sqlagentdatetime (get-date) | ft -auto
+
+    date   time
+    ----   ----
+20110509 210648
+_________________________________________________________________________________
+PS&gt;convertfrom-sqlagentdatetime 20110509 210648
+
+Monday, May 09, 2011 9:06:48 PM
+_________________________________________________________________________________
+PS&gt;convertfrom-SqlAgentDuration 12345
+
+Days              : 0
+Hours             : 1
+Minutes           : 23
+Seconds           : 45
+Milliseconds      : 0
+Ticks             : 50250000000
+TotalDays         : 0.0581597222222222
+TotalHours        : 1.39583333333333
+TotalMinutes      : 83.75
+TotalSeconds      : 5025
+TotalMilliseconds : 5025000
+
+</pre>
+<p>I hope these functions are useful to you. Let me know what you think.<br />
+</body></html></p>

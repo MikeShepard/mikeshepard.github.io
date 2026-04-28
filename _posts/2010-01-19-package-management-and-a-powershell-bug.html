@@ -1,0 +1,96 @@
+---
+layout: post
+title: Package Management and a PowerShell Bug
+date: 2010-01-19 23:41:58.000000000 -06:00
+type: post
+parent_id: '0'
+published: true
+password: ''
+status: publish
+categories:
+- Discussion
+- Scripts
+- Tools
+tags:
+- Package
+- PowerShell
+- Require
+meta:
+  _edit_last: '2'
+  _syntaxhighlighter_encoded: '1'
+author:
+  login: mike
+  email: mshepard70@gmail.com
+  display_name: mike
+  first_name: ''
+  last_name: ''
+permalink: "/2010/01/19/package-management-and-a-powershell-bug/"
+---
+<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
+<html><body><br />
+<strong>UPDATE:  I have worked out how the behavior described at the end of this post is not a bug, but in fact just PowerShell doing what it's told.  Don't have time to explain right now, but I'll write something up later today.  I also worked out how to "fix" the behavior.</strong></p>
+<p>For a long time now, I've been dissatisfied with what I call "package management" in PowerShell.  Those of you who know me will be shocked that anything in PowerShell is less than perfect in my eyes, but this is one place that I feel let down.  Modules in 2.0 remedy the situation somewhat, but it still isn't quite what I want or am used to in other languages.</p>
+<p>Let me give an example.  In VB.NET, if you need to use the functions in an assembly, you put "Imports AssemblyName" at the top of your script.  In C#, you would have "Using AssemblyName".  In Python, there would be "Import Something".</p>
+<p>In PowerShell 1.0, you had nothing.  In 2.0, you could create a module manifest which would specify either RequiredModules or ScriptsToProcess (or several other things to do upon loading the module).  The problems I see  with using the module manifest are:</p>
+<ul>
+<li>What if I'm not writing a module?  There's no such thing as a "script manifest"</li>
+<li>What if the script or module that is required performs some initialization that should only be done once per session?</li>
+<li>What if the script or module that is required performs <em>expensive</em> initialization?</li>
+</ul>
+<p>Because of these reasons (and because I only started using 2.0 when it went RTM) I wrote a couple of quick functions to do what I thought made sense.<br />
+[powershell]<br />
+$global:loaded_scripts=@{pkg_utils='INITIAL'}</p>
+<p>function require($filename){<br />
+	if (!$global:loaded_scripts[$filename]){<br />
+	   . scripts:$filename.ps1<br />
+	   $global:loaded_scripts[$filename]=get-date<br />
+	}<br />
+}<br />
+function reload($filename){<br />
+	. scripts:$filename.ps1<br />
+	$global:loaded_scripts[$filename]=get-date<br />
+}<br />
+[/powershell]</p>
+<p>To use these you need to create a psdrive called scripts: with code like this (probably in your profile):<br />
+[powershell]New-PSdrive -name scripts -PSprovider filesystem -root PathToYourLibraries | Out-Null[/powershell]</p>
+<p>Then, also in your profile, you'll want to dot-source the file you put these functions in (for example, package_tools.ps1):<br />
+[powershell]. scripts:package_tools.ps1[/powershell]</p>
+<p>Once you have those set up, you can dot-source the <strong>require</strong> function to make sure that a script has been loaded as such:<br />
+[powershell]. require somelibrary[/powershell]</p>
+<p>I have the functions I use divided by "subject" into several library scripts, and make sure that at the top of each script, I use ". require" to ensure that any prerequisites are already loaded.</p>
+<p>Now for the PowerShell bug (which took me a long time to track down).<br />
+Create 2 files, a.ps1 and b.ps1 in your scripts: directory.<br />
+[powershell]<br />
+# a.ps1<br />
+write-host "this is script a"<br />
+[/powershell]</p>
+<p>[powershell]<br />
+#b.ps1<br />
+write-host "this is script b"<br />
+write-host "this script loads a"<br />
+. require a<br />
+[/powershell]</p>
+<p>After dot-sourcing package_tools, run the following commands:<br />
+[powershell]<br />
+. require b<br />
+[/powershell]</p>
+<p>You should get output that looks something like this:</p>
+<pre>
+this is script b
+this script loads a
+this is script a
+</pre>
+<p>Everything looks good until you inspect the $global:loaded_scripts variable:</p>
+<pre>
+ps&gt; $loaded_scripts
+
+Name                           Value
+----                           -----
+a                              1/19/2010 11:23:09 PM
+package_tools                  INITIAL
+</pre>
+<p>Although b.ps1 was indeed dot-sourced (you can see the output), and the only code-path through the  require function that would dot-source it would also add an entry to $loaded_scripts, there is no such entry.  The problem is that when b.ps1 called the require function (to load a.ps1), the $filename variable in the calling context (where it should have been "b") was overwritten by the call with "a" as a parameter.  Walking through the code in a debugger confirms the problem.</p>
+<p>Have you ever seen problems with recursion and dot-sourcing in PowerShell?  Can you see any way around the problem I've described?  For instance, saving the $filename in a variable and restoring it after the dot-source call (line 5 above) doesn't help, because the same code-path is followed in the recursive call, and that variable is overwritten as well.</p>
+<p>Even with this bug, I find the require function (and reload, which I didn't discuss, but always loads the script in question) to be very helpful.  I also have extended them to include importing modules, if they exist.  I'll discuss them in my next post, coming soon.</p>
+<p>-Mike</p>
+<p>P.S.  <a href="http://stackoverflow.com/questions/279974/importing-libraries-in-powershell">Here</a>'s a question I posted to StackOverflow.com about these functions back in November of 2008.</body></html></p>

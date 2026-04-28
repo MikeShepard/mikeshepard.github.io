@@ -1,0 +1,70 @@
+---
+layout: post
+title: Calling Extension Methods in PowerShell
+date: 2017-10-06 22:16:11.000000000 -05:00
+type: post
+parent_id: '0'
+published: true
+password: ''
+status: publish
+categories:
+- get-learning
+- Scripts
+tags:
+- extension methods
+meta:
+  _edit_last: '2'
+  _yoast_wpseo_focuskw_text_input: extension method
+  _yoast_wpseo_focuskw: extension method
+  _yoast_wpseo_linkdex: '61'
+  _yoast_wpseo_content_score: '90'
+  _yoast_wpseo_primary_category: '7'
+  _syntaxhighlighter_encoded: '1'
+author:
+  login: mike
+  email: mshepard70@gmail.com
+  display_name: mike
+  first_name: ''
+  last_name: ''
+permalink: "/2017/10/06/calling-extension-method-in-powershell/"
+---
+<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
+<html><body></p>
+<p>A quick one because it's Friday night.</p>
+<p>I recently found myself translating some C# code into PowerShell.  If you've done this, you know that most of it is really routine.  Change the order of some things, change the operators, drop the semicolons.</p>
+<p>In a few places you have to do some adjusting, like changing using scopes into try/finally with .Dispose() in the finally.</p>
+<p>But all of that is pretty straightforward.</p>
+<p>Then I ran into a method that wasn't showing up in the tab-completion.  I hit the dot, and it wasn't in the list.</p>
+<p>I had found....and extension method!</p>
+<h3>Extension Methods</h3>
+<p>In C# (and other managed languages, I guess), an extension method is a static method of a class whose first parameter is declared with the keyword <strong>this.</strong></p>
+<p>For instance,</p>
+<p>[csharp]</p>
+<p>public static class MyExtClass {<br />
+    public static int NumberOfEs (thisstring TheString)<br />
+    {<br />
+        return TheString.Length-TheString.Replace ("e", "").Length;<br />
+    }<br />
+}<br />
+[/csharp]</p>
+<p>Calling this method in C# goes like this: "hello".NumberOfEs().</p>
+<p>It looks like this method (which is in the class MyExtClass is actually a string method with no parameters.</p>
+<h3>Extension Methods in PowerShell</h3>
+<p>Unfortunately, PowerShell doesn't do that magic for you.  In PowerShell, you call it just like it's written, a static method of a different class.</p>
+<p>So, in PowerShell, we would do the following:<br />
+[powershell]<br />
+$code=@'<br />
+public static class MyExtClass {<br />
+    public static int NumberOfEs (this string TheString)<br />
+    {<br />
+        return TheString.Length - TheString.Replace ("e", "").Length;<br />
+    }<br />
+}<br />
+'@<br />
+add-type -TypeDefinition $code </p>
+<p>[MyExtClass]::NumberOfEs('hello')<br />
+[/powershell]</p>
+<p>Note that I've included the C# code in a here-string and used add-type to compile it on the fly.</p>
+<p>The point is, when translating extension method calls into PowerShell, you need to find the extension class (in this case MyExtClass) and call the static method directly.</p>
+<p>You learn something every day.</p>
+<p>--Mike</body></html></p>

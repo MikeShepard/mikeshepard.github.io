@@ -1,0 +1,51 @@
+---
+layout: post
+title: You don't need semicolons in multi-line hashtable literals.
+date: 2016-07-31 22:17:21.000000000 -05:00
+type: post
+parent_id: '0'
+published: true
+password: ''
+status: publish
+categories:
+- Discussion
+- get-learning
+- Scripts
+tags:
+- get-learning
+meta:
+  _edit_last: '2'
+  _syntaxhighlighter_encoded: '1'
+author:
+  login: mike
+  email: mshepard70@gmail.com
+  display_name: mike
+  first_name: ''
+  last_name: ''
+permalink: "/2016/07/31/you-dont-need-semicolons-in-multi-line-hashtable-literals/"
+---
+<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
+<html><body>
+<p>This is not a world-changing topic, but I thought it was worth sharing.</p>
+<p>If you have written hashtable literals on a single line, you've seen this before:<br />
+[powershell]<br />
+$hash=@{Name='Mike';Blog='powershellstation-a07ac6.ingress-erytho.easywp.com'}<br />
+[/powershell]</p>
+<p>Sometimes, it makes more sense to write the hashtable over several lines, especially if it has several items.  I've always written them like this:<br />
+[powershell]<br />
+$hash=@{Name='Mike';<br />
+        Blog='powershellstation-a07ac6.ingress-erytho.easywp.com';<br />
+        Language='PowerShell'<br />
+}<br />
+[/powershell]</p>
+<p>I was watching <a href="https://www.youtube.com/user/powershellorg" target="_blank">Don Jones' toolmaking sessions on youtube</a> and what he did was slightly different.<br />
+[powershell]<br />
+$hash=@{Name='Mike'<br />
+        Blog='powershellstation-a07ac6.ingress-erytho.easywp.com'<br />
+        Language='PowerShell'<br />
+}<br />
+[/powershell]</p>
+<p>I watched and waited for him to get errors, but he's Don, so he got it right.</p>
+<p>I'm not sure how I missed this, but <strong>you don't need semicolons in multi-line hashtable literals</strong>.</p>
+<p>--Mike</p>
+<p></body></html></p>

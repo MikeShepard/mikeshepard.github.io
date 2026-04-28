@@ -1,0 +1,45 @@
+---
+layout: post
+title: An Unexpected Parameter Alias
+date: 2017-04-07 06:00:26.000000000 -05:00
+type: post
+parent_id: '0'
+published: true
+password: ''
+status: publish
+categories:
+- Parameters
+tags: []
+meta:
+  _edit_last: '2'
+  _yoast_wpseo_content_score: '90'
+  _yoast_wpseo_primary_category: '90'
+  _yoast_wpseo_focuskw_text_input: aliases
+  _yoast_wpseo_focuskw: aliases
+  _yoast_wpseo_linkdex: '64'
+author:
+  login: mike
+  email: mshepard70@gmail.com
+  display_name: mike
+  first_name: ''
+  last_name: ''
+permalink: "/2017/04/07/unexpected-parameter-alias/"
+---
+<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
+<html><body>
+<p>I've always said that if you want to learn something really well, teach it to someone.  I've been doing internal PowerShell training for several years at my company.  I'm very grateful for the opportunity for a number of reasons, but in this post I'm going to call out how something I learned in a recent trip to our San Diego office.</p>
+<p>When I'm starting to talk about cmdlets, I usually use <strong>get-childitem</strong> for the simple reason that almost everyone knows what the DOS <strong>DIR</strong> command does.  It gives us a point of reference to compare and contrast cmdlets with.</p>
+<p>I mentioned the <strong>-Recurse</strong> switch and explained that it was analogous to the /S switch in DIR, but one person in the class didn't quite get the context switch.  When he did one of the examples, he tried <strong>get-childitem -s</strong>.  I told him that he needed to use -Recurse, to which he replied "But it works!".</p>
+<p>I always keep a pad of paper when I'm teaching so I can write down anything puzzling (it happens in almost every class).  When the class took a break, I opened a fresh PowerShell session and tried it.</p>
+<p>Of course, it worked.</p>
+<p>Now, to determine why it worked.</p>
+<p>First of all, I thought that parameter disambiguation would have been a problem. because of the -System parameter.  That wasn't a problem.</p>
+<p>Then, I realized that the PowerShell team must have included a "legacy alias" for the -Recurse parameter, similar to how they include cmdlet aliases to ease the transition from DOS or *NIX (dir, ls, ps, cat, etc.).  I don't think I've ever heard anyone mention legacy aliases for parameters, though.</p>
+<p>PowerShell easily verifies that this is the case:</p>
+<p><a href="https://powershellstation.com/wp-content/uploads/2017/04/RecurseAlias.png"><img class="alignnone size-medium wp-image-1151" src="{{site.baseurl}}/assets/2017/04/RecurseAlias-300x154.png" alt="" width="300" height="154"></a></p>
+<p>Of course, I verified this on my work computer.  As I sit here writing on my home laptop, it didn't list any aliases until I updated help.  Blogging is a lot like teaching in that you're bound to find surprises whenever you try to explain something.</p>
+<p>Anyway, this was a fun discovery for me.</p>
+<p>Can you think of any other parameter aliases that are there for legacy reasons?  I might have to try to work up a script to find candidates.</p>
+<p>Let me know what you think in the comments.</p>
+<p>-Mike</p>
+<p></body></html></p>

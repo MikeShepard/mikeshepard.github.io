@@ -1,0 +1,91 @@
+---
+layout: post
+title: Hyper-V HomeLab Intro
+date: 2017-04-12 23:28:27.000000000 -05:00
+type: post
+parent_id: '0'
+published: true
+password: ''
+status: publish
+categories:
+- HomeLab
+- Hyper-V
+- Scripts
+tags:
+- Convert-WindowsImage
+- HomeLab
+- Hyper-V
+meta:
+  _yoast_wpseo_is_cornerstone: ''
+  _edit_last: '2'
+  _syntaxhighlighter_encoded: '1'
+  _yoast_wpseo_content_score: '60'
+  _yoast_wpseo_primary_category: '92'
+author:
+  login: mike
+  email: mshepard70@gmail.com
+  display_name: mike
+  first_name: ''
+  last_name: ''
+permalink: "/2017/04/12/hyper-v-homelab-intro/"
+---
+<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
+<html><body></p>
+<p>So  I've been playing with Hyper-V for a while now.  If you recall it was one of my <a href="https://powershellstation.com/2016/01/06/my-2016-powershell-goals/">2016 goals</a> to build a virtualization lab.</p>
+<p>I've done that, building out the base <a href="https://social.technet.microsoft.com/wiki/contents/articles/1262.test-lab-guides.aspx#Base_Configuration_TLG">Microsoft Test Lab Guide</a> several times:</p>
+<ul>
+<li>Manually (clicking in the GUI)</li>
+<li>Using PowerShell commands (contained in the guides)</li>
+<li>Using <a href="https://github.com/VirtualEngine/lability">Lability</a> and <a href="https://github.com/theJasonHelmick/PS-AutoLab-Env">PS-AutoLab-Env</a>
+</li>
+</ul>
+<p>I was also fortunate enough to be a technical development editor for <a href="https://www.manning.com/books/learn-hyper-v-in-a-month-of-lunches">Learn Hyper-V in a Month of Lunches</a>, which should be released this fall.</p>
+<p>One thing that I've found is that being able to spin up a VM quickly is really nice.  With the Hyper-V cmdlets, that's pretty easy.</p>
+<p>Spinning up a machine from scratch and building a bootable image is not as easy.  Fortunately there are some tools to help.</p>
+<p>In this post, I'm going to share a simple function I've written to help me get things built faster.</p>
+<p>The goal of the function is to take the following information:</p>
+<ul>
+<li>Which ISO to use</li>
+<li>Which edition from the ISO to select</li>
+<li>The Name of the VM (and VHDX)</li>
+<li>How much memory</li>
+<li>How many CPUs</li>
+</ul>
+<p>With that information, it converts the windows image from the ISO to a VHDX, creates a VM with the right specs and using the VHDX, sets up the networking (or starts to, anyway), and starts the VM.</p>
+<p>The bulk of the interesting work is done by <a href="https://gallery.technet.microsoft.com/scriptcenter/Convert-WindowsImageps1-0fe23a8f">Convert-WindowsImage</a>, a function that pulls the correct image from an ISO and creates a virtual disk.</p>
+<p>There are some problems with that script (read the Q&amp;A on the Technet site and you'll see what I mean).  The main one is when it tries to find the edition you ask for (by number or name).  The code is in lines 4087-4095, and should look like this:</p>
+<p>[powershell]<br />
+                $Edition | ForEach-Object -Process {</p>
+<p>                    $Edtn = $PSItem</p>
+<p>                    if ([Int32]::TryParse($Edtn, [ref]$null)) {<br />
+                        $openImage = $openWim[[Int32]($Edtn)]<br />
+                    } else {<br />
+                        $openImage = $openWim[$Edtn]<br />
+                    }<br />
+[/powershell]</p>
+<p>There's a more recent copy of the function on github, but it has slightly different parameters and seems to be stale as well (according to the page it's on).  I've got an email out to find the "live" version.</p>
+<p>With that, here's my function:</p>
+<p>[powershell]<br />
+function new-BootableVM {<br />
+    param($ISOPath = 'E:\isos\2012R2_x64_EN_Eval.iso',<br />
+        $Name,<br />
+        $MemoryInGB,<br />
+        $vCPUs,<br />
+        [switch]$Stopped)</p>
+<p>    $switch = 'LabNet'<br />
+    $vhdpath = "c:\users\Public\Documents\Hyper-V\Virtual hard disks\$name.vhdx"</p>
+<p>    Convert-WindowsImage -SourcePath $ISOPath -Edition $edition -VHDPath $vhdpath -VHDFormat VHDX -VHDType Dynamic -SizeBytes 8GB<br />
+    $vm = New-VM -Name $name -MemoryStartupBytes ($memoryInGB * 1GB) -VHDPath $vhdpath -Generation 2<br />
+    Set-VMProcessor -VM $vm -Count $vCPUs<br />
+    Add-VMNetworkAdapter -vm $vm -SwitchName $switch</p>
+<p>    if (!$stopped) {<br />
+        Start-VM -VM $vm<br />
+    }<br />
+    $vm<br />
+}<br />
+[/powershell]</p>
+<p>Once the function is done running (assuming it didn't have any issues), a VM will be created and ready for you.  You will need to accept the license, set the locale, and set the administrators password, but that only takes a minute.  I'll be adding functions (or adding to this function) to take care of those as well as things like renaming the guest, joining a domain, copying files to the drive, etc.</p>
+<p>It's still a work in progress, so you will see some hardcoded values.  Hopefully you can see what's going on and adapt it to your needs.</p>
+<p>I'll be writing more as I play more with Hyper-V, DSC, and containers.</p>
+<p>Let me know what you think</p>
+<p>--Mike</body></html></p>

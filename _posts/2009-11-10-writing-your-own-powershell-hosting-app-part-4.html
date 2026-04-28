@@ -1,0 +1,287 @@
+---
+layout: post
+title: Writing your own PowerShell Hosting App (Part 4)
+date: 2009-11-10 18:30:54.000000000 -06:00
+type: post
+parent_id: '0'
+published: true
+password: ''
+status: publish
+categories:
+- Writing a Host
+tags:
+- PowerShell
+- VB.NET
+meta:
+  _edit_last: '2'
+  _syntaxhighlighter_encoded: '1'
+author:
+  login: mike
+  email: mshepard70@gmail.com
+  display_name: mike
+  first_name: ''
+  last_name: ''
+permalink: "/2009/11/10/writing-your-own-powershell-hosting-app-part-4/"
+---
+<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
+<html><body></p>
+<p>WARNING:  This is a long post with lots of code!  :-)</p>
+<p>In the last post, we got to the point that we ran into the limitatoin of simply running scripts through a bare runspace.  You can accomplish quite a bit, but to have the full shell experience, you'll want to actually create a the host objects, so that the PowerShell engine will know how to handle interacting with the environment.  The hint that we were at this point was the error message “System.Management.Automation.CmdletInvocationException: Cannot invoke this function because the current host does not implement it.”  Creating a host that does implement "it" is not too difficult, but involves a lot of code.  Without further ado, here we go.</p>
+<p>There are three classes to inherit from to implement a custom host.  They are:</p>
+<ul>
+<li>System.Management.Automation.Host.PSHost</li>
+<li>System.Management.Automation.Host.PSHostUserInterface</li>
+<li>System.Management.Automation.Host.PSHostRawUserInterface</li>
+</ul>
+<p>These classes are declared as MustInherit (which is the same as Abstract in C#), and each declares several properties and methods as MustOverride.  To easily generate code for these methods and properties (in SharpDevelop...each tool may or may not have a way to do this),  I wrote simple stub classes for these as follows:<br />
+[vbnet]Public Class PowerShellWorkBenchHost<br />
+    Inherits System.Management.Automation.Host.PSHost</p>
+<p> End Class</p>
+<p>Public Class PowerShellWorkBenchHostUI<br />
+	Inherits System.Management.Automation.Host.PSHostUserInterface</p>
+<p>  End Sub</p>
+<p>End Class</p>
+<p>Public Class PowerShellWorkBenchHostRawUI<br />
+		Inherits System.Management.Automation.Host.PSHostRawUserInterface</p>
+<p>End Class[/vbnet]<br />
+Then, I'm put the cursor in the blank line under the inherits clause in the first class,  PowerShellWorkBenchHost, and selected Auto Code Generation from the Tools menu.  This brings up a dialog that lets you indicate what code to generate.  One of the options is "Abstract class overridings", which is what we want.  Selecting that shows us a checkbox for the Abstract (MustInherit) class that we're inheriting from (PSHost).  Checking PSHost and clicking OK fills in the member definitions with some default behavior as shown below:</p>
+<p>[caption id="attachment_159" align="alignnone" width="265" caption="Auto Code Generate Dialog"]<img class="size-full wp-image-159" title="Auto Code Generate Dialog" src="{{site.baseurl}}/assets/2009/11/screenshot0006-2009-11-10-19_02_10.jpg" alt="Auto Code Generate Dialog" width="265" height="340">[/caption]<br />
+[vbnet]Public Class PowerShellWorkBenchHost<br />
+    Inherits System.Management.Automation.Host.PSHost<br />
+	Public Overloads Overrides ReadOnly Property Name() As String<br />
+		Get<br />
+			Throw New NotImplementedException()<br />
+		End Get<br />
+	End Property</p>
+<p>	Public Overloads Overrides ReadOnly Property Version() As Version<br />
+		Get<br />
+			Throw New NotImplementedException()<br />
+		End Get<br />
+	End Property</p>
+<p>	Public Overloads Overrides ReadOnly Property InstanceId() As Guid<br />
+		Get<br />
+			Throw New NotImplementedException()<br />
+		End Get<br />
+	End Property</p>
+<p>	Public Overloads Overrides ReadOnly Property UI() As System.Management.Automation.Host.PSHostUserInterface<br />
+		Get<br />
+			Throw New NotImplementedException()<br />
+		End Get<br />
+	End Property</p>
+<p>	Public Overloads Overrides ReadOnly Property CurrentCulture() As System.Globalization.CultureInfo<br />
+		Get<br />
+			Throw New NotImplementedException()<br />
+		End Get<br />
+	End Property</p>
+<p>	Public Overloads Overrides ReadOnly Property CurrentUICulture() As System.Globalization.CultureInfo<br />
+		Get<br />
+			Throw New NotImplementedException()<br />
+		End Get<br />
+	End Property</p>
+<p>	Public Overloads Overrides Sub SetShouldExit(exitCode As Integer)<br />
+		Throw New NotImplementedException()<br />
+	End Sub</p>
+<p>	Public Overloads Overrides Sub EnterNestedPrompt()<br />
+		Throw New NotImplementedException()<br />
+	End Sub</p>
+<p>	Public Overloads Overrides Sub ExitNestedPrompt()<br />
+		Throw New NotImplementedException()<br />
+	End Sub</p>
+<p>	Public Overloads Overrides Sub NotifyBeginApplication()<br />
+		Throw New NotImplementedException()<br />
+	End Sub</p>
+<p>	Public Overloads Overrides Sub NotifyEndApplication()<br />
+		Throw New NotImplementedException()<br />
+	End Sub</p>
+<p> End Class[/vbnet]<br />
+Repeating that for the other two classes results in the following:<br />
+[vbnet]Public Class PowerShellWorkBenchHostRawUI<br />
+		Inherits System.Management.Automation.Host.PSHostRawUserInterface</p>
+<p>	Public Overloads Overrides Property ForegroundColor() As ConsoleColor<br />
+		Get<br />
+			Throw New NotImplementedException()<br />
+		End Get<br />
+		Set<br />
+			Throw New NotImplementedException()<br />
+		End Set<br />
+	End Property</p>
+<p>	Public Overloads Overrides Property BackgroundColor() As ConsoleColor<br />
+		Get<br />
+			Throw New NotImplementedException()<br />
+		End Get<br />
+		Set<br />
+			Throw New NotImplementedException()<br />
+		End Set<br />
+	End Property</p>
+<p>	Public Overloads Overrides Property CursorPosition() As System.Management.Automation.Host.Coordinates<br />
+		Get<br />
+			Throw New NotImplementedException()<br />
+		End Get<br />
+		Set<br />
+			Throw New NotImplementedException()<br />
+		End Set<br />
+	End Property</p>
+<p>	Public Overloads Overrides Property WindowPosition() As System.Management.Automation.Host.Coordinates<br />
+		Get<br />
+			Throw New NotImplementedException()<br />
+		End Get<br />
+		Set<br />
+			Throw New NotImplementedException()<br />
+		End Set<br />
+	End Property</p>
+<p>	Public Overloads Overrides Property CursorSize() As Integer<br />
+		Get<br />
+			Throw New NotImplementedException()<br />
+		End Get<br />
+		Set<br />
+			Throw New NotImplementedException()<br />
+		End Set<br />
+	End Property</p>
+<p>	Public Overloads Overrides Property BufferSize() As System.Management.Automation.Host.Size<br />
+		Get<br />
+			Throw New NotImplementedException()<br />
+		End Get<br />
+		Set<br />
+			Throw New NotImplementedException()<br />
+		End Set<br />
+	End Property</p>
+<p>	Public Overloads Overrides Property WindowSize() As System.Management.Automation.Host.Size<br />
+		Get<br />
+			Throw New NotImplementedException()<br />
+		End Get<br />
+		Set<br />
+			Throw New NotImplementedException()<br />
+		End Set<br />
+	End Property</p>
+<p>	Public Overloads Overrides ReadOnly Property MaxWindowSize() As System.Management.Automation.Host.Size<br />
+		Get<br />
+			Throw New NotImplementedException()<br />
+		End Get<br />
+	End Property</p>
+<p>	Public Overloads Overrides ReadOnly Property MaxPhysicalWindowSize() As System.Management.Automation.Host.Size<br />
+		Get<br />
+			Throw New NotImplementedException()<br />
+		End Get<br />
+	End Property</p>
+<p>	Public Overloads Overrides ReadOnly Property KeyAvailable() As Boolean<br />
+		Get<br />
+			Throw New NotImplementedException()<br />
+		End Get<br />
+	End Property</p>
+<p>	Public Overloads Overrides Property WindowTitle() As String<br />
+		Get<br />
+			Throw New NotImplementedException()<br />
+		End Get<br />
+		Set<br />
+			Throw New NotImplementedException()<br />
+		End Set<br />
+	End Property</p>
+<p>	Public Overloads Overrides Function ReadKey(options As System.Management.Automation.Host.ReadKeyOptions) As System.Management.Automation.Host.KeyInfo<br />
+		Throw New NotImplementedException()<br />
+	End Function</p>
+<p>	Public Overloads Overrides Sub FlushInputBuffer()<br />
+		Throw New NotImplementedException()<br />
+	End Sub</p>
+<p>	Public Overloads Overrides Sub SetBufferContents(origin As System.Management.Automation.Host.Coordinates, contents As System.Management.Automation.Host.BufferCell(,))<br />
+		Throw New NotImplementedException()<br />
+	End Sub</p>
+<p>	Public Overloads Overrides Sub SetBufferContents(rectangle As System.Management.Automation.Host.Rectangle, fill As System.Management.Automation.Host.BufferCell)<br />
+		Throw New NotImplementedException()<br />
+	End Sub</p>
+<p>	Public Overloads Overrides Function GetBufferContents(rectangle As System.Management.Automation.Host.Rectangle) As System.Management.Automation.Host.BufferCell(,)<br />
+		Throw New NotImplementedException()<br />
+	End Function</p>
+<p>	Public Overloads Overrides Sub ScrollBufferContents(source As System.Management.Automation.Host.Rectangle, destination As System.Management.Automation.Host.Coordinates, clip As System.Management.Automation.Host.Rectangle, fill As System.Management.Automation.Host.BufferCell)<br />
+		Throw New NotImplementedException()<br />
+	End Sub</p>
+<p>End Class[/vbnet]<br />
+That's a lot of code, but it's not so bad, since I didn't actually have to write it.  Also, since all of the members simply throw NotImplementedException, it doesn't accomplish anything.</p>
+<p>But it should be clear that a big part of what we need to do now is to fill in the method bodies that implement the features we want to have in our host.</p>
+<p>To actually use these new classes in conjunction with the runspace and pipeline that we created last week, we'll need to modify that code (but only slightly) to reference the new host class:<br />
+[vbnet highlight="2,3"]Sub RunToolStripMenuItem1Click(sender As Object, e As EventArgs)<br />
+	Dim host as New PowerShellWorkBenchHost<br />
+        Dim r As Runspace=RunspaceFactory.CreateRunspace(host)<br />
+        r.Open()<br />
+        Dim p As Pipeline=r.CreatePipeline(txtScript.Text)<br />
+        p.Commands.add(new Command("out-string"))<br />
+        Dim output As Collection(Of psobject)<br />
+        output=p.Invoke()<br />
+        For Each o As PSObject In output<br />
+            txtOutput.AppendText(o.ToString()+vbcrlf)<br />
+        Next<br />
+End Sub[/vbnet]<br />
+If you run the app at this point, it will blow up when you try to run anything.  That's because there are certain things that must be implemented for the custom host to function.  Other things only need to be implemented if you want to use those features in your host.   The not-so-nice thing is that I haven't ever found a list that tells you what you actually need to do, so it's a trial and error kind of thing.  What I did was to put breakpoints on all of the throw statements that were generated, and run the app over and over, trying to run a simple "dir", and implementing the methods that got hit.  Doing that showed me that the following are pretty much essential to implement:</p>
+<ul>
+<li>PSHost.UI</li>
+<li>PSHost.Name</li>
+<li>PSHost.InstanceID</li>
+<li>PSHost.CurrentCulture</li>
+<li>PSHost.CurrentUICulture</li>
+<li>PSHostUserInterface.RawUI</li>
+<li>PSHostRawUserInterface.BufferSize</li>
+</ul>
+<p>Fortunately, these are all pretty easy to implement.  The Name and InstanceID can be constants, the UI and RawUI properties need to return instances of the classes we inherited from PSHostUserInterface and PSHostRawUserInterface.  The CurrentCulture and CurrentUICulture I just pulled from the Threading.Thread.CurrentThread object (which has CurrentCulture and CurrentUICulture properties).  The BufferSize property refers to the size of the "window" that the console will be writing output to, measured in characters.  I made it 80x80, just to have something to work with.<br />
+Here's what those methods look like (I omitted all of the methods that still throw exceptions to make the listing smaller, but you still need the definitions in your code)<br />
+[vbnet]Public Class PowerShellWorkBenchHost<br />
+    Inherits System.Management.Automation.Host.PSHost<br />
+    Private _instanceID As New Guid("eb30b404-18c2-455d-8271-423039280b9b" )<br />
+    private _UI as New PowerShellWorkBenchHostUI<br />
+	Public Overloads Overrides ReadOnly Property Name() As String<br />
+		Get<br />
+			return "PowerShellWorkBenchHost"<br />
+		End Get<br />
+	End Property</p>
+<p>	Public Overloads Overrides ReadOnly Property Version() As Version<br />
+		Get<br />
+			return new Version(1,0,0)<br />
+		End Get<br />
+	End Property</p>
+<p>	Public Overloads Overrides ReadOnly Property InstanceId() As Guid<br />
+		Get<br />
+			return _instanceID<br />
+		End Get<br />
+	End Property</p>
+<p>	Public Overloads Overrides ReadOnly Property UI() As System.Management.Automation.Host.PSHostUserInterface<br />
+		Get<br />
+			return _UI<br />
+		End Get<br />
+	End Property</p>
+<p>	Public Overloads Overrides ReadOnly Property CurrentCulture() As System.Globalization.CultureInfo<br />
+		Get<br />
+		  Return Threading.Thread.CurrentThread.CurrentCulture<br />
+		End Get<br />
+	End Property</p>
+<p>	Public Overloads Overrides ReadOnly Property CurrentUICulture() As System.Globalization.CultureInfo<br />
+		Get<br />
+			  Return Threading.Thread.CurrentThread.CurrentUICulture<br />
+		End Get<br />
+	End Property</p>
+<p> ' LOTS OF OMITTED CODE</p>
+<p> End Class</p>
+<p>Public Class PowerShellWorkBenchHostUI<br />
+	Inherits System.Management.Automation.Host.PSHostUserInterface<br />
+	private _RawUI as New PowerShellWorkBenchHostRawUI<br />
+	Public Overloads Overrides ReadOnly Property RawUI() As System.Management.Automation.Host.PSHostRawUserInterface<br />
+		Get<br />
+			return _RawUI<br />
+		End Get<br />
+	End Property</p>
+<p>'LOTS OF OMITTED CODE</p>
+<p>End Class</p>
+<p>Public Class PowerShellWorkBenchHostRawUI<br />
+		Inherits System.Management.Automation.Host.PSHostRawUserInterface</p>
+<p>	Public Overloads Overrides Property BufferSize() As System.Management.Automation.Host.Size<br />
+		Get<br />
+			return new system.management.automation.host.size(80,80)<br />
+		End Get<br />
+		Set<br />
+			Throw New NotImplementedException()<br />
+		End Set<br />
+	End Property</p>
+<p>'LOTS OF OMITTED CODE</p>
+<p>End Class[/vbnet]<br />
+Now we're using the host, and actually getting output.  We're not getting any more output than we were before using the host, but since we haven't implemented any real host functionality, that's to be expected.</p>
+<p>I was hoping to get something cool (like write-host) working in this post, but I'm afraid it's already way too long.  I'll try to bang out another entry tomorrow to follow up.</p>
+<p>I'm also thinking of creating a project on CodePlex for the code that I'm writing.  Obviously the limited functionality that I'm implementing in the tutorial is not something that everyone would want, but as a community driven project, it could eventually become considerably better (and since the source would be available, you could take it and do what you want with it).  Just a thought at this point...let me know what you think.</p>
+<p>Mike</p>
+<p>P.S.  I really would like to hear what you think about this series (and the blog in general).</body></html></p>

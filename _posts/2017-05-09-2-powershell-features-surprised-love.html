@@ -1,0 +1,49 @@
+---
+layout: post
+title: 2 PowerShell Features I was Surprised to Love
+date: 2017-05-09 21:51:38.000000000 -05:00
+type: post
+parent_id: '0'
+published: true
+password: ''
+status: publish
+categories:
+- Scripts
+tags: []
+meta:
+  _yoast_wpseo_is_cornerstone: ''
+  _edit_last: '2'
+  _yoast_wpseo_content_score: '60'
+  _yoast_wpseo_primary_category: ''
+  _syntaxhighlighter_encoded: '1'
+author:
+  login: mike
+  email: mshepard70@gmail.com
+  display_name: mike
+  first_name: ''
+  last_name: ''
+permalink: "/2017/05/09/2-powershell-features-surprised-love/"
+---
+<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
+<html><body></p>
+<p>After <a href="https://powershellstation.com/2017/04/11/powershell-topics-im-ready-stop-talking/">talking about features I don't want to talk about anymore</a> I thought I would turn my attention to a couple of things in PowerShell that I initially felt were mistakes but have had a change of heart about.</p>
+<p>For the most part, I think the PowerShell team does a fantastic job in terms of language design. They have made some bold choices in a few places, but time and time again their choices seem to me like the correct choices.</p>
+<p>The two features I'm talking about today were things that, when I first heard about then, I thought "I'll never use that". Time has shown me that my reactions were in haste.</p>
+<h2>Module Auto-loading</h2>
+<p>I really like to be explicit about what I'm doing when I write a script. I like explicitly importing modules into a script.  Knowing where the cmdlets used in a script come from is a big part of the learning process.  As you read scripts (you do read scripts, don't you?), you can slowly expand your knowledge base as you start looking into functionality implemented in different modules.  Another big advantage to explicitly importing modules into a script is that you're helping to define the set of dependencies of the script.  "Oh, I need to have the SQLServer module installed to run this script...I thought it looked like a SQLPS script!".  Since cmdlets can have similar names, explicitly loading the module can make it clear what's going on.</p>
+<p>When I saw that PowerShell 3.0 introduced module auto-loading the first thing I thought was "I wonder how I can turn that off", followed closely by "I'm always going to turn that off on every system I use".</p>
+<p>I hadn't met PowerShell 3.0 yet, though.  The number of cmdlets jumped from several hundred to over two thousand.  Knowing what cmdlets came from which modules became a much harder problem.  There were so many more cmdlets (aided by cdxml modules) that keeping track was difficult.</p>
+<p>Module auto-loading was a logical solution to the "too many modules and cmdlets" problem.  I find myself depending on it almost every time I write a script.</p>
+<p>I do like to explicitly import modules (either with import-module or via the module manifest) if I'm using something unusual, though.</p>
+<h2>Collection Properties</h2>
+<p>I don't know if there's an official name for this feature.  Bruce Payette in PowerShell in Action calls this a "fallback dot operator".  The idea is that you can use dot-notation against a collection to retrieve a collection of properties of the objects in the collection.  Since that was probably as hard to read as it was to write, here's an example:</p>
+<p>[powershell]$filenames = (dir C:\temp).FullName[/powershell]</p>
+<p>Clearly, an Array doesn't have a FullName property, right?  And we already had 2 ways (the "old" way and the "aha" way) to do this:<br />
+[powershell]$filenames = dir c:\temp | foreach-object {$_.FullName}<br />
+$filenames = dir c:\temp | select-object -expandProperty FullName<br />
+[/powershell]</p>
+<p>I like being able to use dot-notation against an expression, which just considers the object which is the result of the expression and applies the dot-operator to it.  It does require that you add some parentheses, but that's a small price to pay for not having to introduce another variable.  One of my scripting maxims is that the less you write, the less you debug.  More variables means more places to make mistakes (like misspelling), so I like this approach.</p>
+<p>Using dot-notation to "fall back" from the collection to the members creates a bit of a semantic issue (or at least it messed up my head).  When you see <strong>$variable.property</strong>, you no longer know what's going on.  You can be certain that there is some kind of property reference happening, but it isn't clear whether there is collection unrolling happening at the same time.</p>
+<p>How this one has turned out is that it eliminates the need to check whether I got multiple results and now I can use the same notation for single or multiple objects.  (Side note: this is reminiscent of adding "fake" .Length and .GetEnumerator() members to objects in PowerShell 3.0).  It's very concise and reduces the use of pipelines (which helps performance).</p>
+<p>Well, those were 2 things in PowerShell I was surprised to love.  What about PowerShell delights you?  Let me know in the comments!</p>
+<p>--Mike</body></html></p>

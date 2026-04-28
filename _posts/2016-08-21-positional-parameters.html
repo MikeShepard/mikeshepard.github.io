@@ -1,0 +1,54 @@
+---
+layout: post
+title: Re-Thinking Positional Parameters
+date: 2016-08-21 21:56:24.000000000 -05:00
+type: post
+parent_id: '0'
+published: true
+password: ''
+status: publish
+categories:
+- Code Smells
+- Discussion
+- Scripts
+- User Groups
+tags:
+- Advanced Functions
+- Parameters
+- Positional
+meta:
+  _edit_last: '2'
+  _syntaxhighlighter_encoded: '1'
+author:
+  login: mike
+  email: mshepard70@gmail.com
+  display_name: mike
+  first_name: ''
+  last_name: ''
+permalink: "/2016/08/21/positional-parameters/"
+---
+<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
+<html><body>
+<p>I mentioned in a <a href="https://powershellstation.com/2016/08/06/re-learning/">previous post</a> that I've recently changed my mind a bit about the Position parameter attribute. I guess technically it is the position parameter of the Parameter parameter attribute (i.e. there's a parameter attribute called "Parameter" and it has a parameter called position). I don't think you could come up with something much more difficult to correctly name.</p>
+<p>Anyway, I've always had a low opinion of this particular parameter. Before I explain why, let's review how it works.</p>
+<p>If you have an advanced function, say Get-Stuff, you might see something like this:</p>
+<p>[powershell]<br />
+Function Get-Stuff{<br />
+[CmdletBinding()]<br />
+Param([Parameter(Position=0)]$param1,<br />
+      [Parameter(Position=1)]$param2,<br />
+      [Parameter(Position=2)]$param3)</p>
+<p>    #body of function<br />
+    write-output @{Param1=$param1;Param2=$param2;Param3=$param3}<br />
+}<br />
+[/powershell]</p>
+<p>The point of the <em>Position=</em> parameter (of the Parameter parameter attribute in the <strong>Param</strong> statement) is to say that if you use positional parameters in calling the function, you can expect that <strong>$param1</strong> is in the first position (position 0), <strong>$param2</strong> is in the second position (position 1) and so on.</p>
+<p>The great part about it is that this code works the same without the Position= statements. Parameters (ignoring parameter sets) can be used in the order they're listed in the function unless the <em>PositionalBinding</em> parameter of the <strong>CmdletBinding</strong> attribute is set to <strong>$false</strong> (which it isn't, by default).</p>
+<p>I've seen a lot of code which, in a function that has 12 parameters, mechanically sets Position= from 0 to 11 in order. It's not exactly confusing, but it's certainly not clear why you would bother doing it since it's not necessary. From that observation, I decided that there was no point to using the Position= setting at all.</p>
+<p>Micah Battin spoke a few months ago at the <a href="https://www.meetup.com/STLPSUG/" target="_blank">STLPSUG</a> meeting on PowerShell Functions and got me to reconsider my position (no pun intended).</p>
+<p>I explained my reservations and he said something to the effect that you should turn off automatic positional arguments (<strong>PositionalBinding=$false</strong> in the <strong>CmdletBinding()</strong>) and then set the position for the first one or two parameters. Those are the ones that people will be specifying postionally anyway.</p>
+<p>Have you ever seen someone call a cmdlet and list 12 parameters with no names? I would guess not. There's no reason to expect that people will want to write useless code like that, so why should your function definition encourage it?  By only including positions for the one or two "essential parameters" you're doing your part to make the caller's code better.</p>
+<p>I'm going to be editing my "Advanced Function" snippet to include <strong>PositionalBinding=$False</strong> and see where it takes me.</p>
+<p>What do you think?</p>
+<p>--Mike</p>
+<p></body></html></p>

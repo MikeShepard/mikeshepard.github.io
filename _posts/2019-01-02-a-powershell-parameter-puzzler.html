@@ -1,0 +1,60 @@
+---
+layout: post
+title: A PowerShell Parameter Puzzler
+date: 2019-01-02 21:33:07.000000000 -06:00
+type: post
+parent_id: '0'
+published: true
+password: ''
+status: publish
+categories:
+- Parameters
+- Scripts
+tags:
+- parameter
+- puzzle
+- syntax
+meta:
+  _edit_last: '2'
+  _syntaxhighlighter_encoded: '1'
+  _yoast_wpseo_content_score: '90'
+  _yoast_wpseo_primary_category: '7'
+  _yoast_wpseo_focuskw: parameter
+  _yoast_wpseo_linkdex: '62'
+author:
+  login: mike
+  email: mshepard70@gmail.com
+  display_name: mike
+  first_name: ''
+  last_name: ''
+permalink: "/2019/01/02/a-powershell-parameter-puzzler/"
+---
+<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
+<html><body><br />
+<img class="size-medium wp-image-1400 alignright" style="font-family: Consolas, Monaco, monospace;" src="{{site.baseurl}}/assets/2019/01/puzzle-308908_640-300x280.png" alt="" width="300" height="280"><br />
+I ran across an interesting PowerShell behavior today thanks to a coworker (hi Matt!).</p>
+<p>It involved a function with just a few arguments. When I looked at the syntax something looked off.</p>
+<p>I am not going to recreate the exact scenario I found (because it involved a cmdlet written in C#), but I was able to recreate a similar issue using advanced functions.</p>
+<p>So consider that you are entering a command and you see an intellisense prompt like this one:<br />
+<img class="size-medium wp-image-1397 alignnone" src="{{site.baseurl}}/assets/2019/01/intellisense-300x251.png" alt="" width="300" height="251"></p>
+<p>You would rightfully assume that it had 3 parameters.</p>
+<p>If you looked at the syntax using Get-Help (or the -? switch) you would see something strange:</p>
+<p><img class="size-medium wp-image-1398 alignnone" src="{{site.baseurl}}/assets/2019/01/question_syntax-300x75.png" alt="" width="300" height="75"></p>
+<p>Wait...where did the other 2 parameters go?</p>
+<p>Using Get-Command get-Thing -syntax shows essentially the same result:</p>
+<p><img class="alignnone size-medium wp-image-1399" src="{{site.baseurl}}/assets/2019/01/get-command_syntax-300x36.png" alt="" width="300" height="36"></p>
+<p>This was the kind of problem I ran into.  I was given a cmdlet, and when I looked at the syntax to see the parameters, I didn't find the parameters I expected.  They were there, but they weren't shown by Get-Command.</p>
+<p>The "puzzle" is a bit less confusing when you see the code of the function:</p>
+<p>[powershell]<br />
+function get-thing {<br />
+[CmdletBinding()]<br />
+Param(<br />
+  [Parameter(Position=0)]$parm1,<br />
+  [Parameter(Position=0)]$parm2,<br />
+  [Parameter(Position=0)]$parm3<br />
+)</p>
+<p>#nothing to see here</p>
+<p>}<br />
+[/powershell]</p>
+<p>The issue arose from the overlapping position modifiers on the parameters. When those are corrected the issue goes away.</p>
+<p>Note: The original instance was a bit stranger. As I mentioned earlier, the cmdlet in question was written in C#. What really surprised me was that Get-Help and Get-Command showed different syntaxes. Get-Help showed all of the parameters, while Get-Command only showed the last one.</body></html></p>

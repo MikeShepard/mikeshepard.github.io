@@ -1,0 +1,71 @@
+---
+layout: post
+title: Breaking the rules with helper functions
+date: 2015-10-02 01:01:19.000000000 -05:00
+type: post
+parent_id: '0'
+published: true
+password: ''
+status: publish
+categories:
+- Discussion
+- Modules
+- Scripts
+tags: []
+meta:
+  _edit_last: '2'
+  _syntaxhighlighter_encoded: '1'
+author:
+  login: mike
+  email: mshepard70@gmail.com
+  display_name: mike
+  first_name: ''
+  last_name: ''
+permalink: "/2015/10/02/breaking-the-rules-with-helper-functions/"
+---
+<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
+<html><body><br />
+<a href="http://stackoverflow.com/questions/6032344/how-to-hide-helper-functions-in-powershell-modules/6032855#6032855">One of my most popular answers</a> on StackOverflow is also one which has a <em>tiny</em> bit of controversy. It involves how to "hide" helper functions in a module in order to keep them from being exported.</p>
+<p><strong>Export-ModuleMember Details</strong><br />
+In case you're unfamiliar with how exporting functions from a module works, here are the basic rules:</p>
+<ol>
+<li>If there are no <strong>Export-ModuleMember</strong> statements, all function are exported</li>
+<li>If there are any Export-ModuleMember statements, only the functions named in an <strong>Export-ModuleMember</strong> statement are exported</li>
+</ol>
+<p>In a <a href="http://stackoverflow.com/questions/11199953/can-i-exclude-a-single-function-from-export-modulemember">similar question</a> (which I answered the same way) a couple of other solutions are presented.  Those solutions involve invoking the PSParser to find all of the functions and while technically correct, I think they miss the point of the question.  </p>
+<p><strong>Why hide helper functions?</strong><br />
+In the context of a PowerShell module, a helper function is simply a function which supports the functionality of the "public" functions in the module, but isn't appropriate for use by the end-user.  A helper function may implement common logic needed by several functions or possibly interact with implementation details in the module which are abstracted away from the user's viewpoint.  Exporting helper functions provides no benefit for the public, and in fact can cause confusion as these extra functions get in the way of understanding the focus of the module.  Thus, it is important to be able to exclude these helper functions from the normal export from the module.</p>
+<p><strong>Why it's hard to hide helper functions</strong><br />
+First, it's not actually hard to hide helper functions, it's just tedious.  All you have to do is list each non-helper function in an <strong>Export-ModuleMember</strong> statement.  Unfortunately, that means if you have 100 functions with only one helper function, you need to list each of the 99 functions in order to hide the single helper function.  Also, if you add a function later, you need to remember to add it to the list of exported functions.  Not a good prize in my book.  The PSParser solutions are correct in that they work, but they are a big block of code that obscures the intent.</p>
+<p><strong>My easy solution and the broken rule</strong><br />
+My solution is to name helper functions with a VerbNoun convention rather than the standard Verb-Noun convention and use <strong>Export-ModuleMember *-*</strong> to export all functions named like PowerShell cmdlets are supposed to be.  Using a different naming conventions is breaking an important rule in the PowerShell community and you'll see in the comments about my original answer that someone called me out on it.</p>
+<p><strong>Why the rule exists (and why I don't care that I broke it)</strong><br />
+PowerShell was designed and delivered as a very discoverable system.  That is, you can use PowerShell to find out stuff about PowerShell, and once you know some PowerShell you can leverage that knowledge to use even more PowerShell.  The Verb-Noun convention clearly marks PowerShell cmdlets (functions, scripts) as distictive items, and the verbs are curated to help guide you to the same functionality in different arenas.  For instance, my favorite example is the verb Stop.  You could easily have used End, Terminate, Kill, or any number of other verbs in place of Stop, but because Stop is the <em>approved</em> verb you know it's the one to use.  Thus, when you start to look at services, you know it's going to be Stop-Service.  When you look at jobs, you know it will be Stop-Job.</p>
+<p>By using Verb-Noun in your functions you make them fit nicely into the PowerShell ecosystem.  Running into improperly named (either not following the convention or using unapproved verbs) is uncommon, and because of this things work nicely and everyone is happy.</p>
+<p>Helper functions are not meant to be discoverable.  They exist only in the private implementation of a module, and users never need to know that they exist, let alone try to figure out how to use them.  For this reason, I don't really mind breaking the rule.</p>
+<p>I'd rather have this:<br />
+[powershell]Export-ModuleMember *-*[/powershell]</p>
+<p>Than this:<br />
+[powershell]Add-Type -Path "${env:ProgramFiles(x86)}\Reference Assemblies\Microsoft\WindowsPowerShell\3.0\System.Management.Automation.dll"</p>
+<p>Function Get-PSFunctionNames([string]$Path) {<br />
+    $ast = [System.Management.Automation.Language.Parser]::ParseFile($Path, [ref]$null, [ref]$null)<br />
+    $functionDefAsts = $ast.FindAll({ $args[0] -is [System.Management.Automation.Language.FunctionDefinitionAst] }, $true)<br />
+    $functionDefAsts | ForEach-Object { $_.Name }<br />
+}<br />
+Export-ModuleMember -Function ( (Get-PSFunctionNames $PSCommandPath) | Where { $_ -ne 'MyPrivateFunction' } )<br />
+[/powershell]</p>
+<p>or this:<br />
+[powershell]<br />
+$errors = $null<br />
+$functions = [system.management.automation.psparser]::Tokenize($psISE.CurrentFile.Editor.Text, [ref]$errors) `<br />
+    | ?{(($_.Content -Eq "Function") -or ($_.Content -eq "Filter")) -and $_.Type -eq "Keyword" } `<br />
+    | Select-Object @{"Name"="FunctionName"; "Expression"={<br />
+        $psISE.CurrentFile.Editor.Select($_.StartLine,$_.EndColumn+1,$_.StartLine,$psISE.CurrentFile.Editor.GetLineLength($_.StartLine))<br />
+        $psISE.CurrentFile.Editor.SelectedText<br />
+    }<br />
+}<br />
+$functions | ?{ $_.FunctionName -ne "your-excluded-function" }<br />
+[/powershell]</p>
+<p>I'm really interested in feedback on this, since I'm coloring outside the lines.  Do you favor practicality or do you think I should follow the rule.</p>
+<p>Let me know your thoughts in the comments.</p>
+<p>-Mike</body></html></p>

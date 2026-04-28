@@ -1,0 +1,58 @@
+---
+layout: post
+title: PowerShell’s Problem with Return
+date: 2011-08-26 22:29:36.000000000 -05:00
+type: post
+parent_id: '0'
+published: true
+password: ''
+status: publish
+categories:
+- Discussion
+- Scripts
+tags: []
+meta:
+  _edit_last: '2'
+  _syntaxhighlighter_encoded: '1'
+author:
+  login: mike
+  email: mshepard70@gmail.com
+  display_name: mike
+  first_name: ''
+  last_name: ''
+permalink: "/2011/08/26/powershell%e2%80%99s-problem-with-return/"
+---
+<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
+<html><body></p>
+<p>I think that PowerShell is a fairly readable language, once you’re used to its unique features. Naming functions (cmdlets) with an embedded hyphen, using -eq instead of the equals sign (and similarly for other operators) and not using commas to delimit parameters in a function call (but using them in a method call) are all things that you get used to pretty quickly. There is one feature of PowerShell, however, that I don’t think will ever come naturally to me, and that’s how it handles return values from functions.</p>
+<p>In most languages, if you see “return 1″ as the only return in a function, you can know that the function is going to the value 1 to the caller. In fact, I’m not sure I’ve ever seen a language that didn’t work that way. That is, until I found PowerShell. Generally speaking, the return statement works just as expected. In the absence of any statements writing to the output stream (with write-output) or “dropping” their values, “return 1″ will cause the caller to receive the value “1″. Using write-output is pretty obvious, and I’d recommend using it explicitly if you intend to add objects to the output stream (thereby including them in the eventual function value). Expressions that don’t capture their return values, however, are not quite so easy to spot.</p>
+<p>For example, examine this code to add a parameter to an ADO.NET command object looks fine:</p>
+<p>[powershell]$cmd.Parameters.AddWithValue('@demographics','$demoXML)[/powershell]</p>
+<p>This is a straightforward translation of one of the lines of code in the example code <a href="http://here/">here</a>.  The problem with the code is that AddWithValue not only adds a parameter, it also returns the parameter.  Since we didn’t assign it to a variable, cast it to [void] or pipe it to out-null, the output of this function (AddWithValue) gets added to the output of the function it’s in.</p>
+<p>Several “add” functions in the .net framework follow this pattern, either returning the object that was added or the index of that object in the collection.  The DBConnection.Open method (inherited by SQLConnection, among others) returns the opened connection.  I’m sure that with time I could find more examples than I’d feel like sharing.</p>
+<p>Another way that I’ve seen the output stream getting messed up is when a function uses strings to output information without using write-host.  For example, this function outputs “progress” information as it goes:</p>
+<p>[powershell]<br />
+function get-filelength{<br />
+param($filename)<br />
+	"reading file"<br />
+	$len=0<br />
+	$file=get-content $filename<br />
+	foreach($line in $file){<br />
+	   "adding a line"<br />
+	   $len+=$line.length<br />
+	}<br />
+	return $len<br />
+}<br />
+[/powershell]</p>
+<p>I realize that this is not the best way to find the length of a file, but it works for the purpose of illustration. If you simply call the function (without assigning it to a variable), you’ll see a bunch of text, followed by the “value” of the function. The “returned value” of the function is clearly intended to be $len, but instead all of the text is included. The type of the function output is Object[], rather than a number.</p>
+<p>There are some good reasons to use the output stream in a function (the next post will examine one such use), but it’s very easy to accidentally put something in the stream without intending to. When this happens, it often leads to unexpected results and long debugging sessions.</p>
+<p>Here are my recommendations for avoiding this kind of error:</p>
+<ol start="1">
+<li>Use one of the “write” functions to provide text messages to the user (write-host, write-debug, write-verbose)</li>
+<li>Use write-output if your intent is to add something to the output stream</li>
+<li>Check msdn to see if the methods you use have output. If you’re looking at the C# version, methods that return void do not need to be “handled”. In the VB.NET version, they’ll be declared as Sub, rather than Function.</li>
+<li>Be consistent with how you “handle” methods or functions whose values you want to discard. Options are to cast the result as [void] or pipe it to out-null</li>
+<li>If you’re using write-output to put objects in the output stream, use return with no value (i.e., don’t return $val). Seeing a value returned explicitly implies that that is the only value returned.</li>
+<li>If all else fails, use write-host to output the type of variables when debugging (or look at their values in the watch window if you’re using an IDE with a debugger).</li>
+</ol>
+<p></body></html></p>

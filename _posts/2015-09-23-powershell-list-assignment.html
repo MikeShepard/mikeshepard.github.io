@@ -1,0 +1,48 @@
+---
+layout: post
+title: PowerShell List Assignment
+date: 2015-09-23 00:53:29.000000000 -05:00
+type: post
+parent_id: '0'
+published: true
+password: ''
+status: publish
+categories:
+- Scripts
+tags: []
+meta:
+  _edit_last: '2'
+  _syntaxhighlighter_encoded: '1'
+author:
+  login: mike
+  email: mshepard70@gmail.com
+  display_name: mike
+  first_name: ''
+  last_name: ''
+permalink: "/2015/09/23/powershell-list-assignment/"
+---
+<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
+<html><body>
+<p>PowerShell and lists of data go together hand-in-hand.  Any time you execute a cmdlet, function, or script, the output is a list of objects which is placed in the output stream for processing.</p>
+<p>Assigning a list to a variable is not very interesting, either.  You just assign it and it's done.  Like this, for instance:<br />
+[powershell]$files=dir c:\temp[/powershell]<br />
+Nothing to see here, we do this every time we use PowerShell.  Lists on the right-hand side of the assignment operator are boring.</p>
+<p>You might have even seen a trick for swapping variables using a comma on the left-hand side like this:<br />
+[powershell]$a,$b=$b,$a[/powershell]</p>
+<p>That's kind of cool, but it seems like a pretty specific kind of thing to do.  Fortunately for us, lists on the left-hand side can do more that this.</p>
+<p>As an example, consider this line:</p>
+<p>[powershell]$a,$b=1,2,3[/powershell]</p>
+<p>If you look at $a, you'll see that it got the 1, and $b got 2 and 3.</p>
+<p>We can expand the example:</p>
+<p>[powershell]$a,$b,$c=1,2,3,4,5,6[/powershell]</p>
+<p>Now, $a gets 1, $b gets 2, and $c gets 3,4,5 and 6.  </p>
+<p>The pattern should be clear.  Each variable on the left gets a single object, until the last one which gets all remaining objects.  If we have more variables than values, the "extra" variables are $null.  If you specify the same variable more than once, it keeps the last corresponding value.</p>
+<p>Why is this useful?</p>
+<p>Well, if you want to work with a collection but treat the first item specially, now you have an easy way to do that.</p>
+<p>[powershell]$first,$rest = &lt;however you get your collection&gt;<br />
+&lt;process $first&gt;<br />
+&lt;process $rest&gt;[/powershell]</p>
+<p>Probably not something you'll do all the time, but it's another trick in the bag.</p>
+<p>Do you have any scenarios where this would be helpful?  Let me know in the comments.</p>
+<p>-Mike</p>
+<p></body></html></p>

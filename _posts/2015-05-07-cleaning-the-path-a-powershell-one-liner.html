@@ -1,0 +1,58 @@
+---
+layout: post
+title: Cleaning the Path - A PowerShell One-liner
+date: 2015-05-07 02:41:24.000000000 -05:00
+type: post
+parent_id: '0'
+published: true
+password: ''
+status: publish
+categories:
+- Scripts
+tags:
+- one-liner
+- PowerShell
+- scripts
+meta:
+  _edit_last: '2'
+  _syntaxhighlighter_encoded: '1'
+author:
+  login: mike
+  email: mshepard70@gmail.com
+  display_name: mike
+  first_name: ''
+  last_name: ''
+permalink: "/2015/05/07/cleaning-the-path-a-powershell-one-liner/"
+---
+<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
+<html><body>
+<p>I'm not super crazy about writing one-liners in PowerShell, but I ran across a fun problem which was quick to write as a one-liner.  I'll give that here with a little explanation, and follow up in a couple of days with a more polished advanced function solution.</p>
+<p>Anyway, the problem was that I was working on a computer and happened to take a look at the PATH environment variable and saw a lot of directories in the path that were no longer valid.  Apparently efforts to clean up the machine (e.g. removing old Visual Studio and SQL Server installs) didn't include fixing the path.<br />
+To see if you have this problem, you can easily see your PATH with the following line of PowerShell (and no, this isn't the one-liner)<br />
+[powershell]$env:Path[/powershell]<br />
+When I saw the output (which included 48 different folders) I knew I needed to fix it.<br />
+Since Test-Path is an easy way to see if a folder exists, I quickly wrote the following to see which entries were bad:<br />
+[powershell]$env:path -split ';' | where {!(Test-Path $_  )}[/powershell]<br />
+That listed 11 that were bad, but I also got an error because apparently there were some adjacent semicolons, meaning that $_ was set to an empty string which Test-Path didn't like.<br />
+A quick addition made it not complain:<br />
+[powershell]$env:path -split ';' | where {$_ -and !(Test-Path $_  )}[/powershell]<br />
+This gave me the list of directories that I needed to eliminate.  Reversing the logic a bit to get the directories I want to retain looked like this:<br />
+[powershell]$env:path -split ';' | where {$_ -and (Test-Path $_  )}[/powershell]<br />
+Looking better, but now I notice that some directories are listed more than once ($PSHOME, for example is listed 6 times).<br />
+Adding a quick uniqueness check:<br />
+[powershell]$env:path -split ';' | where {$_ -and (Test-Path $_  )}| select-object -unique[/powershell]<br />
+That gives a much better list.<br />
+I then added -Join to paste these back together.</p>
+<p>[powershell]($env:path -split ';' | where {$_ -and (Test-Path $_  )}| select-object -unique) -join ';'[/powershell]<br />
+And that looks like a good value for $env:Path.<br />
+If I just needed to set it for the current session, I could do this:<br />
+[powershell]$env:path=($env:path -split ';' | where {$_ -and (Test-Path $_  )}| select-object -unique) -join ';'[/powershell]<br />
+But that isn't particularly useful.  Before I do anything permanent, though, I should save the current PATH somewhere.  We can use the System.Environment class to set environment variables for the machine and copy the existing PATH to a new environment variable.<br />
+[powershell][System.Environment]::SetEnvironmentVariable('Path_SAVED',($env:path),'Machine')[/powershell]<br />
+The final one-liner is this (and it's not pretty):<br />
+[powershell][System.Environment]::SetEnvironmentVariable('Path',($env:path -split ';' | where {$_ -and (Test-Path $_  )}| select-object -unique) -join ';','Machine')[/powershell]</p>
+<p>Ok...that was a fun exercise.  PowerShell continually impresses me with how easy it is do to things.</p>
+<p>Got any good ideas for ways to improve this?  </p>
+<p>Let me know in the comments, and watch for the follow-up article in a couple of days about rewriting this as a real advanced function.</p>
+<p>-Mike</p>
+<p></body></html></p>

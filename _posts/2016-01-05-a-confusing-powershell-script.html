@@ -1,0 +1,39 @@
+---
+layout: post
+title: A confusing PowerShell script
+date: 2016-01-05 04:29:12.000000000 -06:00
+type: post
+parent_id: '0'
+published: true
+password: ''
+status: publish
+categories:
+- Scripts
+tags: []
+meta:
+  _edit_last: '2'
+  _syntaxhighlighter_encoded: '1'
+author:
+  login: mike
+  email: mshepard70@gmail.com
+  display_name: mike
+  first_name: ''
+  last_name: ''
+permalink: "/2016/01/05/a-confusing-powershell-script/"
+---
+<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
+<html><body>
+<p>I recently stumbled upon a bit of code (not important where) that had a line that looked like this:</p>
+<p>[powershell]$Something.SomethingElse -Contains 'Foo'[/powershell]</p>
+<p>When I saw it, I immediately thought "they're using the -Contains operator instead of the -Like operator or the .Contains() method."  This is a common mistake, so my radar picks it up without me even thinking about it.</p>
+<p>I was wrong, however.  The $Something variable was (probably) a list, so the dot-operator got a list of SomethingElse property values from the items in the list.  Then, -Contains made sense.</p>
+<p>I don't think I like the dot-operator being used this way in published code.  I feel like it's less clear than something more explicit like this:<br />
+[powershell]($Something | Select-Object -ExpandProperty SomethingElse) -Contains 'Foo'[/powershell]</p>
+<p>or even (for this specific example at least):</p>
+<p>[powershell] [bool]($Something | Where-Object SomethingElse -eq 'Foo')[/powershell]</p>
+<p>Both of these are a bit longer than the original but I think it's a lot clearer that we're working with a collection of objects with a SomethingElse property and that we're actually looking for an item in the collection, rather than accidentally using the wrong operator.</p>
+<p>There aren't a lot of features of PowerShell that I don't like, but this is one that I don't tend to use.</p>
+<p>What about you?  Do you use the dot this way?</p>
+<p>Let me know what you think in the comments.</p>
+<p>--Mike</p>
+<p></body></html></p>

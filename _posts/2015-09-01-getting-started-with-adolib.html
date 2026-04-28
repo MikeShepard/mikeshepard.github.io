@@ -1,0 +1,61 @@
+---
+layout: post
+title: Getting Started with ADOLib
+date: 2015-09-01 01:49:03.000000000 -05:00
+type: post
+parent_id: '0'
+published: true
+password: ''
+status: publish
+categories:
+- Modules
+- Scripts
+tags:
+- ADO.NET
+- ADOLib
+- SQL
+- SQL Server
+- SQLPSX
+meta:
+  _edit_last: '2'
+  _syntaxhighlighter_encoded: '1'
+author:
+  login: mike
+  email: mshepard70@gmail.com
+  display_name: mike
+  first_name: ''
+  last_name: ''
+permalink: "/2015/09/01/getting-started-with-adolib/"
+---
+<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
+<html><body>
+<p>In the last post, I gave a quick history of my involvement with SQL and SQLPSX.  A big part of that was the ADOLib module in SQLPSX, which I haven't ever really explained here.  Since it has been almost 6 years now, I don't see how I have managed to skip it.</p>
+<p>This post should correct that oversight.</p>
+<p>First of all, SQLPSX is mainly about administering SQL.  ADOLib, on the other hand is specifically geared towards using SQL as a service, executing queries and SQL commands as reasonably possible.</p>
+<p>To that end, here are some examples of ADOLib usage:</p>
+<p>Query a database on the local machine (.) with an windows-authenticated ad-hoc connection.</p>
+<p>[powershell]invoke-query -sql 'select top 1 * from AdventureWorks2012.Person.Person' -server . [/powershell]</p>
+<p>Query a database on the local machine (.) with a windows-authenticated persistent connection</p>
+<p>[powershell]$conn=new-connection -server '.'</p>
+<p>invoke-query -sql 'select top 1 * from AdventureWorks2012.Person.Person' -connection $conn[/powershell]</p>
+<p>Note that we can include the database in the connection as well:</p>
+<p>[powershell]$conn=new-connection -server '.' -database AdventureWorks2012</p>
+<p>invoke-query -sql 'select top 1 * from Person.Person' -connection $conn[/powershell]</p>
+<p>If we need to use SQL Security, we can supply a -User and -Password (in plaintext :-()</p>
+<p>[powershell]$conn=new-connection -server '.' -User MyUser -Password P@ssword[/powershell]</p>
+<p>We can run sql statements that don't return rows (like INSERT, UPDATE, DELETE) with Invoke-SQL:</p>
+<p>[powershell]invoke-sql -sql "Update Person.Person set MiddleName='F' where BusinessEntityID=@ID" -parameters @{ID=1} -connection $conn[/powershell]</p>
+<p>Here I'm also using SQL parameters. It's pretty simple. You just include the parameters prefixed with @ in the SQL statement and then provide a -Parameters hashtable including values for each of the parameters you use. Here I only used a single parameter (ID), so there was only one entry in the hashtable. Invoke-SQL returns the number of rows affected by the SQL statement, by the way.</p>
+<p>There's a cmdlet for executing Stored Procedures called Invoke-StoredProcedure (with parameters that match Invoke-Query):</p>
+<p>[powershell]invoke-storedprocedure -storedProcName sp_who2 -connection $conn[/powershell]</p>
+<p>The final important piece in ADOLib is Invoke-BulkCopy which is used to move lots of data quickly between ADO providers. You will usually be moving data between different servers (because there are lots easier ways to move data on the same server), but in this example we will use the same server as source and destination.<br />
+I've created a copy of the DatabaseLog table in AdventureWorks2012 and called it DatabaseLog2. Databaselog2 is empty, but we can use the following commands to copy the data.</p>
+<p>[powershell]$cmd=new-sqlcommand -connection $conn -sql 'Select * from DatabaseLog'<br />
+invoke-bulkcopy -records $cmd -server '.' -table DatabaseLog2[/powershell]</p>
+<p>Here you can see that I am creating a command object with the source query but not executing it. I pass it into Invoke-BulkCopy so the .NET SQLBulkCopy class can take care of handling the rows. I also have to provide new connection information to the cmdlet. I'm not sure why I didn't allow you to pass an established connection in, but I've created an issue so I can follow up on that.</p>
+<p>There is more in ADOLib (including transaction support and output parameters), but I'll let you look inside and see them.</p>
+<p>Next time I'll show how these same kinds of things can be accomplished using the new POSH_Ado module.</p>
+<p>Let me know what you think in the comments</p>
+<p>-Mike</p>
+<p>P.S.  ADOLib can be found <a href="https://github.com/MikeShepard/SQLPSX/tree/master/Modules/adoLib">here</a></p>
+<p></body></html></p>

@@ -1,0 +1,75 @@
+---
+layout: post
+title: Introducing VisioBot3000 - Part 1 (Clark Kent)
+date: 2016-04-28 20:21:44.000000000 -05:00
+type: post
+parent_id: '0'
+published: true
+password: ''
+status: publish
+categories:
+- Scripts
+tags:
+- VisioBot3000
+meta:
+  _edit_last: '2'
+  _syntaxhighlighter_encoded: '1'
+  _yoast_wpseo_content_score: '30'
+  _yoast_wpseo_primary_category: ''
+author:
+  login: mike
+  email: mshepard70@gmail.com
+  display_name: mike
+  first_name: ''
+  last_name: ''
+permalink: "/2016/04/28/introducing-visiobot3000-part-1-clark-kent/"
+---
+<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
+<html><body><br />
+<a href="https://powershellstation.com/tag/visio/" target="_blank">For a while now</a>, I've been demonstrating Visio automation in PowerShell. For the most part, the posts have included a bunch of short code snippets designed to illustrate simple concepts.</p>
+<p>Unfortunately, the code has been filled with "magic" constants, and lots of method calls on the various Visio COM objects. Both of those make code hard to read and write, the exact opposite of what you want as a PowerShell scripter. What's the solution? PowerShell makes it easy to wrap complex code in cmdlets (or advanced functions, if you prefer) and expose a much simpler interface.</p>
+<h2>Background</h2>
+<p>When I started looking at driving Visio from PowerShell, I ran across the <a href="https://github.com/saveenr/VisioAutomation">VisioAutomation</a> project (originally <a href="https://visioautomation.codeplex.com/">here</a>) by Saveen Reddy.  Contained in that project (which is much broader in scope than my interests) was a module called VisioPS that exposed several Visio concepts as PowerShell cmdlets.  I played with it some, and it worked.  That was exciting.  A major downside for me was that the module was a binary module, which meant writing cmdlets in C#.  That's a great approach for the project, which is geared towards .NET languages in general, but it limits the attractiveness for PowerShell developers (or at least for me).   I ended up re-writing parts of the module in PowerShell and decided eventually to write my own module.  There are probably some naming artifacts left over from its origin as a "re-implementation" of VisioPS.  I wanted to make sure to give credit for getting me started down this road.</p>
+<h2>What is VisioBot3000?</h2>
+<p>To start with, VisioBot3000 implements cmdlets to help you draw Visio diagrams using the things that I've introduced over the last several posts:</p>
+<ul>
+<li>Documents</li>
+<li>Pages</li>
+<li>Stencils</li>
+<li>Masters</li>
+<li>Shapes</li>
+<li>Containers</li>
+<li>Connectors</li>
+</ul>
+<p>It also has some support (barely) for Layers.</p>
+<p>Here's a simple (annotated) example of using VisioBot3000.  It uses a custom stencil that I have on my system (and a stock stencil that I copied to c:\temp), but that's not terribly important:</p>
+<p>[powershell]<br />
+Import-Module VisioBot3000 -Force</p>
+<p>#start Visio and create a new document<br />
+New-VisioApplication<br />
+New-VisioDocument C:\temp\TestVisioPrimitives.vsdx </p>
+<p>#tell Visio what Stencils I want to use and give them "nicknames"<br />
+Register-VisioStencil -Name Containers -Path C:\temp\MyContainers.vssx<br />
+Register-VisioStencil -Name Servers -Path C:\temp\SERVER_U.vssx</p>
+<p>#pick a master from one of those stencils and give it a nickname<br />
+Register-VisioShape -Name WebServer -From Servers -MasterName 'Web Server'<br />
+Register-VisioShape -Name DBServer -From Servers -MasterName 'Database Server'</p>
+<p>#pick another master (this time a container) and give it a nickname<br />
+#note that this is a different cmdlet<br />
+Register-VisioContainer -Name Domain -From Containers -MasterName 'Domain'</p>
+<p>#draw a container with two items in it<br />
+New-VisioContainer -shape (get-visioshape Domain) -name MyDomain -contents {<br />
+   New-VisioShape -master WebServer -name PrimaryServer -x 5 -y 5<br />
+   New-VisioShape -master DBServer -Name SQL01 -x 5 -y 7<br />
+}</p>
+<p>#add a connector<br />
+New-VisioConnector -from PrimaryServer -to SQL01 -name SQL -color Red -Arrow<br />
+[/powershell]</p>
+<p>That probably seems like a lot of code, but it's a lot less than you'd have to write to draw the diagram. A lot of it is boilerplate code that you'd probably factor out into a "standard diagram stencils and masters script". And look....the only "magic numbers" in the code are the x/y positions. Not super bad, in my opinion.</p>
+<p>Here's the output:<br />
+<a href="https://powershellstation.com/wp-content/uploads/2016/04/VisioBotPrimitives1.png"><img class="alignnone size-medium wp-image-979" src="{{site.baseurl}}/assets/2016/04/VisioBotPrimitives1-210x300.png" alt="VisioBotPrimitives1" width="210" height="300"></a></p>
+<p>This code is a huge (yuge?) improvement over writing code against the bare COM objects. But it's not even close to the best part of VisioBot3000.</p>
+<p>Did you notice that the title said "Clark Kent"? Stay tuned until next time when VisioBot3000 takes of its glasses, so to speak, and the power is really revealed.</p>
+<p>As usual, let me know what you think in the comments (or on Reddit, or Google+, or Twitter)</p>
+<p>--Mike</p>
+<p>P.S. VisioBot3000 lives on github <a href="https://github.com/MikeShepard/VisioBot3000">here</a>.</body></html></p>

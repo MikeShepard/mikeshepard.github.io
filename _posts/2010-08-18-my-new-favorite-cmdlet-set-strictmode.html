@@ -1,0 +1,81 @@
+---
+layout: post
+title: 'My new favorite cmdlet: set-strictmode'
+date: 2010-08-18 14:42:50.000000000 -05:00
+type: post
+parent_id: '0'
+published: true
+password: ''
+status: publish
+categories: []
+tags: []
+meta:
+  _edit_last: '2'
+  _wp_old_slug: ''
+  _syntaxhighlighter_encoded: '1'
+author:
+  login: mike
+  email: mshepard70@gmail.com
+  display_name: mike
+  first_name: ''
+  last_name: ''
+permalink: "/2010/08/18/my-new-favorite-cmdlet-set-strictmode/"
+---
+<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
+<html><body></p>
+<p>If you’ve ever written Visual Basic or VB.Net code, you’re aware that it’s highly recommended that you use “Option Strict” in all of your code.  Similarly, Perl scripters have a “use strict” that comes highly suggested.</p>
+<p>The idea of these options is that there’s quite a bit of flexibility built into these languages, and sometimes that flexibility backfires on you.  Using these options actually limits the flexibility of the languages in question in ways that help coders to keep from making certain types of mistakes in their code.  Writing code professionally in VB.Net (you may scoff, but it happens quite a lot) or Perl (it’s not my language of choice, but again, there’s a lot out there) without using these options is not a good idea at all.</p>
+<p>I’ve been writing code in PowerShell for about 2 years, and have probably written about 10,000 lines, mostly code that’s used on a daily basis.  I’ve read several PowerShell books, online tutorials, and watched several webcasts.  I may have not been paying attention, but I’ve completely missed any emphasis on the analogous option in PowerShell, “set-strictmode”.  One of my co-workers asked if there was something like this in PowerShell, and I found it almost instantly.  Google, and the PowerShell help file both explain how the cmdlet works.  He and I started using it, and to our dismay, found dozens of errors in code that we had been trusting, in some case, for over a year.</p>
+<p>First of all, let me explain that I’m not complaining that there’s not any information about how set-strictmode works in the “ecology” of the PowerShell community.  I’m confident that each book and tutorial explains how this cmdlet works.  What I’m concerned about is how I could have read as much as I have from as many people are talking about PowerShell without hearing anyone (or everyone) shouting at the top of their collective voices, “Add this to your profile…it will save you countless hours and tears in the long run”.  Hopefully, I’ve just missed it, and everyone has been saying this all along.  In case this has not been the case, let me say:</p>
+<p><span style="font-size: x-large">Add set-strictmode to your profile.</span></p>
+<p><span style="font-size: x-large">It will save you countless hours and tears in the long run.</span></p>
+<p>So….how do I use set-strictmode, and what does it help with?  First, to turn on “strict mode” you need to decide which version of strictmode you want.  The options are:</p>
+<table border="1" cellspacing="0" cellpadding="2" width="565">
+<tbody>
+<tr>
+<td valign="top" width="200">Version</td>
+<td valign="top" width="363">Effect</td>
+</tr>
+<tr>
+<td valign="top" width="200">1.0</td>
+<td valign="top" width="363">References to uninitialized variables(except in a string) are errors</td>
+</tr>
+<tr>
+<td valign="top" width="200">2.0</td>
+<td valign="top" width="363">
+<ul>
+<li>References to uninitialized variables(including in a string) are errors </li>
+<li>References to undefined properties are errors </li>
+<li>Calling a function using method-call syntax is an error </li>
+<li>${} (an un-named variable) is a syntax error </li>
+</ul>
+</td>
+</tr>
+<tr>
+<td valign="top" width="200">Latest</td>
+<td valign="top" width="363">Uses the most strict mode available for this version of PowerShell.  (Currently the same as 2.0)</td>
+</tr>
+</tbody>
+</table>
+<p>I would advise that you use “set-strictmode –version Latest” in your profile.</p>
+<p>Let’s look at the different restrictions.  First, if you’ve written any PowerShell scripts, you’re aware that you don’t have to declare your variables.  That’s a “good thing”, and strictmode 1.0 doesn’t change that in any way.  What it does do is make sure that you’re not retrieving values from variables you haven’t assigned anything to.  Here’s some sample code that strictmode will choke on.</p>
+<p>  [powershell]$servername=read-host -prompt &amp;quot;Enter name of server&amp;quot;<br />
+$wmi=get-wmiobject -class Win32_Service -computername $server_name[/powershell]</p>
+<p>This is a pretty simple example, but it’s almost certain that sooner or later you’ll typo a variable name in a script.  Strictmode will help keep you from getting in this kind of trouble.  With strictmode Version 1.0, you won’t be warned about using uninitialized variables in double-quoted string, e.g. “Server=$server_name”…(they’ll be replaced with $null).  Version 2.0 will cause references to uninitialized variablesinside strings to be an error as well.</p>
+<p>Here’s an example of code that illustrates property restrictions in StrictMode 2.0.</p>
+<p>[powershell]$servername=&amp;quot;Server123&amp;quot;<br />
+$length=$servername.lenght[/powershell]</p>
+<p>I would write up an example of using the method-call syntax for a function, but Thomas Lee just <a href="http://tfl09.blogspot.com/2010/09/calling-functions-in-powershell.html">blogged about this</a> in his blog <a href="http://tfl09.blogspot.com/">Under the Stairs</a>.</p>
+<p>The final “restriction” in strict mode 2.0 says that you can’t have a variable with no name.  The syntax ${varname} is a way of expressing $varname, when varname contains characters that are not generally allowed in variable names.  I haven’t ever had a really convincing use for this syntax (I’ve thought about using it to associate variables with filenames using the full path as the variable name, but it seems like a dictionary would be cleaner).</p>
+<p>I should note that <a href="http://leeholmes.com/blog/">Lee Holmes</a> has done a great thing in his recently published <a href="http://www.leeholmes.com/blog/PowerShellCookbookV2NowAvailable.aspx">PowerShell Cookbook V2</a>.  Each script in the cookbook starts with “set-strictmode –version Latest”.   In my opinion, this is a best practice.</p>
+<p>If you’re just now hearing about set-strictmode for the first time, and already have a body of powershell scripts in your toolbox (I’m in this category), I’d recommend the following steps:</p>
+<ol>
+<li>Add set-strictmode –version Latest to the profile on the machine you do your script development on</li>
+<li>Add set-strictmode –version Latest  to any scripts you create from this time forward</li>
+<li>Add set-strictmode –version Latest to scripts that you have tested to make sure they comply with strictmode.</li>
+</ol>
+<p>I’m going to avoid turning on strictmode on servers that I’m running PowerShell on for now, because I’m sure stuff will break.  I’m slowly refurbishing scripts as I run them on my development box and see the strictmode errors pop up, and since set-strictmode is a scoped change (if you set it in a script or function, it reverts to the old setting when you exit the script or function), I can take advantage of it in a script-by-script basis.</p>
+<p>If you are just starting to build a PowerShell script library, I would recommend turning strictmode on in the profile on every machine that you run PowerShell scripts.  You’ll be glad you did.</p>
+<p>Hopefully this was not too much of a rant.  Please let me know what experiences you’ve had with with set-strictmode.</p>
+<p>Mike</p>
+<p></body></html></p>

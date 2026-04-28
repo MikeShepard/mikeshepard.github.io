@@ -1,0 +1,98 @@
+---
+layout: post
+title: Dude, Where's my Command?
+date: 2020-09-01 19:53:52.000000000 -05:00
+type: post
+parent_id: '0'
+published: true
+password: ''
+status: publish
+categories:
+- Scripts
+tags: []
+meta:
+  _edit_last: '2'
+  _syntaxhighlighter_encoded: '1'
+  _yoast_wpseo_content_score: '90'
+  _yoast_wpseo_estimated-reading-time-minutes: ''
+author:
+  login: mike
+  email: mshepard70@gmail.com
+  display_name: mike
+  first_name: ''
+  last_name: ''
+permalink: "/2020/09/01/dude-wheres-my-command/"
+---
+<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
+<html><body></p>
+<h1>The Dilemma</h1>
+<p>This post was inspired by a recent occurrence at work.  I have built a framework which constructs documents based on a lists of functions in a module specific to that kind of document.</p>
+<p>I found myself running into an issue where even though I knew there was a command named a certain thing, and that the function was correctly exported from the module, PowerShell wasn't finding the command.</p>
+<p>My code looked something like this:</p>
+<p>[powershell]<br />
+$module='Module1'<br />
+$Steps='Get-CustomerData','Get-MarketingData','New-CustomerMarketingDocument'<br />
+# each function takes a hashtable as a parameter and outputs a hashtable<br />
+$state=@{}<br />
+foreach($Step in $Steps){<br />
+    $stepCmd=Get-Command -Name $step -module $module<br />
+    $state=&amp;amp; $StepCmd -state @State<br />
+}<br />
+[/powershell]</p>
+<p>So why was PowerShell not working nicely for me? The problems has to do with how PowerShell loads functions. Let's take a step back</p>
+<h1>PowerShell's Command-Loading Procedure</h1>
+<p>For now, let's assume we have a simple script module called Module1.</p>
+<p>For a script module to be "discoverable" by PowerShell, it must exist in one of the folders listed in the <strong>PSModulePath</strong> environment variable.</p>
+<p>This PowerShell will show you the folders that PowwerShell will look in:</p>
+<p>[powershell]$env:PSModulePath.Split(';')[/powershell]</p>
+<p>Here are the results from a PowerShell 7 instance:<br />
+<img class="alignnone wp-image-1446 size-full" src="{{site.baseurl}}/assets/2020/09/PSModulePath.png" alt="" width="831" height="262"></p>
+<p>When you try to run a command (or use <strong>Get-Command</strong>), PowerShell will first look to see if the command is already loaded. IF so, then it just runs (or outputs) the command you asked for.</p>
+<p>If it isn't already present, PowerShell looks through valid modules for the function. As a reminder, valid modules:</p>
+<ul>
+<li>Exist in one of the folders in <strong>PSModulePath</strong>
+</li>
+<li>Have a "module file" named the same as the folder it's in (for instance, module1\module1.psm1)</li>
+<li>Module Files extensions are psm1, psd1, dll, or cdxml.</li>
+<li>File is syntactically valid and not blocked</li>
+</ul>
+<p>If the command is present, and exported (via <strong>Export-ModuleMember</strong> and <strong>Functions/CmdletsToExport</strong> in the manifest), then the module will be loaded silently and the command (now present) will be executed or output.</p>
+<p>Pretty simple, right?</p>
+<p>In my case, I had a valid module, in a valid folder, in the <strong>PSModulePath</strong>, with the named function exported from it.  What could have gone wrong?</p>
+<h2>PowerShell Command Hiding</h2>
+<p>The problem was that I had gotten used to naming functions somewhat generically, and had duplicated one.</p>
+<p>I had two modules which contained a function called <strong>Get-DocumentData.  </strong>The command discovery procedure worked fine, it just found the wrong command.</p>
+<p>Let's see an example of what I'm talking about.</p>
+<p>Consider two modules, module1 and module2.</p>
+<p>Module1 has a single command, <strong>Get-Stuff</strong></p>
+<p>[powershell]<br />
+function Get-Stuff{<br />
+    'in module1'<br />
+}<br />
+[/powershell]</p>
+<p>Similarly, Module2 has a <strong>Get-Stuff</strong> command which outputs 'in module2'.</p>
+<p>If I were to open a new PowerShell session and type <strong>Get-Stuff</strong>, PowerShell would find module1's copy of Get-Stuff first and load it (that is, module1).</p>
+<p>If that were the only<strong> Get-Stuff</strong>, the story would be over.</p>
+<p>In this case, I have two different modules with Get-Stuff functions.</p>
+<p>To get to the second, I can import the module explicitly:</p>
+<p>[powershell]Import-Module module2[/powershell]</p>
+<p>You can verify the output below:<br />
+<img class="alignnone size-full wp-image-1450" src="{{site.baseurl}}/assets/2020/09/twomodules.png" alt="" width="375" height="129"></p>
+<p>Now, we've imported both modules and executed both functions. What does Get-Command tell us?<br />
+<img class="alignnone size-full wp-image-1451" src="{{site.baseurl}}/assets/2020/09/get-command1.png" alt="" width="792" height="113"><br />
+First, it only shows us the command from module2, that is, the most recently loaded.</p>
+<p>If we ask for the command from module1, we won't find it:<br />
+<img class="alignnone size-full wp-image-1452" src="{{site.baseurl}}/assets/2020/09/get-command2.png" alt="" width="1048" height="178"></p>
+<p>You might notice that the error is misleading.  There sure is a <strong>Get-Stuff</strong> command available, just not from module1 (or at least not available from module1).</p>
+<p>But if we ask for "all" Get-Stuff commands, there it is:<br />
+<img class="alignnone size-full wp-image-1453" src="{{site.baseurl}}/assets/2020/09/get-command3.png" alt="" width="791" height="144"></p>
+<p>So, why didn't <strong>Get-Command</strong> show it?</p>
+<p>The answer (which you can read in more detail <a href="https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_command_precedence?view=powershell-5.1" target="_blank" rel="noopener noreferrer">here</a>) is that the module1 version of the command has been hidden, and <strong>Get-Command</strong> (without <strong>-All</strong>) shows commands that aren't hidden.</p>
+<p>Adding <strong>-All</strong> to our earlier search for the command works like we had expected:<br />
+<img class="alignnone size-full wp-image-1454" src="{{site.baseurl}}/assets/2020/09/get-command4.png" alt="" width="789" height="122"></p>
+<p>Note that there's another way to get a module-specific command, and that's by using a fully-qualified command reference like <strong>module1\get-stuff</strong>:<br />
+<img class="alignnone size-full wp-image-1456" src="{{site.baseurl}}/assets/2020/09/fullyqualified.png" alt="" width="355" height="45"></p>
+<p>I beat my head against this one for quite a while.  I was even considering writing a blog post about it when I read the about_command_precedence help topic (for research) and figured out the "issue".</p>
+<p> </p>
+<p>Thanks for reading,</p>
+<p>Mike</body></html></p>

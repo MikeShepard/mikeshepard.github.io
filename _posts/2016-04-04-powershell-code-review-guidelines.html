@@ -1,0 +1,86 @@
+---
+layout: post
+title: PowerShell Code Review Guidelines
+date: 2016-04-04 02:10:06.000000000 -05:00
+type: post
+parent_id: '0'
+published: true
+password: ''
+status: publish
+categories:
+- Code Smells
+- Discussion
+- Error Handling
+tags:
+- Code Review
+- Document
+- Visio
+meta:
+  _edit_last: '2'
+author:
+  login: mike
+  email: mshepard70@gmail.com
+  display_name: mike
+  first_name: ''
+  last_name: ''
+permalink: "/2016/04/04/powershell-code-review-guidelines/"
+---
+<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
+<html><body></p>
+<p>I get asked to look at other people's PowerShell code a lot at work, and I really enjoy it.  I also find myself looking at my "old" code from several years ago (back to 2007!) and think...there's a lot of work to be done.</p>
+<p>To that end, I've compiled a list of "PowerShell code review guidelines" to help keep the ideas flowing.</p>
+<p>Before I show them, though, I have some ground rules to share.  BTW...I use function, script, and code somewhat interchangably, so please don't get confused by that.</p>
+<ol>
+<li>The most important thing is whether the script solves the problem at hand.  In my book, if it does that, the rest is extra.</li>
+<li>Remember that everyone is at a different place in the "path to true PowerShell enlightenment".  Don't beat people over the head because they're not using DSC, or Remoting, or Workflows, or whatever your favorite thing is.  That doesn't mean you don't mention those options, but the focus should be on the code in front of you.</li>
+<li>You can't and shouldn't try to solve all of the problems at once.  This goes right along with #2 above.  If the script is full of Write-Host output, and uses Read-Host in loops to validate parameters, you probably should deal with those and not worry so much that they haven't used a lot of pipelines.</li>
+</ol>
+<p>In my mind, a code review is an opportunity to help a scripter use best practices more consistently.  It is an opportunity to help them write more flexible, more maintainable, and more reliable code.</p>
+<p>Most importantly, it's not a humiliation session in how much better you are at PowerShell.  If you use them in this way, don't be surprised if you don't get a lot of return customers.</p>
+<h3>General</h3>
+<ol>
+<li>Does the function or script accomplish the intended task?</li>
+<li>Is there any comment-based help including examples?</li>
+<li>Is the function or script “advanced” using [CmdletBinding()]?</li>
+<li>Are risk mitigation parameters supported if appropriate?</li>
+<li>Does the code use aliases for cmdlets?</li>
+<li>Does the script or function follow the Verb-Noun Convention?</li>
+<li>Is the verb in the approved list?</li>
+<li>Is it the correct verb?</li>
+<li>Are the noun(s) consistent?</li>
+<li>Is the function or script in a module with a discoverable name?</li>
+<h3>Parameters</h3>
+<li>Do the Parameters have specified types?</li>
+<li>Are the parameters named appropriately?</li>
+<li>Are parameters set as mandatory when appropriate?</li>
+<li>Is any declarative parameter validation used?</li>
+<li>Are arrays allowed when appropriate?</li>
+<li>Is pipeline input allowed and implemented properly?</li>
+<li>Are switch parameters used to flag options?</li>
+<li>Do parameters have appropriate default values?</li>
+<li>Are “use cases” divided into ParameterSets?</li>
+<li>Are named parameters used instead of positional parameters?</li>
+<h3>Output</h3>
+<li>Is the output in the form of objects?</li>
+<li>Is output produced in the PROCESS block if possible?</li>
+<li>Are format cmdlets used?</li>
+<li>Is write-verbose used to supply user-directed output messages?</li>
+<li>Is write-warning or write-error used for problem messages?</li>
+<li>Is write-debug used for developer-directed output messages?</li>
+<h3>Flow</h3>
+<li>Are filtering operations as far to the left in pipelines as possible?</li>
+<li>Are pipelines used appropriately in place of sequential logic?</li>
+<li>Are pipelines overly used (extremely long pipelines?)</li>
+<h3>Comments</h3>
+<li>Are comments used to explain logic (and not statements)?</li>
+<li>Is commented-out code present?</li>
+<h3>Error Handling</h3>
+<li>Are try/catch/finally used for terminating errors?</li>
+<li>Are errors signaled with write-error?</li>
+<li>Are terminating errors forced with –ErrorAction STOP?</li>
+<li>Are console apps checked using $LastExitCode</li>
+<li>Do write-error calls use the -TargetObject parameter?</li>
+</ol>
+<p>Let me know what you think.</p>
+<p>Should have it posted to github for revisions tomorrow sometime.</p>
+<p>--Mike</body></html></p>

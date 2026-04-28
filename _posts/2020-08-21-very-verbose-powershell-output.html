@@ -1,0 +1,49 @@
+---
+layout: post
+title: Very Verbose PowerShell Output
+date: 2020-08-21 06:50:46.000000000 -05:00
+type: post
+parent_id: '0'
+published: true
+password: ''
+status: publish
+categories:
+- Scripts
+tags: []
+meta:
+  _edit_last: '2'
+  _yoast_wpseo_content_score: '60'
+  _syntaxhighlighter_encoded: '1'
+  _yoast_wpseo_focuskw: Verbose PowerShell output
+  _yoast_wpseo_metadesc: See how to force verbose powershell output with a simple
+    trick.
+  _yoast_wpseo_linkdex: '50'
+author:
+  login: mike
+  email: mshepard70@gmail.com
+  display_name: mike
+  first_name: ''
+  last_name: ''
+permalink: "/2020/08/21/very-verbose-powershell-output/"
+---
+<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
+<html><body>
+<p>Have you ever been writing a PowerShell script and wanted verbose output to show up no matter what?</p>
+<p>You may have thought of doing something like this:<br />
+[powershell]<br />
+#Save the preference variable so you can put it back later<br />
+$saveVerbosePreference=$VerbosePreference</p>
+<p>#Override the preference variable to make the output show up<br />
+$VerbosePreference='Continue'<br />
+Write-Verbose 'This is an important message you need to see'</p>
+<p>#Leave it like you found it<br />
+$VerbosePreference=$saveVerbosePreference<br />
+[/powershell] </p>
+<p>If you do that, you'll get the verbose message every time, just like you wanted.</p>
+<p>Fortunately for you, there's a much easier way to get the message:<br />
+[powershell]<br />
+#By adding the -Verbose switch, you override the preference for this cmdlet<br />
+Write-Verbose 'This is an important message you need to see' -Verbose<br />
+[/powershell]</p>
+<p>Wasn't that easy?</p>
+<p></body></html></p>

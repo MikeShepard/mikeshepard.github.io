@@ -1,0 +1,83 @@
+---
+layout: post
+title: PowerShell Splatting Tricks
+date: 2013-03-26 21:50:20.000000000 -05:00
+type: post
+parent_id: '0'
+published: true
+password: ''
+status: publish
+categories:
+- Scripts
+tags: []
+meta:
+  _edit_last: '2'
+  _syntaxhighlighter_encoded: '1'
+author:
+  login: mike
+  email: mshepard70@gmail.com
+  display_name: mike
+  first_name: ''
+  last_name: ''
+permalink: "/2013/03/26/powershell-splatting-tricks/"
+---
+<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
+<html><body></p>
+<p>If you've never heard of splatting in PowerShell or possibly read about it but never used it, you should probably consider it.  Briefly, splatting is the ability to package up parameters into a hashtable and use the hashtable to supply the parameters to a function call. The parameters which are passed into a function automatically populate a hashtable called <code>$PSBoundParameters</code>. Note that to "splat" a hashtable you use an <code>@</code> in place of the normal <code>$</code>. So to pass <code>$PSBoundParameters</code>, you'd use <code>@PSBoundParameters</code>. If this isn't making sense, please refer to the code example below.</p>
+<p>Why would you want to do this? I can think of a couple of instances where the functionality is very useful.</p>
+<p>First, consider a function which calls several other, related functions. If the parameters for the "inner" are the same (or similar), splatting can make the resulting function calls very easy.</p>
+<p>For example, assume we have a functions which start and stop a "widget" (with some options, of course). In order write a restart-widget function, we can simply pass the $PSBoundParameters hashtable on to the start/stop functions.<br />
+The code could look something like this:<br />
+[powershell]function start-item{<br />
+param([switch]$option1,<br />
+      [switch]$option2,<br />
+      [switch]$option3)<br />
+      #start the item using the provided options<br />
+}<br />
+function stop-item{<br />
+param([switch]$option1,<br />
+      [switch]$option2,<br />
+      [switch]$option3)<br />
+      #Stop the item using the provided options<br />
+}<br />
+function restart-item{<br />
+param([switch]$option1,<br />
+      [switch]$option2,<br />
+      [switch]$option3)<br />
+      #restart the item using the provided options<br />
+      #note, the hashtable with parameters passed to this function is called $PSBoundParameters<br />
+      stop-item @PSBoundParameters<br />
+      start-item @PSBoundParameters<br />
+}<br />
+}[/powershell]<br />
+Note that with 3 switch parameters, you'd have to write 8 different if/then branches to pass the appropriate switches to these functions without using splatting.</p>
+<p>Another example of splatting is when writing a proxy function, you will often be adding or removing parameters from a given function and you will need to adjust the hashtable accordingly before passing it into the "wrapped" function.</p>
+<p>The first several times I used splatting, I was simply passing <code>$PSBoundParameters</code> to a subordinate function. In many cases, though, you'll be constructing your own hashtable or modifying <code>$PSBoundParameters</code> in order to supply parameters to another function.</p>
+<p>A couple of corner-cases which I haven't ever seen discussed are:</p>
+<ol>
+<li>How are switch parameters handled in a hashtable since there isn't really a value?</li>
+<li>Can I mix splatting with normal parameter passing</li>
+</ol>
+<p>To answer these questions, we'll write a simple function (all best-practices are out the window) and try it out.<br />
+[powershell]function show-splat{<br />
+param($name,[switch]$hello)<br />
+  $PSBoundParameters | out-string<br />
+  if($hello){<br />
+    write-host &amp;quot;Hello!&amp;quot;<br />
+  }<br />
+  write-host $name<br />
+}[/powershell]<br />
+Calling it as such gives us the answers:<br />
+<code><br />
+PS C:\&gt; $parms=@{hello=$true}<br />
+PS C:\&gt; show-splat -name Mike @parms<br />
+Key Value<br />
+--- -----<br />
+name Mike<br />
+hello True<br />
+</code></p>
+<p>Hello!<br />
+Mike</p>
+<p>We see clearly that the switch (<code>$hello</code>) is simply passed as a boolean value, and we were able to mix a named parameter (<code>-name</code>) with splatting.  Mixing the two could be useful if you had a lengthy command-line and wanted to specify options for it using splatting or if you only wanted to pass a selection of parameters on to another function.</p>
+<p> </p>
+<p>Anyway, splatting is a powerful technique which can easily simplify your functions.  Let me know if you have situations where it seems appropriate.</body></html></p>

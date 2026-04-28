@@ -1,0 +1,65 @@
+---
+layout: post
+title: WPFBot3000 - Approaching 1.0
+date: 2018-07-31 23:23:39.000000000 -05:00
+type: post
+parent_id: '0'
+published: true
+password: ''
+status: publish
+categories:
+- Announcement
+- WPF
+tags:
+- WPFBot3000
+meta:
+  _edit_last: '2'
+  _yoast_wpseo_content_score: '90'
+  _yoast_wpseo_primary_category: '117'
+  _syntaxhighlighter_encoded: '1'
+  _yoast_wpseo_focuskw_text_input: WPFBot3000
+  _yoast_wpseo_focuskw: WPFBot3000
+  _yoast_wpseo_linkdex: '73'
+author:
+  login: mike
+  email: mshepard70@gmail.com
+  display_name: mike
+  first_name: ''
+  last_name: ''
+permalink: "/2018/07/31/wpfbot3000-approaching-1-0/"
+---
+<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
+<html><body></p>
+<p>I just pushed version 0.9.18 of WPFBot3000 to the PowerShell Gallery and would love to get feedback. I've been poking and prodding, refactoring and shuffling for the last month or so.</p>
+<p>In that time I've added the following:</p>
+<ul>
+<li>Attached Properties (like Grid.Row or Dockpanel.Top)</li>
+<li>DockPanels</li>
+<li>A separate "DataEntryGrid" to help with complex layout</li>
+<li>A ton of other controls (DataGrid and ListView are examples)</li>
+<li>A really exciting BYOC (bring your own controls) set of functions</li>
+</ul>
+<p>Mostly, though, I've tried to focus on one thing: reducing the code needed to build a UI.</p>
+<p>To that end, here are a few more additions:</p>
+<ul>
+<li>Variables for all named controls (no more need to GetControlByName()</li>
+<li>-ShowForValue switch on Window which makes it work similarly to Dialog</li>
+</ul>
+<p>In case you haven't looked at this before, here's the easy demo:</p>
+<p>[powershell]<br />
+$output=Dialog {<br />
+    TextBox FirstName<br />
+    TextBox LastName<br />
+    Calendar Birthdate<br />
+}<br />
+'{0} {1} was born on {2}' -f $output.FirstName,$output.LastName,$output.Birthdate<br />
+[/powershell]</p>
+<p><img class="alignnone wp-image-1368 size-full" src="{{site.baseurl}}/assets/2018/07/wpfbot3000-dataentry.png" alt="" width="256" height="282"></p>
+<p><img class="alignnone wp-image-1369 size-full" src="{{site.baseurl}}/assets/2018/07/wpfbot3000-dataentry-output.png" alt="" width="608" height="102"></p>
+<p>There are tons of features to talk about, and I'll be following up with a series of posts illustrating them.</p>
+<p>In the meantime, use <strong>Install-Module WPFBot3000</strong> (or <strong>Update-Module WPFBot3000</strong>) and let me know what you think.</p>
+<p>Are there things that are missing?</p>
+<p>Are there things that are broken?</p>
+<p>Is something difficult to do that shouldn't be?</p>
+<p>Feel free to enter issues in the <a href="https://github.com/MikeShepard/WPFBot3000">github repo</a> or let me know through twitter, email, Reddit, etc.</p>
+<p>-Mike</body></html></p>

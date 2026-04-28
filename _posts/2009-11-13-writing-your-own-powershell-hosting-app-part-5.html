@@ -1,0 +1,116 @@
+---
+layout: post
+title: Writing your own PowerShell Hosting App (part 5)
+date: 2009-11-13 23:11:55.000000000 -06:00
+type: post
+parent_id: '0'
+published: true
+password: ''
+status: publish
+categories:
+- Writing a Host
+tags:
+- PowerShell
+- VB.NET
+meta:
+  _edit_last: '2'
+  ratings_users: '0'
+  ratings_score: '0'
+  ratings_average: '0'
+  _syntaxhighlighter_encoded: '1'
+author:
+  login: mike
+  email: mshepard70@gmail.com
+  display_name: mike
+  first_name: ''
+  last_name: ''
+permalink: "/2009/11/13/writing-your-own-powershell-hosting-app-part-5/"
+---
+<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
+<html><body></p>
+<p>In the last post, we got to the point that we were actually using the new host objects that we implemented, but we still hadn't provided anything more than trivial implementations (throwing an exception) for the methods that make a custom host useful, e.g. the write-* functions.</p>
+<p>Before we do that, we need to discuss interaction between PowerShell (the engine) and windows forms (though we would have had the same issue with WPF).  In PowerShell 1.0, the engine creates its own thread to run the Invoke() method, and doesn't provide a way to change that thread's apartment model, which is MTA.  The reason that is important is that to interact safely with Windows Forms (or WPF), you need to be in the same thread.  The bottom line is that when using the 1.0 object interface, you can't directly interact with the window environment.  Which means that any hopes you had of writing some simple code to append text to the textbox in the WriteHost method are going to be dashed.  Unless, of course, you use the 2.0 object model.  The designers realized the shortcoming, and in 2.o they allow you to change the child thread to STA.</p>
+<p>So now we have a couple of choices.  As I mentioned in <a title="Part 3" href="https://powershellstation.com/2009/10/27/writing-your-own-powershell-hosting-app-part-3/">part 3</a>, I was purposely using the 1.0 object model, since 2.0 wasn't final, and the 1.0 methods would work fine in a 2.0 install.   One thing we could easily do is switch the code to 2.0, set the threading model to STA, and go on our merry way.  Another approach would be to have the Host objects interact with the user interface <em>indirectly</em>.  One way to do that would be to simply have the host methods package their arguments into an object, and add the object into a queue that is consumed in a timer event handler on the form.  This works quite nicely, and provides an easy separation between the host and the interface.</p>
+<p>For now, though, for the sake of simplicity (and to keep the code from getting longer than anyone would care to read), we'll just use the 2.0 object model.  As I mentioned in part 4, I plan to create a project on Codeplex for a more complete host than I can really create in a tutorial.  It will include code to keep the host and interface separate (which I think I like better).</p>
+<p>Here is the revised code in the form to use the 2.0 model (I've moved some of the declarations out of the Click method because the objects don't need to be recreated each time):<br />
+[vbnet]Public Partial Class MainForm</p>
+<p>public shared PowerShellOutput as textbox<br />
+private host as new PowerShellWorkBenchHost<br />
+private r As Runspace=RunspaceFactory.CreateRunspace(host)<br />
+	Public Sub New()<br />
+		' The Me.InitializeComponent call is required for Windows Forms designer support.<br />
+		Me.InitializeComponent()</p>
+<p>		PowerShellOutput=txtOutput<br />
+       	r.ThreadOptions=PSThreadOptions.UseCurrentThread<br />
+        r.Open()<br />
+     End Sub</p>
+<p>    Sub RunToolStripMenuItem1Click(sender As Object, e As EventArgs)</p>
+<p> 		dim ps As powershell=PowerShell.Create()<br />
+        ps.Runspace=r<br />
+        ps.AddScript(txtScript.Text)<br />
+        ps.AddCommand("out-default")<br />
+        Dim output As Collection(Of psobject)<br />
+        output=ps.Invoke()</p>
+<p>    End Sub</p>
+<p>End Class[/vbnet]<br />
+The line of code that will allow the host methods to interact with the form is:<br />
+[vbnet]r.ThreadOptions=PSThreadOptions.UseCurrentThread[/vbnet]<br />
+A few other changes that should be noted are:</p>
+<ul>
+<li>Adding a shared member PowerShellOutput to use in the host to update the textbox</li>
+<li>Switching from out-string to out-default (now that we're handling host output, we can let the default behavior send the objects in the pipeline to the host)</li>
+<li>Removing the loop through the output (because of the previous point)</li>
+</ul>
+<p>With that being said, I'll make another comment.  If you're trying to follow along with this series (as in, you have an editor open and are copying code in and trying it as you go), you'll want to make sure you set a breakpoint on each of the throw statements in the host classes.  If you don't do this, you won't know what methods you need to implement (except by trial and error).  I have spent several hours debugging when the breakpoints would have showed me the problem immediately.  Please learn from my mistakes.</p>
+<p>Now, we can finally get to coding the output routines.  We obviously need to implement some write* method, but there are several.   To figure out which one, I tried to run write-host "hello" and dir (fairly simple commands) and it turns out that we need to implement these methods for those to work:</p>
+<ul>
+<li>WriteLine</li>
+<li>Write  --both versions</li>
+<li>PSHostRawUserInterface.ForegroundColor</li>
+<li>PSHostRawUserInterface.BackgroundColor</li>
+</ul>
+<p>I really wasn't expecting the last color methods to come into play until we started passing them to the write-host cmdlet (which is why I lost so much time debugging).  Here are the implementations I'm using for now.  Note that we're somewhat limited by the choice of a textbox (rather than a more fully-featured control) for output.<br />
+In PSHostUserInterface:<br />
+[vbnet]	Public Overloads Overrides Sub Write(value As String)<br />
+		If value=vblf Then<br />
+			mainform.PowerShellOutput.AppendText(vbcrlf)<br />
+		else<br />
+			MainForm.PowerShellOutput.AppendText(value	)<br />
+		End If<br />
+	End Sub</p>
+<p>	Public Overloads Overrides Sub Write(foregroundColor As ConsoleColor, backgroundColor As ConsoleColor, value As String)<br />
+		MainForm.PowerShellOutput.AppendText(value	)<br />
+	End Sub</p>
+<p>	Public Overloads Overrides Sub WriteLine(value As String)<br />
+		MainForm.PowerShellOutput.AppendText(value+vbcrlf)<br />
+	End Sub[/vbnet]<br />
+and in PSHostRawUserInterface:<br />
+[vbnet]	Public Overloads Overrides Property ForegroundColor() As ConsoleColor<br />
+		Get<br />
+			return ConsoleColor.Black<br />
+		End Get<br />
+		Set<br />
+			Throw New NotImplementedException()<br />
+		End Set<br />
+	End Property</p>
+<p>	Public Overloads Overrides Property BackgroundColor() As ConsoleColor<br />
+		Get<br />
+			return ConsoleColor.White<br />
+		End Get<br />
+		Set<br />
+			Throw New NotImplementedException()<br />
+		End Set<br />
+	End Property[/vbnet]<br />
+With those changes, we are (finally) using the custom host for output.  Here's an obligatory screenshot:</p>
+<p>[caption id="attachment_193" align="alignnone" width="674" caption="Output at last!"]<img class="size-full wp-image-193" title="Output at last!" src="{{site.baseurl}}/assets/2009/11/screenshot0005-2009-11-17-19_16_34.jpg" alt="Output at last!" width="674" height="338">[/caption]</p>
+<p>So what's next?  Obviously, we should fill in appropriate implementations for the other write-* functions.  Other than write-progress, they shouldn't prove any challenge.  Write-progress, on the other hand, would really look nice as a progressbar (possibly in a status bar?).  There are a few other things to consider:</p>
+<ul>
+<li>clear-host is implemented as a function which uses the rawUI class to perform it's stuff...that probably won't work in out GUI app</li>
+<li>Colors (if you choose to implement them) are going to be specified using the ConsoleColor class (which is different from the Color class used by Windows Forms)</li>
+<li>Profiles....do you want to load them?  Do you want to have a profile specific to your new host?</li>
+<li>What about interacting with the GUI in other ways?</li>
+</ul>
+<p>The last point is the main thing that drove me to write my own host.  You may be fortunate enough to have a GUI tool to do all of your administration duties, but I suspect that most of us have several tools that we have to switch between to get stuff done.  And those tools are probably not powershell-ready.  Writing your own host allows you to build your "dream environment", combining the best features of your favorite tools, and adding script-support in the process.</p>
+<p>Next time, we'll see about doing something different...adding data from powershell into a treeview control (in the host, of course).</p>
+<p>As usual, please let me know if you're enjoying this series.</p>
+<p>Mike</body></html></p>

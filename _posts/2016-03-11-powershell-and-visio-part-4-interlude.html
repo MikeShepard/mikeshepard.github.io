@@ -1,0 +1,55 @@
+---
+layout: post
+title: PowerShell and Visio - Part 4 (Interlude)
+date: 2016-03-11 02:00:39.000000000 -06:00
+type: post
+parent_id: '0'
+published: true
+password: ''
+status: publish
+categories:
+- Scripts
+- Visio
+tags:
+- Visio
+meta:
+  _edit_last: '2'
+  _syntaxhighlighter_encoded: '1'
+author:
+  login: mike
+  email: mshepard70@gmail.com
+  display_name: mike
+  first_name: ''
+  last_name: ''
+permalink: "/2016/03/11/powershell-and-visio-part-4-interlude/"
+---
+<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
+<html><body></p>
+<h2>Why mess with Visio from PowerShell?</h2>
+<p>I've got a couple of posts with some really basic code to access things in PowerShell and it occurred to me...I probably haven't made it clear why you might want to do this (other than that you can).</p>
+<p>So, instead of moving on to connections (which will be next, followed by containers), I thought I'd take a break and show you a really quick and practical script.</p>
+<h2>The Scenario</h2>
+<p>Imagine that you just got handed a network diagram of a bunch (dozens?) of servers that you manage.  The only problem is, the diagram only includes the server name.  Your boss needs it to include the IP Addresses for each item.  You have a choice.  You can either manually look up each name with Resolve-DNSName and copy-and-paste the IP Address into the diagram, or you can use PowerShell to solve the problem.</p>
+<p>Here's the script.  The funny part (to me, at least) is that the complexity is trying to get the IPV4 address out of Resolve-DNSName, the Visio part is simple.</p>
+<p> <br />
+[powershell]<br />
+$Visio = New-Object -ComObject Visio.Application<br />
+$Doc=$Visio.Documents.Open('c:\temp\ServerDiagram.vsdx')<br />
+$Page=$Visio.ActivePage</p>
+<p>foreach($shape in $page.Shapes){<br />
+    if(!$shape.Text.Contains("`n")){<br />
+        $address=Resolve-DnsName $shape.text<br />
+        $address=$address| where-object {$_.IP4Address } | select-object -First 1<br />
+        $newLabel="{0}`n{1}" -f $shape.text,$address.IP4Address<br />
+        $Shape.Text=$newLabel<br />
+    }<br />
+}<br />
+[/powershell]</p>
+<p>All it does is look for shapes on the page that don't contain newlines, and update those shapes with the IP Address it wrestles out of Resolve-DNSName.</p>
+<p>Here's "before"<br />
+<a href="https://powershellstation.com/wp-content/uploads/2016/03/ServersBefore.png" rel="attachment wp-att-916"><img src="{{site.baseurl}}/assets/2016/03/ServersBefore-300x233.png" alt="ServersBefore" width="300" height="233" class="alignnone size-medium wp-image-916"></a></p>
+<p>And "after"<br />
+<a href="https://powershellstation.com/wp-content/uploads/2016/03/ServersAfter.png" rel="attachment wp-att-917"><img src="{{site.baseurl}}/assets/2016/03/ServersAfter-300x248.png" alt="ServersAfter" width="300" height="248" class="alignnone size-medium wp-image-917"></a></p>
+<p>I think you can see that something like this is a handy tool to have in your back pocket.  I know that when I draw server diagrams I don't label the IP Addresses manually anymore.  This script (or one just like it) has saved me hours. </p>
+<p>And that, my friend, is what PowerShell is all about.</p>
+<p>--Mike</body></html></p>

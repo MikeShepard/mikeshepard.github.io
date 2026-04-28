@@ -1,0 +1,213 @@
+---
+layout: post
+title: Writing your own PowerShell Hosting App (part 6...the final episode)
+date: 2009-11-20 12:52:22.000000000 -06:00
+type: post
+parent_id: '0'
+published: true
+password: ''
+status: publish
+categories:
+- Writing a Host
+tags:
+- PowerShell
+- VB.NET
+meta:
+  _edit_last: '2'
+  ratings_users: '0'
+  ratings_score: '0'
+  ratings_average: '0'
+  _syntaxhighlighter_encoded: '1'
+author:
+  login: mike
+  email: mshepard70@gmail.com
+  display_name: mike
+  first_name: ''
+  last_name: ''
+permalink: "/2009/11/20/writing-your-own-powershell-hosting-app-part-6the-final-episode/"
+---
+<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
+<html><body></p>
+<p>Before we proceed with putting powershell objects in a treeview (which I promised last time), I need to explain some changes I have made to the code.</p>
+<ul>
+<li>Refactoring the InvokeString functionality ouf of the menu item event</li>
+<li>Merging the error stream into the output stream</li>
+<li>Replacing the clear-host function with a custom cmdlet</li>
+</ul>
+<p>First, we had been calling the invoke method in the OnClick event of the menu item. While that works fine as a proof-of-concept, we’re going to need that functionality elsewhere, so it’s a simple matter to extract the logic into a function as follows:<br />
+[vbnet highlight="10"]Sub RunToolStripMenuItem1Click(sender As Object, e As EventArgs)<br />
+  	InvokeString(txtScript.Text)<br />
+End Sub</p>
+<p>Private Sub InvokeString(strScript As String)<br />
+	dim ps As powershell=PowerShell.Create()<br />
+        ps.Runspace=r<br />
+        ps.AddScript(strScript)<br />
+        ps.AddCommand("out-default")<br />
+        ps.Commands.Commands.Item(ps.Commands.Commands.Count-1).MergeUnclaimedPreviousCommandResults = PipelineResultTypes.Error + PipelineResultTypes.Output<br />
+        Dim output As Collection(Of psobject)<br />
+        output=ps.Invoke()</p>
+<p>End Sub[/vbnet]<br />
+In this new InvokeString method you see highlighted (if you allow javascript :-)) the line of code that merges the error stream into the output stream (so that errors we throw with our new cmdlets will show up in the console).  We’ll still need to update the our PSHostUserInterface class to handle the WriteError method, but that’s pretty easy (as are the debug, verbose, and warning methods):</p>
+<pre class="brush: vbnet">Public Overloads Overrides Sub WriteErrorLine(value As String)
+	MainForm.PowerShellOutput.AppendText("ERROR:"+value +vbcrlf)
+End Sub
+
+Public Overloads Overrides Sub WriteDebugLine(message As String)
+	MainForm.PowerShellOutput.AppendText("DEBUG:"+message +vbcrlf)
+End Sub
+
+Public Overloads Overrides Sub WriteProgress(sourceId As Long, record As System.Management.Automation.ProgressRecord)
+	Throw New NotImplementedException()
+End Sub
+
+Public Overloads Overrides Sub WriteVerboseLine(message As String)
+	MainForm.PowerShellOutput.AppendText("VERBOSE:"+message +vbcrlf)
+End Sub
+
+Public Overloads Overrides Sub WriteWarningLine(message As String)
+	MainForm.PowerShellOutput.AppendText("WARNING:"+message +vbcrlf)
+End Sub</pre>
+<p>With that, we can see that the built-in clear-host isn’t going to work:</p>
+<pre>ERROR:Exception setting "CursorPosition": "The method or operation is not implemented
+ERROR:."
+ERROR:At line:8 char:16
+ERROR:+ $Host.UI.RawUI. &lt;&lt;&lt;&lt; CursorPosition = $origin
+ERROR:    + CategoryInfo          : InvalidOperation: (:) [], RuntimeException
+ERROR:    + FullyQualifiedErrorId : PropertyAssignmentException
+ERROR:
+ERROR:Exception calling "SetBufferContents" with "2" argument(s): "The method or oper
+ERROR:ation is not implemented."
+ERROR:At line:9 char:33
+ERROR:+ $Host.UI.RawUI.SetBufferContents &lt;&lt;&lt;&lt; ($rect, $space)
+ERROR:    + CategoryInfo          : NotSpecified: (:) [], MethodInvocationException
+ERROR:    + FullyQualifiedErrorId : DotNetMethodException
+ERROR:</pre>
+<p>You can see that, by default, “clear-host” is a function that relies on the RawUI class in the host (using rectangles, and filling with spaces, it looks like).  We really don’t want that kind of access in our interface, so we’re going to replace this function with a cmdlet that simply clears the textbox.</p>
+<p>That brings up another “benefit” of writing your own GUI host…the ability to implement cmdlets without writing SnapIns.  With 2.0, you can write advanced functions (and I encourage you to do that), but with 1.0 you didn’t have that option.  With your own host, you get to add cmdlets without the pain of a SnapIn installer.  The two things we need to do are:</p>
+<ol>
+<li>Create a cmdlet class to do the work</li>
+<li>Add the cmdlet to the runspace configuration</li>
+</ol>
+<p>When we replace the clear-host function, we’re going to also want to remove the existing function, but that’s not typical.  Here’s the code:</p>
+<p>First, the cmdlet class (I usually put all of the cmdlets in the same file, rather than having a single file for each class, but that's just a preference):</p>
+<pre class="brush: vbnet">Imports System.Management.Automation
+Imports System.ComponentModel
+
+ _
+Public Class ClearHost
+    Inherits Cmdlet
+
+    Protected Overrides Sub EndProcessing()
+        MainForm.PowerShellOutput.Clear
+    End Sub
+End Class</pre>
+<p>To add the cmdlet to the runspace (and remove the function), I added these lines after the r.Open() call:</p>
+<pre class="brush: vbnet">InvokeString("remove-item function:clear-host")
+r.RunspaceConfiguration.Cmdlets.Prepend(New CmdletConfigurationEntry("clear-host",GetType(ClearHost),Nothing))
+r.RunspaceConfiguration.Cmdlets.Update()</pre>
+<p>Now, finally, on to the promised treeview manipulation.  I want the cmdlet to be fairly simple, allowing you to specify the name of the label of the new node, and optionally the label of the parent node and an object to attach to the node (we’ll put it in the tag property of the treenode).  We’ll also need to expose the treeview control in a shared member of the form (since the cmdlet doesn’t have a reference to the specific window we instantiate).</p>
+<p>First, here’s the cmdlet.  I’ve tried to make the code as simple as possible, so there are no tricks involved.</p>
+<pre class="brush: vbnet"> _
+Public Class NewTreeNode
+	Inherits Cmdlet
+
+	private _nodename as String=""
+	private _parentnodename as String=""
+	private _object as PSObject=nothing
+ _
+    Public Property NodeName() As String
+        Get
+            Return _nodename
+        End Get
+
+        Set(ByVal value As String)
+            _nodename = value
+        End Set
+
+    End Property
+ _
+    Public Property ParentNodeName() As String
+        Get
+            Return _parentnodename
+        End Get
+
+        Set(ByVal value As String)
+            _parentnodename = value
+        End Set
+
+    End Property
+ _
+    Public Property PSObject() As PSObject
+        Get
+            Return _object
+        End Get
+
+        Set(ByVal value As PSObject)
+            _object = value
+        End Set
+
+    End Property
+
+    Protected Overloads Overrides Sub EndProcessing()
+		MyBase.EndProcessing()
+		Dim _node As TreeNode
+		Dim _parent As TreeNode
+		_parent=PWBUIHandling.FindNodeInTree(_parentnodename,mainform.Tree.Nodes)
+		If _parent is nothing then
+			_node=MainForm.Tree.Nodes.Add(_nodename,_nodename)
+		Else
+			_node=_parent.Nodes.Add(_nodename,_nodename)
+		End If
+		_node.Tag=_object
+    End Sub
+End Class</pre>
+<p>In the form, we’ll need to add a treeview (I also added a second splitter to help organize the UI, but that’s obviously not necessary).  Adding the shared property,setting it, and adding the cmdlet to the runspace complete the changes:</p>
+<pre class="brush: vbnet">Public Partial Class MainForm
+
+Public Shared PowerShellOutput As textbox
+public shared Tree as TreeView
+private host as new PowerShellWorkBenchHost
+private r As Runspace=RunspaceFactory.CreateRunspace(host)
+	Public Sub New()
+		' The Me.InitializeComponent call is required for Windows Forms designer support.
+		Me.InitializeComponent()
+
+		PowerShellOutput=txtOutput
+		Tree=treeView1
+       	r.ThreadOptions=PSThreadOptions.UseCurrentThread
+        r.Open()
+        InvokeString("remove-item function:clear-host")
+      	r.RunspaceConfiguration.Cmdlets.Prepend(New CmdletConfigurationEntry("clear-host",GetType(ClearHost),Nothing))
+      	r.RunspaceConfiguration.Cmdlets.Append(New CmdletConfigurationEntry("new-treenode",GetType(NewTreeNode),Nothing))
+      	r.RunspaceConfiguration.Cmdlets.Update()
+
+   End Sub</pre>
+<p>With that, let’s see how it works:</p>
+<p><img class="alignnone size-full wp-image-204" title="screenshot00052009113022_11_42_thumb.jpg" src="{{site.baseurl}}/assets/2009/11/screenshot00052009113022_11_42_thumb.jpg" alt="screenshot00052009113022_11_42_thumb.jpg" width="678" height="339"></p>
+<p>Obviously, I haven’t built an application that’s ready for use, but I think it is a good example of how you can use the PowerShell APIs to create a scriptable environment that you can customize.  And the fact that the code written to make it happen is less than 200 lines is a testament to the useful nature of the API (actual hand-coded lines, that is, there are about 400 lines in the whole project).</p>
+<p>What’s next?  I think I’ll stop on the tutorial and segue into the codeplex project I’m starting (it should be live in the next week or 2).  In it, you should find things like</p>
+<ul>
+<li>Syntax Highlighting (thanks to AvalonEdit)</li>
+<li>Advanced docking interface (thanks to AvalonDock)</li>
+<li>Tab Expansion</li>
+<li>Custom pop-up menus for UI objects (like the nodes in the tree, for example)</li>
+<li>Whatever else I (or anyone who wants to contribute) think of</li>
+</ul>
+<p>-Mike</p>
+<p>P.S.  I just realized that I forgot to include the FindNodeInTree function that the cmdlet called.  I hate that the treeview class doesn’t include a Find method.  Here’s the code:</p>
+<pre class="brush: vbnet">	Function FindNodeInTree(nodename As String, nodes As TreeNodeCollection) as TreeNode
+		dim rtn as TreeNode =nothing
+		If nodes.ContainsKey(nodename) Then
+			Return nodes(nodename)
+		Else
+			For Each node As treenode In nodes
+				rtn=FindNodeInTree(nodename,node.Nodes)
+				If rtn IsNot Nothing Then
+					return rtn
+				End If
+			Next
+
+		End If
+		return rtn
+	End Function</pre>
+<p></body></html></p>

@@ -1,0 +1,60 @@
+---
+layout: post
+title: Executing SQL the Right Way in PowerShell
+date: 2009-09-15 21:32:17.000000000 -05:00
+type: post
+parent_id: '0'
+published: true
+password: ''
+status: publish
+categories:
+- Scripts
+- SQL Server
+tags: []
+meta:
+  _edit_last: '2'
+  _syntaxhighlighter_encoded: '1'
+  _yoast_wpseo_content_score: '30'
+  _yoast_wpseo_primary_category: '8'
+author:
+  login: mike
+  email: mshepard70@gmail.com
+  display_name: mike
+  first_name: ''
+  last_name: ''
+permalink: "/2009/09/15/executing-sql-the-right-way-in-powershell/"
+---
+<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
+<html><body></p>
+<p>We all know that using string concatenation (or substitution) in SQL is a "bad thing".  If you google "SQL Injection", you'll find hundreds of pages that tell you not to do things this way and that you need to use parameterized queries.  However, I still see a lot of code in PowerShell that does this:</p>
+<pre class="brush: powershell; gutter: false">$cmd.ExecuteNonQuery("delete from Table1 where Column1='$value'")</pre>
+<p>Since code like this is obviously prone to SQL injection attacks, it must be that doing it the right way is difficult, right?  Actually, no.  Here's a simple function that allows you to run parameterized queries easily using dictionaries.</p>
+<p>[powershell]function exec-query( $sql,$parameters=@{},$conn,$timeout=30,[switch]$help){<br />
+ if ($help){<br />
+ $msg = @"<br />
+Execute a sql statement.  Parameters are allowed.<br />
+Input parameters should be a dictionary of parameter names and values.<br />
+Return value will usually be a list of datarows.<br />
+"@<br />
+ Write-Host $msg<br />
+ return<br />
+ }<br />
+ $cmd=new-object system.Data.SqlClient.SqlCommand($sql,$conn)<br />
+ $cmd.CommandTimeout=$timeout<br />
+ foreach($p in $parameters.Keys){<br />
+ [Void] $cmd.Parameters.AddWithValue("@$p",$parameters[$p])<br />
+ }<br />
+ $ds=New-Object system.Data.DataSet<br />
+ $da=New-Object system.Data.SqlClient.SqlDataAdapter($cmd)<br />
+ $da.fill($ds) | Out-Null</p>
+<p> return $ds<br />
+}[/powershell]</p>
+<p>Example usage:</p>
+<p>[powershell]$conn=new-object data.sqlclient.sqlconnection "Server=servername;Integrated Security=True"<br />
+$conn.open()<br />
+exec-query 'select * from sys.databases' -conn $conn<br />
+exec-query 'select FirstName,LastName from AdventureWorks2008.Person.Person where FirstName=@fname' -parameter @{fname='Mike'} -conn $conn[/powershell]</p>
+<p>As you can see from the second example, using a parameterized function wasn't much harder than it would have been to do string concatenation or substitution.  And you don't have to worry about little <a href="http://www.bobby-tables.com/">Bobby Tables</a>.</p>
+<p>The code above still needs some work to take care of output parameters, but I'll save that for another post.</p>
+<p>Let me know if you have any questions, comments, or complaints.</p>
+<p>Mike</body></html></p>

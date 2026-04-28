@@ -1,0 +1,108 @@
+---
+layout: post
+title: Introducing WPFBot3000
+date: 2018-07-05 22:00:05.000000000 -05:00
+type: post
+parent_id: '0'
+published: true
+password: ''
+status: publish
+categories:
+- Scripts
+- WPF
+tags:
+- WPFBot3000
+meta:
+  _edit_last: '2'
+  _yoast_wpseo_content_score: '90'
+  _yoast_wpseo_primary_category: ''
+  _syntaxhighlighter_encoded: '1'
+author:
+  login: mike
+  email: mshepard70@gmail.com
+  display_name: mike
+  first_name: ''
+  last_name: ''
+permalink: "/2018/07/05/introducing-wpfbot3000/"
+---
+<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
+<html><body></p>
+<h2>Preamble</h2>
+<p>After 2 "intro" posts about writing a DSL for WPF, I decided to just bit the bullet and publish the project. It has been bubbling around in my head (and in github) for over 6 months and rather than give it out in installments I decided that I would rather just have it in front of a bunch of people. You can find WPFBot3000 <a href="https://github.com/MikeShepard/WPFBot3000/">here</a>.</p>
+<p><img class="size-thumbnail wp-image-1359 alignright" src="{{site.baseurl}}/assets/2018/07/survey-2316468_640-150x150.png" alt="" width="150" height="150"></p>
+<h2>Before the code, a few remarks</h2>
+<p>A few things I need to say before I get to showing example code. First, naming is hard. The repo for this has been called "WPF_DSL" until about 2 hours ago. I decided on the way home from work that it needed a better name. Since it was similar in form to my other DSL project (VisioBot3000), the name should have been obvious to me a long time ago.</p>
+<p>Second, the main reasons I wrote this are:</p>
+<ul>
+<li>As an example of a DSL in PowerShell</li>
+<li>To allow for easier creation of WPF windows</li>
+<li>Because I'm really not that good at WPF</li>
+</ul>
+<p>In light of that last point, if you're looking at the code in the repo and you see something particularly horrible, please enter an issue (or even better a pull request with a fix). As far as the first two go, you can be the judge after you've seen some examples.</p>
+<h2>Installing WPFBot3000</h2>
+<p>WPFBot3000 can be found in the <a href="https://www.powershellgallery.com/">PowerShell Gallery</a>, so if you want to install it for all users you can do this:</p>
+<p>[powershell]<br />
+#in an elevated session<br />
+Install-Module WPFBot3000<br />
+[/powershell]</p>
+<p>Or, if you want to install it for the current user only, do this:</p>
+<p>[powershell]<br />
+Install-Module WPFBot3000 -Scope CurrentUser<br />
+[/powershell]</p>
+<p>If you'd rather, you can clone the repo from github (it has examples and tests) and install it from the WPFBot3000 subfolder.</p>
+<h2>A first example</h2>
+<p>Here's a pretty simple example that should look familiar if you read the previous posts.</p>
+<p>[powershell]<br />
+Import-Module WPFBot3000<br />
+Dialog {<br />
+   TextBox FirstName<br />
+   TextBox LastName<br />
+   TextBox EmailAddress<br />
+   DatePicker ReminderDate<br />
+}<br />
+[/powershell]</p>
+<p>Running that shows a window like this (the gridlines are for debugging layout and they will be going away/configurable in an upcoming release):</p>
+<p><img class="alignnone wp-image-1351 size-full" src="{{site.baseurl}}/assets/2018/07/WPFBot3000_dataEntry.png" alt="" width="498" height="211"></p>
+<p>Comparing the code to the examples in the previous posts you'll notice the main command is now <strong>Dialog</strong> rather than <strong>Window</strong>.  There is still a <strong>Window</strong> command, but it just outputs the window object.  The <strong>Dialog</strong> command uses <strong>Window</strong> to build the object (after adding an OK and Cancel Button) and then calls ShowDialog() on it.  If the user presses OK, <strong>Dialog</strong> builds an object representing the controls in the window and outputs that object.  The output object has properties that match the names of the controls* in the window:</p>
+<p><img class="size-medium wp-image-1352 alignnone" src="{{site.baseurl}}/assets/2018/07/WPFBot3000_dataEntryResult-300x102.png" alt="" width="300" height="102"></p>
+<p>* Only named controls that know how to return a value</p>
+<p>You'll also notice that <strong>DatePicker</strong> has been implemented in addition to <strong>TextBox</strong>.</p>
+<p>The current list of controls that have been implemented is as follows:</p>
+<ul>
+<li>Button</li>
+<li>CheckBox</li>
+<li>ComboBox</li>
+<li>CredentialPicker</li>
+<li>DatePicker</li>
+<li>DirectoryPicker</li>
+<li>FilePicker</li>
+<li>Grid</li>
+<li>GridSplitter</li>
+<li>Image</li>
+<li>Label</li>
+<li>ListBox</li>
+<li>MutliLineTextBox</li>
+<li>Password</li>
+<li>StackPanel</li>
+<li>TabControl</li>
+<li>TabItem</li>
+<li>TextBlock</li>
+<li>TextBox</li>
+<li>TreeView</li>
+</ul>
+<h2>Other Features</h2>
+<p>I'm not going to go into every feature present (more posts to come), but here are some teasers:</p>
+<ul>
+<li>Context Menus</li>
+</ul>
+<p><img class="alignnone size-full wp-image-1354" src="{{site.baseurl}}/assets/2018/07/WPFBot3000_contextMenu.png" alt="" width="566" height="177"></p>
+<ul>
+<li>Event Handlers</li>
+</ul>
+<p><img class="alignnone size-full wp-image-1355" src="{{site.baseurl}}/assets/2018/07/WPFBot3000_event.png" alt="" width="494" height="248"></p>
+<ul>
+<li>Changing Properties (but not attached or derived properties yet)</li>
+</ul>
+<p><img class="alignnone size-full wp-image-1357" src="{{site.baseurl}}/assets/2018/07/WPF3000_properties.png" alt="" width="567" height="73"></p>
+<p>That's enough for tonight, but I'll be posting more in the days and weeks to come.</p>
+<p>Let me know what you think. Feel free to post</body></html></p>

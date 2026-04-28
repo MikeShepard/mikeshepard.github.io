@@ -1,0 +1,59 @@
+---
+layout: post
+title: 'PowerShell and MySQL : POSH_Ado_MySQL'
+date: 2015-10-07 00:07:17.000000000 -05:00
+type: post
+parent_id: '0'
+published: true
+password: ''
+status: publish
+categories:
+- Modules
+- POSH_Ado
+- Scripts
+tags: []
+meta:
+  _edit_last: '2'
+  _syntaxhighlighter_encoded: '1'
+author:
+  login: mike
+  email: mshepard70@gmail.com
+  display_name: mike
+  first_name: ''
+  last_name: ''
+permalink: "/2015/10/07/powershell-and-mysql-posh_ado_mysql/"
+---
+<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
+<html><body></p>
+<p>Using PowerShell and MySQL together with <a href="https://github.com/MikeShepard/POSH_Ado">POSH_Ado</a> is just as easy as SQL Server.  You'll need the POSH_Ado and POSH_Ado_MySQL Modules, and use this command to get started:<br />
+[powershell]Import-Module POSH_Ado_MySQL[/powershell]</p>
+<p>Once you've done that you'll have the following functions at your disposal:</p>
+<ul>
+<li><strong>New-MySQLCommand</strong></li>
+<li><strong>New-MySQLConnectionString</strong></li>
+<li><strong>New-MySQLCommand</strong></li>
+<li><strong>Invoke-MySQLCommand</strong></li>
+<li><strong>Invoke-MySQLQuery</strong></li>
+<li><strong>Invoke-MySQLStoredProcedure</strong></li>
+</ul>
+<p>These functions work just like the ones for SQLServer in AdoLib or POSH_Ado_SQLServer, except that they work with MySQL.  </p>
+<p>Inside POSH_Ado_MySQL, you'll see that (just like POSH_Ado_SQLServer), it is simply importing the POSH_Ado module, specifying the MySQL ADO.NET provider name and the prefix (MySQL).  Then, it calls the <strong>Set-MySQLADONetParameters</strong> function to add an option to the connection strings that are generated and to specify that there is no prefix for parameter names.</p>
+<p>[powershell]<br />
+import-module POSH_Ado -args MySql.Data.MySqlClient -Prefix MySQL -force</p>
+<p># .NET (and PowerShell) do not like zero datetime values by default.  This option helps with that.<br />
+# http://dev.mysql.com/doc/refman/5.5/en/connector-net-connection-options.html<br />
+Set-MySQLADONetParameters -option @{'Allow Zero Datetime'='true'} -ParameterPrefix ''</p>
+<p>Export-ModuleMember *-MySQL*<br />
+[/powershell]</p>
+<p>Hopefully by now you can see the power of the POSH_Ado project:</p>
+<ol>
+<li>All of the ADO.NET logic is in one place</li>
+<li>Consistent (but distinctly named) cmdlets for working with each platform</li>
+<li>Flexibility to set platform-specific options</li>
+</ol>
+<p>There are currently 3 other platform-specific POSH_Ado modules: POSH_Ado_Oracle, POSH_Ado_Firebird, and POSH_Ado_DB2.  It should be no trouble to create Postgres, SQLite, and OLEDB modules as well.</p>
+<p>Do you have any projects where POSH_Ado could come in handy?  What about other platforms to explore?</p>
+<p>Let me know your thoughts in the comments.</p>
+<p>-Mike</p>
+<p>P.S.  POSH_Ado and the platform-specific modules can be found <a href="https://github.com/MikeShepard/POSH_Ado">here</a><br />
+</body></html></p>

@@ -1,0 +1,82 @@
+---
+layout: post
+title: It's 10 O'Clock.  Do you know where your servers are?
+date: 2013-12-13 04:28:46.000000000 -06:00
+type: post
+parent_id: '0'
+published: true
+password: ''
+status: publish
+categories:
+- Scripts
+tags: []
+meta:
+  _edit_last: '2'
+  _syntaxhighlighter_encoded: '1'
+author:
+  login: mike
+  email: mshepard70@gmail.com
+  display_name: mike
+  first_name: ''
+  last_name: ''
+permalink: "/2013/12/13/its-10-oclock-do-you-know-where-your-servers-are/"
+---
+<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
+<html><body></p>
+<p>Ok…that’s a strange title, but let me finish before you decide its lame. (On a side note, I’m a dad, so my humor tends to run in that direction naturally).</p>
+<p>I see lots of examples in books and on the web about how to use pipeline input to functions. I’m not talking about how to implement pipeline input in your own advanced functions, but rather examples of using pipeline input with existing cmdlets.<br />
+The examples invariably look like this:</p>
+<p>[powershell]<br />
+‘server1’,’server2’ | get-somethingInteresting –blah –blah2<br />
+[/powershell]</p>
+<p>This is a good thing. The object-oriented pipeline is in my opinion the most distinguishing feature of PowerShell, and we need to be using the pipeline in examples to keep scripters from falling back into their pre-PowerShell habits. There is an aspect of this that concerns me, though.</p>
+<p>How many of you are dealing with a datacenter comprised of two servers? I’m guessing that if you only had two servers, you probably wouldn’t be all gung-ho about learning PowerShell, since it’s possible to manage two of almost anything without needing to resort to automation. Not to say that small environments are a bad fit for PowerShell, but just that in such a situation you probably wouldn’t have a desperate need for it.<br />
+How would you feel about typing that example in with five servers instead of two? You might do that (out of stubbornness), but if it were 100, you wouldn’t even consider doing such a thing. For that matter, what made you pick those specific two servers? Would you be likely to pick the same two a year from now? If your universe is anything like mine, you probably wouldn’t be looking at the same things next week, let alone next year.<br />
+My point is that while the example does show how to throw strings onto the pipeline to a cmdlet, and though the point of the example is the cmdlet rather than the details of the input, it feels like we’re giving a wrong impression about how things should work in the “real world”.</p>
+<p>As an aside, I want to be very clear that I’m not dogging the PowerShell community. I feel that the PowerShell community is a very vibrant group of intelligent individuals who are very willing to share of their time and efforts to help get the word out about PowerShell and how we’re using it to remodel our corners of the world. We also are fortunate to have a group of people who are invested so much that they’re not only writing books about PowerShell, they’re writing good books. So to everyone who is working to make the PowerShell cosmos a better place, thanks! This is just something that has occurred to me that might help as well.</p>
+<p>Ok..back to the soapbox.</p>
+<p>If I’m not happy about supplying the names of servers on the pipeline like this, I must be thinking of something else. I know…we can store them in a file! The next kind of example I see is like this:</p>
+<p>[powershell]<br />
+Get-content c:\servers.txt | get-somethingInteresting –blah –blah2<br />
+[/powershell]</p>
+<p>This is a vast improvement in terms of real-world usage. Here, we can maintain a text file with the list of our servers and use that instead of constant strings in our script. There’s some separation happening, which is generally a good thing (when done in moderation :-)). I still see some problems with this approach:</p>
+<ul>
+<li>Where is the file? Is it on every server? Every workstation? Anywhere I’m running scripts in scheduled tasks or scheduled jobs? </li>
+<li>What does the file look like? In this example it looks like a straight list of names. What if I decide I need more information?</li>
+<li>What if I don’t want all of the servers? Do I trust pattern matching and naming conventions?</li>
+<li>What if the file moves? I need to change every script.</li>
+</ul>
+<p>I was a developer for a long time and a DBA for a while as well. The obvious answer is to store the servers in a table! There’s good and bad to this approach as well. I obviously can store more information, and any number of servers. I can also query based on different attributes, so I can be more flexible.</p>
+<ul>
+<li>Do I really want to manage database connections in every script?</li>
+<li>What about when the SQL Server (you are using SQL Server, right?) gets replaced. I have to adjust every script again!</li>
+<li>Database permissions?</li>
+<li>I have to remember what the database schema looks like every time I write a script?</li>
+</ul>
+<p>What about querying AD to get the list? That would introduce another dependency, but with AD cmdlets I should be able to do what I need. But…</p>
+<ul>
+<li>What directory am I going to hit (probably the same one most of the time, but what about servers in disconnected domains?)</li>
+<li>Am I responsible for all of the computers in all of the OUs? If not, how do I know which ones to return?</li>
+<li>Does AD have the attributes I need in order to filter the list appropriately?</li>
+</ul>
+<p>At this point you’re probably wondering what the right answer is. The problem is that I don’t have the answer. You’re going to use whatever organizational scheme makes the most sense to you. If your background is like mine, you’ll probably use a database. If you’ve just got a small datacenter, you might use a text file or a csv. If you’re in right with the AD folks, they’ve got another solution for you. They all work and they all have problems. You’ll figure out workarounds for the stuff you don’t like. You’re using PowerShell, so you’re not afraid.</p>
+<p>Now for the payoff: Whatever solution you decide to use, <strong>hide it in a function</strong>.</p>
+<p>You should have a function that you always turn to called something like “get-XYXComputer”, where XYZ is an abbreviation for your company. When you write that function, give it parameters that will help you filter the list according to the kinds of work that you’re doing in your scripts. Some easy examples are to filter based on name (a must), on OS, the role of the server (web server, file server, etc.), or the geographical location of the server (if you have more than one datacenter). You can probably come up with several more, but it’s not too important to get them all to start with. As you use your function you’ll find that certain properties keep popping up in where-object clauses downstream from your new get-function, and that’s how you’ll know when it’s time to add a new parameter.</p>
+<p>The insides of your function are not really important. The important thing is that you put the function in a module (or a script file) and include it using import-module or dot-sourcing in all of your scripts.<br />
+Now, you’re going to write code that looks like this:</p>
+<p>[powershell]<br />
+Get-XYZComputer –servertype Web | get-somethinginteresting<br />
+[/powershell]</p>
+<p>A couple of important things to do when you write this function. First of all, make sure it outputs objects. Servernames are interesting, but PowerShell lives and breathes objects. Second of all, make sure that the name of the server is in a property called “Computername”. If you do this, you’ll have an easier time consuming these computer objects on the pipeline, since several cmdlets take the computername parameter from the pipeline by propertyname.</p>
+<p>If you’re thinking this doesn’t apply to you because you only have five servers and have had the same ones for years, what is it that you’re managing?</p>
+<ul>
+<li>Databases?</li>
+<li>Users?</li>
+<li>Folders?</li>
+<li>WebSites?</li>
+<li>Widgets?</li>
+</ul>
+<p>If you don’t have a function or cmdlet to provide your objects you’re in the same boat. If you do, but it doesn’t provide you with the kind of flexibility you want (e.g. it requires you to provide a bunch of parameters that don’t change, or it doesn’t give you the kind of filtering you want), you can still use this approach. By customizing the acquisition of domain objects, you’re making your life easier for yourself and anyone who needs to use your scripts in the future. By including a reference to your company in the cmdlet name, you’ve making it clear that it’s custom for your environment (as opposed to using proxy functions to graft in the functionality you want).  And if you decide to change how your data is stored, you just change the function.</p>
+<p>So...do you know where your servers are? Can you use a function call to get the list without needing to worry about how your metadata is stored? If so, you’ve got another tool in your PowerShell toolbox that will serve you well. If not, what are you waiting for?<br />
+Let me know what you think.</p>
+<p>--Mike </body></html></p>

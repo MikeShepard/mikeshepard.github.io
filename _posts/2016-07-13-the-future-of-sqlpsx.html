@@ -1,0 +1,41 @@
+---
+layout: post
+title: The future of SQLPSX
+date: 2016-07-13 19:32:32.000000000 -05:00
+type: post
+parent_id: '0'
+published: true
+password: ''
+status: publish
+categories:
+- SQL Server
+- SQLPSX
+tags:
+- SQLPSX
+- SQLServer
+meta:
+  _edit_last: '2'
+author:
+  login: mike
+  email: mshepard70@gmail.com
+  display_name: mike
+  first_name: ''
+  last_name: ''
+permalink: "/2016/07/13/the-future-of-sqlpsx/"
+---
+<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
+<html><body></p>
+<p>With the recent seismic shift in the SQL PowerShell tools landscape, I thought it would be a good idea to address the state and future of the SQLPSX project.</p>
+<p>First of all, SQLPSX is not going away.  There will always be some functions or scripts that don't make it into the official modules installed with SQL Server.  I'm very excited to see the first sets of changes to the official SQL client tools and the energy in both the community and the MS Team is very exciting.  On the other hand, SQLPSX has been around for a long time and some people have grown accustomed to using it.  </p>
+<p>My plans for SQLPSX are the following:</p>
+<ul>
+<li>Rename the SQLServer module to SQLPSXServer to avoid a conflict with the official SQLServer module</li>
+<li>Remove the "main" SQLPSX module which loads the sub-modules</li>
+<li>Move several modules to a "Deprecated" folder (SQLISE, OracleISE, WPK, ISECreamBasic</li>
+<li>Remove the installer...most people do xcopy installs anymore</li>
+<li>Edit the codeplex page to point here</li>
+</ul>
+<p>There has been some activity on <a href="https://github.com/MikeShepard/SQLPSX" target="_blank">Github</a> lately from a new contributor (Patrick Keisler) who has updated the SMO assembly loading as well as other places assemblies are loaded.  He also contributed a module for dealing with mirroring and with a Central Management Server (CMS).  I've been talking with people on the SQL Server community slack channel about getting some testing done (I don't have a lot of different SQL Servers sitting around) and hope to have a new release this month.  That will be the first real release in about 5 years!</p>
+<p>If you want to know how you can get involved in SQLPSX, let me know.</p>
+<p>--Mike<br />
+</body></html></p>

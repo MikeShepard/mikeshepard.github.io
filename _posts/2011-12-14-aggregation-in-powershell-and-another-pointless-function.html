@@ -1,0 +1,73 @@
+---
+layout: post
+title: Aggregation In PowerShell (and another pointless function)
+date: 2011-12-14 04:37:42.000000000 -06:00
+type: post
+parent_id: '0'
+published: true
+password: ''
+status: publish
+categories:
+- Discussion
+- Scripts
+tags: []
+meta:
+  _edit_last: '2'
+  _syntaxhighlighter_encoded: '1'
+author:
+  login: mike
+  email: mshepard70@gmail.com
+  display_name: mike
+  first_name: ''
+  last_name: ''
+permalink: "/2011/12/14/aggregation-in-powershell-and-another-pointless-function/"
+---
+<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
+<html><body>
+<p>I've been doing a lot of thinking about "idiomatic PowerShell" since my <a title="PowerShell’s Problem with Return" href="https://powershellstation.com/2011/08/26/powershell%e2%80%99s-problem-with-return/">last post</a> and my thinking led me to an idea that I haven't actually used, but seems like the kind of thing that people would do in PowerShell.</p>
+<p>If I were writing a script that needed to get a "bunch of things" from somewhere (perhaps several different sources) and return all of them, I might be tempted to do something like this. Please forgive my PowerShell pseudocode:<br />
+[powershell]function get-stuff{<br />
+param($parm1 )<br />
+    $results=@()<br />
+    foreach ($source in $sources){<br />
+        $results += ($source | where { $_ -and "Some condition exists"  })<br />
+    }<br />
+    foreach ($source in $someothersources){<br />
+        $results += ($source | where { $_ -and "Some condition exists"  })<br />
+    }<br />
+ return $results<br />
+}[/powershell]<br />
+I've used several permutations of that kind of code using arrays of some sort to collect the results as I go along and eventually return the collection from the function. I'm not sure that there's anything wrong with doing it this way. That is, I'm not sure that you're likely to have issues with doing it this way.</p>
+<p>On the other hand, it's more idiomatic (i.e more in the style of the PowerShell language) to do something like this (again, pardon the pseudocode):<br />
+[powershell]function get-stuff{<br />
+param($parm1 )<br />
+    foreach ($source in $sources){<br />
+        $source | where { $_ -and "Some condition exists"  }<br />
+    }<br />
+    foreach ($source in $someothersources){<br />
+        $source | where { $_ -and "Some condition exists"  }<br />
+    }</p>
+<p>}[/powershell]<br />
+All I'm doing here is sending the output of the inner statements (which are pipelines) to the output stream of the function. Note that there isn't any need for anything to accumulate the results into.  Using the output stream makes this function work more like the built-in cmdlets in PowerShell as it won't be blocking the pipeline.</p>
+<p>The only thing that I have against this code is that it goes against rule #2 that I wrote last time about writing values to the output stream.  I said there that if you were going to write to the output stream, you should explicitly use <strong>write-output</strong>.  We could modify the code above to use <strong>write-output</strong>, but that would involve using parentheses (around the pipelines), messing up the flow of the code, and even blocking the pipeline while the expressions in the parentheses were collected (as an argument to write-output).  </p>
+<p>That brings me to what I was saying about "another pointless function".  About a year ago I wrote a <a href="https://powershellstation.com/2010/08/01/the-identity-function/" title="The Identity Function">post</a> about the identity function, which doesn't really do anything except return the input.  It is a really useful function for creating lists and such, allowing you to skip on providing a bunch of punctuation.  It's not a pointless function, but it's not one that is getting much press, either.  I was thinking about how to make the "pipeline" version of the code work nicely and not make it ugly and thought of the following function.<br />
+[powershell]<br />
+function out-output{<br />
+    process{ $_ }<br />
+}<br />
+[/powershell]<br />
+Like the identity function (or ql, as I've seen it referred to), out-output doesn't do anything but emit values that are provided.  Out-output, however, gets its values from the pipeline rather than the argument list.  This function allows us to be explicit about our intent to use the output stream.<br />
+[powershell]function get-stuff{<br />
+param($parm1 )<br />
+    foreach ($source in $sources){<br />
+        $source | where { $_ -and "Some condition exists"  } | out-output<br />
+    }<br />
+    foreach ($source in $someothersources){<br />
+        $source | where { $_ -and "Some condition exists"  } | out-output<br />
+    }<br />
+}<br />
+[/powershell]<br />
+I'm not sure if this is a good idea, and I know that it's just adding a tiny bit of processing to the script.  My thought is that making the operation of the script explicit is worth it in the long run.</p>
+<p>What do you think?</p>
+<p>-mike</p>
+<p></body></html></p>

@@ -1,0 +1,120 @@
+---
+layout: post
+title: Starting a PowerShell DSL for WPF Apps
+date: 2018-06-28 21:41:58.000000000 -05:00
+type: post
+parent_id: '0'
+published: true
+password: ''
+status: publish
+categories:
+- DSL
+- Scripts
+- WPF
+tags:
+- DSL
+- WPF
+- WPF_DSL
+meta:
+  _edit_last: '2'
+  _yoast_wpseo_content_score: '90'
+  _yoast_wpseo_primary_category: '117'
+  _syntaxhighlighter_encoded: '1'
+  _yoast_wpseo_focuskw_text_input: DSL
+  _yoast_wpseo_focuskw: DSL
+  _yoast_wpseo_linkdex: '71'
+author:
+  login: mike
+  email: mshepard70@gmail.com
+  display_name: mike
+  first_name: ''
+  last_name: ''
+permalink: "/2018/06/28/starting-a-powershell-dsl-for-wpf-apps/"
+---
+<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
+<html><body></p>
+<h2>The problems</h2>
+<p>There is always a problem. In my case, I had two problems.</p>
+<p>First, when I teach PowerShell, I mention that it's a nice language for writing DSLs (domain-specific languages). If you want an in-depth look, Kevin Marquette has a <a href="https://kevinmarquette.github.io/2017-02-26-Powershell-DSL-intro-to-domain-specific-languages-part-1">great series</a> on writing DSLs. I highly recommend reading it (and everything else he's written). I'm going to cover some of the same material he did, but differently.</p>
+<p>Anyway, back to the story. When I mention DSLs, I generally get a lot of blank stares. Then, I get to try to explain them, but I don't have a great example (Pester, Psake, and DSC are a bit advanced). So I was looking for a DSL I could write that would be easy to explain, with the code and output straight-forward. That's the first problem.</p>
+<p>The second problem, again from teaching, is when I talk about writing GUIs. This is always a popular topic, and it's a lot of fun to discuss the different options. I get asked about when it is a good idea to write a UI in PowerShell vs. when it would make more sense to do it in a managed language. My answer is something along the lines of "If it's something simple like a data-entry form, then PowerShell is a great fit. If it has much complexity you are probably going to want to use C#." I got thinking after teaching last November that writing a data-entry form in PowerShell really isn't that easy.</p>
+<h2>PowerShell to the rescue!</h2>
+<p>I decided that I needed to remedy the situation. Writing a data-entry form (where we're not super concerned about the look-and-feel) should be trivial.</p>
+<p>My first thought was that I should be able to write something like this:</p>
+<p>[powershell]<br />
+Window {<br />
+    TextBox FirstName<br />
+    TextBox LastName<br />
+    TextBox EmailAddress<br />
+}<br />
+[/powershell]</p>
+<p>And have PowerShell present you with a reasonable looking UI. After pressing Ok (Ok/Cancel would be added automatically), it would output an object with properties named FirstName, LastName, and EmailAddress.</p>
+<p>The first swag at the code looked something like this (fwiw, this is a reconstruction, not the actual code).</p>
+<p>First, the <strong>TextBox</strong> function:</p>
+<p>[powershell]<br />
+function TextBox {<br />
+    [CmdletBinding()]<br />
+    Param($Name)<br />
+    $Properties = @{ Name = $name ;MinWidth=100}<br />
+    New-Object System.Windows.Controls.TextBox -Property $properties<br />
+}<br />
+[/powershell]</p>
+<p>That's pretty simple. It takes the name as a parameter and outputs a textbox with that name.</p>
+<p>The <strong>Window</strong> function is a bit trickier. The controls (textboxes and labels) are going to go in a 2-column grid (so we don't have to fight hard with the layout).</p>
+<p>Also, for now I'm going to leave off the ok/cancel buttons (so I also have to pretend you pressed ok), but this is a great start.</p>
+<p>Here's attempt 1 at the code:</p>
+<p>[powershell]<br />
+Add-Type -AssemblyName PresentationFramework<br />
+function Window {<br />
+    [CmdletBinding()]<br />
+    Param($contents)<br />
+    $window = new-object system.windows.window -Property @{ SizeToContent = 'WidthAndHeight'}<br />
+    $grid = new-object System.Windows.Controls.Grid -Property @{Margin=10}</p>
+<p>    $window.Content = $grid<br />
+    $grid.ColumnDefinitions.Add((new-object System.Windows.Controls.ColumnDefinition -property @{ Width = 'Auto'}))<br />
+    $grid.ColumnDefinitions.Add((new-object System.Windows.Controls.ColumnDefinition -property @{ Width = '*'}))<br />
+    $controls = &amp;amp; $Contents<br />
+    $row = 0<br />
+    foreach ($item in $controls) {<br />
+        $grid.RowDefinitions.Add((new-object System.Windows.Controls.RowDefinition ))<br />
+        $label = New-Object System.Windows.Controls.Label -Property @{Content = $item.Name}<br />
+        [System.Windows.Controls.Grid]::SetRow($label, $row)<br />
+        [System.Windows.Controls.Grid]::SetColumn($label, 0)<br />
+        $grid.Children.Add($label) | out-null</p>
+<p>        [System.Windows.Controls.Grid]::SetRow($item, $row)<br />
+        [System.Windows.Controls.Grid]::SetColumn($item, 1)<br />
+        $grid.AddChild($item) | Out-Null<br />
+        $row++<br />
+    }<br />
+    if($window.ShowDialog() -or $true){<br />
+        $output=[Ordered]@{}<br />
+        foreach($item in $controls){<br />
+          $output[$item.Name]=$item.Text<br />
+        }<br />
+        [PSCustomObject]$output<br />
+      }<br />
+}<br />
+[/powershell]</p>
+<p>Most of the code is pretty straight-forward. I execute the <strong>$Contents</strong> parameter to get the controls. Then I loop through those and create labels in the first column and put the control in the second column.</p>
+<p>After calling the <strong>ShowDialog()</strong> method on the window (and using -or $true to fake out the missing OK button), loop through the controls and output an object with properties and values harvested from the name and text of the controls.</p>
+<p>Here's what the example looks like when you run it:</p>
+<p><img class="alignleft size-full wp-image-1334" src="{{site.baseurl}}/assets/2018/06/wpf_dataentry.png" alt="" width="207" height="133"></p>
+<p> </p>
+<p> </p>
+<p> </p>
+<p> </p>
+<p>Not a lot of code for that result.</p>
+<p>What's missing though?</p>
+<ol>
+<li>Only textboxes?  Need several other controls</li>
+<li>OK/Cancel</li>
+<li>with other controls, reading the text property won't be a strategy</li>
+<li>Nested controls</li>
+<li>Populating controls</li>
+<li>Events</li>
+<li>ContextMenus</li>
+<li>Setting control properties</li>
+</ol>
+<p>Stay tuned for more of this WPF DSL.</p>
+<p>--Mike</p>
+<p>P.S.  It has been pointed out to me that I didn't explain what a DSL is.  For now, I'd point you to the Kevin Marquette articles I linked above.  I'll post tomorrow with a quick "what is a DSL and why".</body></html></p>

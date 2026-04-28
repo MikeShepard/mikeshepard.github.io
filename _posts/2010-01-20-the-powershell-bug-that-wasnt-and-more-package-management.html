@@ -1,0 +1,131 @@
+---
+layout: post
+title: The PowerShell Bug That Wasn't, and More Package Management
+date: 2010-01-20 23:04:26.000000000 -06:00
+type: post
+parent_id: '0'
+published: true
+password: ''
+status: publish
+categories:
+- Discussion
+- Scripts
+- Tools
+- V2.0 Features
+tags:
+- Package
+- PowerShell
+- Require
+- Tools
+meta:
+  _edit_last: '2'
+  _syntaxhighlighter_encoded: '1'
+author:
+  login: mike
+  email: mshepard70@gmail.com
+  display_name: mike
+  first_name: ''
+  last_name: ''
+permalink: "/2010/01/20/the-powershell-bug-that-wasnt-and-more-package-management/"
+---
+<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
+<html><body></p>
+<p>Have you ever tracked down a bug, been confident that you had found the root of your problems, only to realize shortly afterwords that you missed it completely?</p>
+<p>What I posted yesterday as a bug in PowerShell (having to do with recursive functions, dot-sourcing, and parameters) seemed during my debugging session to clearly be a bug.  After all, I watched the parameter value change from b to a, didn't I?  Sure did.  And in almost every language I've ever used, that would be a bug.  On the other hand, PowerShell is the only language that I know of that has dot-sourcing.  Here's a much simpler code example which shows my faulty thinking:<br />
+[powershell]function f($x){<br />
+   if ($x -eq 1){<br />
+      write-host $x<br />
+      . f ($x+1)<br />
+      write-host $x<br />
+   }<br />
+}</p>
+<p>f 1[/powershell]<br />
+Here, we have a simple "recursive function" which uses dot-sourcing to call itself.  In my mind, how this would have worked is as follows:</p>
+<ul>
+<li>We call the function, passing 1 for $x</li>
+<li>The if condition is true, so it prints 1 and calls the function, passing 2 for $x</li>
+<li>In the inner call, the if condition is false, so nothing happens</li>
+<li>We pop back to the calling frame, where $x is 1 and print it</li>
+</ul>
+<p>If it weren't for that pesky dot operator, that would have been accurate.</p>
+<p>The problem is, the dot operator changes the scoping of the inner call.  Here's what the about_operators help topic, has to say about the dot sourcing operator:</p>
+<pre>        Description: Runs a script so that the items in the script are part of the calling scope.</pre>
+<p>Which is not a surprise...really.  The reason I was using the dot operator in my package management code was to make sure that functions defined in the scripts it was calling would be included in the existing scope, rather than their script scope.  The problem was one of nearsightedness.  I was so focused on the fact that the dot sourcing was making the functions part of the caller's scope that I didn't consider that variable declarations (including parameters) would also be in the caller's scope.</p>
+<p>So, the correct interpretation of the above script is:</p>
+<ul>
+<li>We call the function, passing 1 for $x</li>
+<li>The if condition is true, so it prints 1 and calls the function, passing 2 for $x</li>
+<li>The parameter is named $x, so $x in is set to 2 (overwriting the $x that was set to 1)</li>
+<li>In the inner call, the if condition is false, so nothing happens</li>
+<li>We pop back to the calling frame, where $x is 2 and print 2.</li>
+</ul>
+<p>The trick here is that the function f dot-sourced something that set $x to 2.  The fact that it was f is incidental.  It didn't have to be.</p>
+<p>Maybe this example will make it more clear:<br />
+[powershell]function f($x){<br />
+    write-host $x<br />
+    . g<br />
+    write-host $x<br />
+ }</p>
+<p>function g{<br />
+   $x = "Hello, World!"<br />
+}<br />
+f 1[/powershell]<br />
+If we were doing this without dot-sourcing, we would expect to see the number 1 printed out twice.  However, since we dot-sourced g, the assignment in the function body of g happens in the scope of f.  In other words, it's as if the $x="Hello, World!" were executed inside f.  Thus, the output of this script is 1, followed by "Hello, World!".</p>
+<p>So, it wasn't a bug, it was just me not being thorough in applying my understanding of dot-sourcing.</p>
+<p>Now, on with Package Management.<br />
+First, to fix the problem caused by the parameter being overwritten (which it is, it's just that it's expected to be).  I hadn't worked out a way to fix the problem before I went to bed last night, but as I was rolling this stuff around in my head (which is when I figured out that it wasn't really a <em>bug</em>), I thought of a simple solution.  Since we can expect that sometimes the $filename parameter in the require (and reload) function will be overwritten by the a value in the dot-sourced script, we just need to make sure we're done using it at that point.  So, I simply made the assignment to the dictionary before dot-sourcing.   Here's the updated code:<br />
+[powershell]$global:loaded_scripts=@{pkg_utils='INITIAL'}</p>
+<p>function require($filename){<br />
+	if (!$global:loaded_scripts[$filename]){<br />
+	   $global:loaded_scripts[$filename]=get-date<br />
+	   . scripts:$filename.ps1<br />
+	}<br />
+}<br />
+function reload($filename){<br />
+	$global:loaded_scripts[$filename]=get-date<br />
+	. scripts:$filename.ps1<br />
+}[/powershell]<br />
+To add modules, we need to do a few extra things:</p>
+<ul>
+<li>We need to detect if we're running in 2.0 or not</li>
+<li>We need to see if there is a module with the given name</li>
+<li>We need to see if the module is already loaded or not (in the case of require...it won't matter for reload</li>
+</ul>
+<p>Fortunately, none of those are very difficult.  Here's the updated code (including modules).  I even added some comments to make the flow more clear:<br />
+[powershell]<br />
+$global:loaded_scripts=@{pkg_utils='INITIAL'}</p>
+<p>function require($filename){<br />
+    if ($global:loaded_scripts[$filename]){<br />
+          # this function has already loaded this (script or module)<br />
+          return<br />
+    }<br />
+    if ($psversiontable){<br />
+       # we're in 2.0<br />
+       if (get-module $filename -listavailable){<br />
+               #the module exists in the module path<br />
+         	   $global:loaded_scripts[$filename]=get-date<br />
+               import-module $filename<br />
+               return<br />
+       }<br />
+    }<br />
+    #it wasn't a module...so dot-source the script<br />
+    $global:loaded_scripts[$filename]=get-date<br />
+    . scripts:$filename.ps1</p>
+<p>}<br />
+function reload($filename){<br />
+    if ($psversiontable){<br />
+        # we're in 2.0<br />
+        if (get-module $filename -listavailable){<br />
+           #the module exists in the module path<br />
+           $global:loaded_scripts[$filename]=get-date<br />
+           import-module $filename<br />
+           return<br />
+        }<br />
+    }<br />
+    # it wasn't a module...so dot-source the script.<br />
+  	$global:loaded_scripts[$filename]=get-date<br />
+	. scripts:$filename.ps1<br />
+}<br />
+[/powershell]<br />
+That's it for today.  Let me know what you think.</p>
+<p>-Mike</body></html></p>
