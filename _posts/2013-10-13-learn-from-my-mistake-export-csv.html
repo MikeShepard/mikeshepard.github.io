@@ -21,39 +21,46 @@ author:
   last_name: ''
 permalink: "/2013/10/13/learn-from-my-mistake-export-csv/"
 ---
-<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
-<html><body>
 <p>You've probably been told all your life that you should learn from your mistakes.  I agree with this statement, but I prefer always to learn from other people's mistakes.  In this post, I'll give you an opportunity to learn a bit more about PowerShell by watching me mess up.  What a deal!</p>
 <p>I was helping a colleague with a script he was writing.  His script wasn't very complicated.  It simply read in a list of computernames from a text file and tried to access them via WMI.  He wanted the script to keep track of the ones that were inaccessible and output that list to a second text file for later review.</p>
 <p>I was helping him via IM (not the best approach, but we were both busy with other things), and what we came up with was something like this.</p>
-<p>[powershell]<br />
-$errorservers=@()<br />
-$servers=get-content c:\temp\servers.txt<br />
-foreach($server in $servers){<br />
-     try {<br />
-        #Do some stuff here<br />
-     } catch {<br />
-       $errorServers+=$server<br />
-     }<br />
-}<br />
-$errorServers | export-csv c:\temp\ErrorServers.txt<br />
-[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+$errorservers=@()
+
+$servers=get-content c:\temp\servers.txt
+
+foreach($server in $servers){
+
+     try {
+
+        #Do some stuff here
+
+     } catch {
+
+       $errorServers+=$server
+
+     }
+
+}
+
+$errorServers | export-csv c:\temp\ErrorServers.txt
+</code></pre>
 <p>Imagine my surprise when he emailed me the error output (which we both were expecting to be a list of unreachable servers) and it looked like this:<br />
 <code><br />
 #TYPE System.String<br />
 "PSPath","PSParentPath","PSChildName","PSDrive","PSProvider","ReadCount","Length"<br />
 "C:\temp\computers.txt","C:\temp","computers.txt","C","Microsoft.PowerShell.Core\FileSystem","2","14"<br />
 </code></p>
-<p>When I was able to observe the script running, I had him output the value of $errorServers, and when he did, the output looked exactly like we had expected.  Changing the last line to [powershell light="true"]$errorServers | out-file c:\temp\ErrorServers.txt[/powershell] fixed the script as far as he was concerend.  But where did the "mystery columns" come from?</p>
+<p>When I was able to observe the script running, I had him output the value of $errorServers, and when he did, the output looked exactly like we had expected.  Changing the last line to [powershell light="true"]$errorServers | out-file c:\temp\ErrorServers.txt fixed the script as far as he was concerend.  But where did the "mystery columns" come from?</p>
 <p>It turns out when you read a file with get-content, PowerShell "decorates" the strings it returns with information about where the string came from (what file, folder, drive, provider, line, and length of the read data).  When we sent the string to the console for output, the console printed the value of the string (since that's how the console outputs strings).  However, when we sent the string to a file with export-csv, the cmdlet looked for properties that made sense to be columns and found the "decorations" that were provided by get-content.  I had no idea that PowerShell was doing this because I don't generally look for properties on strings (as a side note, the $profile variable set by PowerShell also has some "hidden" properties).  </p>
 <p>To see this more clearly, I did the following:<br />
 [powershell light="true"]<br />
 PS&gt; get-content C:\temp\computers.txt | select -first 1 | format-list *<br />
-[/powershell]<br />
+<br />
 kyndig</p>
 <p>[powershell light="true"]<br />
 PS&gt; get-content C:\temp\computers.txt | select -first 1 | format-list * -force<br />
-[/powershell]</p>
+</p>
 <p>PSPath       : C:\temp\computers.txt<br />
 PSParentPath : C:\temp<br />
 PSChildName  : computers.txt<br />
@@ -63,4 +70,6 @@ ReadCount    : 1<br />
 Length       : 6</p>
 <p>I was able to learn something useful from my mistake this time.  Hope you did, too.</p>
 <p>--Mike</p>
-<p></body></html></p>
+
+
+

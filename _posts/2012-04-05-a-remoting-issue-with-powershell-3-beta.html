@@ -23,14 +23,12 @@ author:
   last_name: ''
 permalink: "/2012/04/05/a-remoting-issue-with-powershell-3-beta/"
 ---
-<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
-<html><body></p>
 <p>I've been doing some thinking about PowerShell Remoting for a project at work and realized that I hadn't ever set up remoting on my "home" laptop.  I'm not in a domain, so remoting configuration is a bit different.  In any case, I would be using the same machine as source and target of the remoting call, so how could it go wrong?</p>
 <p>First of all, VMWare had set up some network adapters and placed them in a public profile.  Enable-PSRemoting doesn't like that.  It was an easy google (bing?) to fix and Enable-PSRemoting succeeded.</p>
 <p>I then issued this:<br />
-[powershell]<br />
-invoke-command -scriptblock { get-process | select-object -first 10  } -computer  localhost<br />
-[/powershell]<br />
+<pre class="wp-code language-powershell"><code>
+invoke-command -scriptblock { get-process | select-object -first 10  } -computer  localhost
+</code></pre><br />
 Imagine my surprise when the result was this:</p>
 <pre>
 Could not find file 'C:\Windows\System32\WindowsPowerShell\v1.0\Event.Format.ps1xml'.
@@ -40,4 +38,5 @@ Could not find file 'C:\Windows\System32\WindowsPowerShell\v1.0\Event.Format.ps1
 <p>I searched the internet for this, but only found one hit that was close, and that was <a href="http://nuget.codeplex.com/workitem/2016" title="a bug report">a bug report</a> for <a href="http://nuget.codeplex.com/" title="nuget">nuget</a>.</p>
 <p>It seems like the powershell engine that is running the remote payload is looking for a formatting file that doesn't exist.  To work around this, I simply copied an existing Format.ps1xml file (I chose Registry.format.ps1xml because it was the smallest), removed the signature from it, and changed the name of the view (so it wouldn't change any output).</p>
 <p>It's not a big bug, and it's a beta so I'm not worried.  Just thought I'd share my workaround.</p>
-<p>-Mike</body></html></p>
+<p>-Mike</p>
+

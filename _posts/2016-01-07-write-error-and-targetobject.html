@@ -24,8 +24,6 @@ author:
   last_name: ''
 permalink: "/2016/01/07/write-error-and-targetobject/"
 ---
-<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
-<html><body>
 <p>Sometimes I feel like I know a lot about PowerShell.  I've taught dozens of classes on PowerShell, written two books, and used it for 8 years now.</p>
 <p>And then I stumble upon <a href="http://blogs.msdn.com/b/powershell/archive/2006/11/03/erroraction-and-errorvariable.aspx">this post</a> from Jeffery Snover in 2006.xI'm not even sure now why I was looking at it at the end of 2015.   The post is about <strong>-ErrorAction</strong> and <strong>-ErrorVariable</strong>.  I'm very comfortable with those two common parameters.  Nothing to see there.  But in scanning down the page, my eye stopped in the middle of a screenshot.</p>
 <p><a href="https://powershellstation.com/wp-content/uploads/2016/01/TargetObject.png" rel="attachment wp-att-838"><img class="alignnone size-full wp-image-838" src="{{site.baseurl}}/assets/2016/01/TargetObject.png" alt="TargetObject" width="714" height="93"></a></p>
@@ -36,9 +34,9 @@ permalink: "/2016/01/07/write-error-and-targetobject/"
 <p><a href="https://powershellstation.com/wp-content/uploads/2016/01/TargetObjectParameter.png" rel="attachment wp-att-839"><img class="alignnone size-full wp-image-839" src="{{site.baseurl}}/assets/2016/01/TargetObjectParameter.png" alt="TargetObjectParameter" width="765" height="161"></a></p>
 <p>And the example in the post showed that the parameter is used when <strong>Stop-Process</strong> has an error. Why hadn't I ever seen it before?</p>
 <p>Ah, I know. My standard example when explaining non-terminating errors looks like this:</p>
-<p>[powershell]<br />
-gwmi Win32_OperatingSystem -computername NOSUCHCOMPUTER,localhost<br />
-[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+gwmi Win32_OperatingSystem -computername NOSUCHCOMPUTER,localhost
+</code></pre>
 <p>The <strong>$Error</strong> object written by <strong>Get-WMIObject</strong> looks like this:<br />
 <a href="https://powershellstation.com/wp-content/uploads/2016/01/WMIError.png" rel="attachment wp-att-841"><img class="alignnone size-full wp-image-841" src="{{site.baseurl}}/assets/2016/01/WMIError.png" alt="WMIError" width="734" height="227"></a></p>
 <p>Unfortunately the <strong>TargetObject </strong>property is empty. Since <strong>Get-WMIObject</strong> implicitly loops through the <strong>ComputerNames</strong>, it would be super useful to know the name of a computer where the operation failed.</p>
@@ -48,4 +46,5 @@ gwmi Win32_OperatingSystem -computername NOSUCHCOMPUTER,localhost<br />
 <p>As always, let me know what you think in the comments.</p>
 <p>--Mike</p>
 <p>P.S.  I've filed a bug for Get-WMIObject on uservoice <a href="https://windowsserver.uservoice.com/forums/301869-powershell/suggestions/11333961-populate-targetobject-in-wmi-error-output-with-the">here</a>.  Please take a minute to upvote it.</p>
-<p></body></html></p>
+
+

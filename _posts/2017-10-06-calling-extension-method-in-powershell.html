@@ -28,8 +28,6 @@ author:
   last_name: ''
 permalink: "/2017/10/06/calling-extension-method-in-powershell/"
 ---
-<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
-<html><body></p>
 <p>A quick one because it's Friday night.</p>
 <p>I recently found myself translating some C# code into PowerShell.  If you've done this, you know that most of it is really routine.  Change the order of some things, change the operators, drop the semicolons.</p>
 <p>In a few places you have to do some adjusting, like changing using scopes into try/finally with .Dispose() in the finally.</p>
@@ -52,19 +50,30 @@ permalink: "/2017/10/06/calling-extension-method-in-powershell/"
 <h3>Extension Methods in PowerShell</h3>
 <p>Unfortunately, PowerShell doesn't do that magic for you.  In PowerShell, you call it just like it's written, a static method of a different class.</p>
 <p>So, in PowerShell, we would do the following:<br />
-[powershell]<br />
-$code=@'<br />
-public static class MyExtClass {<br />
-    public static int NumberOfEs (this string TheString)<br />
-    {<br />
-        return TheString.Length - TheString.Replace ("e", "").Length;<br />
-    }<br />
-}<br />
-'@<br />
-add-type -TypeDefinition $code </p>
-<p>[MyExtClass]::NumberOfEs('hello')<br />
-[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+$code=@&#39;
+
+public static class MyExtClass {
+
+    public static int NumberOfEs (this string TheString)
+
+    {
+
+        return TheString.Length - TheString.Replace (&quot;e&quot;, &quot;&quot;).Length;
+
+    }
+
+}
+
+&#39;@
+
+add-type -TypeDefinition $code 
+[MyExtClass]::NumberOfEs(&#39;hello&#39;)
+</code></pre>
 <p>Note that I've included the C# code in a here-string and used add-type to compile it on the fly.</p>
 <p>The point is, when translating extension method calls into PowerShell, you need to find the extension class (in this case MyExtClass) and call the static method directly.</p>
 <p>You learn something every day.</p>
-<p>--Mike</body></html></p>
+<p>--Mike</p>
+
+
+

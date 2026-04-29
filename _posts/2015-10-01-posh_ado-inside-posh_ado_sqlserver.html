@@ -22,13 +22,11 @@ author:
   last_name: ''
 permalink: "/2015/10/01/posh_ado-inside-posh_ado_sqlserver/"
 ---
-<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
-<html><body></p>
 <p>In a <a href="https://powershellstation.com/2015/09/14/getting-started-with-posh_ado/">previous post</a> I introduced the POSH_Ado "project" and explained that it is a way to use the same code-base to access several different database platforms.  I illustrated it with some sample calls to a SQL Server database using the POSH_Ado_SQLServer module and promised to show the internals of the module later.  The time has come.  Here's how POSH_Ado_SQLServer works:</p>
-<p>[powershell]<br />
-import-module POSH_Ado -args System.Data.SqlClient -Prefix SQLServer -force</p>
-<p>Export-ModuleMember *-SQLServer*<br />
-[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+import-module POSH_Ado -args System.Data.SqlClient -Prefix SQLServer -force
+Export-ModuleMember *-SQLServer*
+</code></pre>
 <p>That's it.  The module simply imports the POSH_Ado module, telling it what ADO.NET provider to use (System.Data.SQLClient) and what prefix to use for the imported cmdlets (SQLServer).  It then, in turn, exports all of the cmdlets with the SQLServer prefix.</p>
 <p>With that tiny bit of effort you get:</p>
 <ul>
@@ -44,4 +42,6 @@ import-module POSH_Ado -args System.Data.SqlClient -Prefix SQLServer -force</p>
 </ul>
 <p>Since the code for POSH_Ado is based on Adolib which targeted SQL Server, it shouldn't be surprising to see that there's not much to do to get POSH_Ado to work with SQL Server.  In the next "episode", I'll connect to MySQL, and the real benefit of POSH_Ado should become apparent.</p>
 <p>Let me know what you think in the comments!</p>
-<p>-Mike</body></html></p>
+<p>-Mike</p>
+
+

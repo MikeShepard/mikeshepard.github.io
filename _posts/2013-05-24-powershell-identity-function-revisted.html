@@ -21,19 +21,21 @@ author:
   last_name: ''
 permalink: "/2013/05/24/powershell-identity-function-revisted/"
 ---
-<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
-<html><body>
 <p>One of my earliest  (<a href="https://powershellstation.com/2010/08/01/the-identity-function/" title="The Identity Function">posts</a> was about implementing an "identity function" in PowerShell to assist in typing lists of strings without bothering with commas.</p>
 <p>The function I presented was this:<br />
-[powershell]<br />
-function identity{<br />
-    return $args<br />
-}<br />
-[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+function identity{
+
+    return $args
+
+}
+</code></pre>
 <p>I recently saw (in a Scripting Games entry) that you don't need to define your own function for this.  <code>write-output</code> works just fine.</p>
 <p>For example:<br />
-[powershell]<br />
-$values=write-output apple orange banana<br />
-[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+$values=write-output apple orange banana
+</code></pre>
 <p>Mike</p>
-<p></body></html></p>
+
+
+

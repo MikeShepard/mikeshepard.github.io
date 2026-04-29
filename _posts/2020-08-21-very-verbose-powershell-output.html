@@ -26,24 +26,29 @@ author:
   last_name: ''
 permalink: "/2020/08/21/very-verbose-powershell-output/"
 ---
-<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
-<html><body>
 <p>Have you ever been writing a PowerShell script and wanted verbose output to show up no matter what?</p>
 <p>You may have thought of doing something like this:<br />
-[powershell]<br />
-#Save the preference variable so you can put it back later<br />
-$saveVerbosePreference=$VerbosePreference</p>
-<p>#Override the preference variable to make the output show up<br />
-$VerbosePreference='Continue'<br />
-Write-Verbose 'This is an important message you need to see'</p>
-<p>#Leave it like you found it<br />
-$VerbosePreference=$saveVerbosePreference<br />
-[/powershell] </p>
+<pre class="wp-code language-powershell"><code>
+#Save the preference variable so you can put it back later
+
+$saveVerbosePreference=$VerbosePreference
+#Override the preference variable to make the output show up
+
+$VerbosePreference=&#39;Continue&#39;
+
+Write-Verbose &#39;This is an important message you need to see&#39;
+#Leave it like you found it
+
+$VerbosePreference=$saveVerbosePreference
+</code></pre> </p>
 <p>If you do that, you'll get the verbose message every time, just like you wanted.</p>
 <p>Fortunately for you, there's a much easier way to get the message:<br />
-[powershell]<br />
-#By adding the -Verbose switch, you override the preference for this cmdlet<br />
-Write-Verbose 'This is an important message you need to see' -Verbose<br />
-[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+#By adding the -Verbose switch, you override the preference for this cmdlet
+
+Write-Verbose &#39;This is an important message you need to see&#39; -Verbose
+</code></pre>
 <p>Wasn't that easy?</p>
-<p></body></html></p>
+
+
+

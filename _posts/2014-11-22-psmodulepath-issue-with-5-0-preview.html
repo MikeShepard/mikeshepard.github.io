@@ -20,8 +20,6 @@ author:
   last_name: ''
 permalink: "/2014/11/22/psmodulepath-issue-with-5-0-preview/"
 ---
-<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
-<html><body>
 <p>At work, I have a library of modules stored on a network share.  In order to make things work well when I'm not on the network, I include the network share in my PSModulePath, but later in the PSModulePath I point to a local copy of the library.<br />
 Since installing the 5.0 preview (which I love, btw), I've seen some really strange errors, like this one:<br />
 <a href="https://powershellstation.com/wp-content/uploads/2014/11/error.png"><img src="{{site.baseurl}}/assets/2014/11/error.png" alt="error" width="796" height="56" class="alignnone size-full wp-image-639"></a><br />
@@ -29,4 +27,5 @@ Obviously, I am not redefining the set-variable cmdlet in my scripts.  I've had 
 If you have to include network shares in your PSModulePath, I would recommend adding them in your profile, and use test-path to make sure that they are available before making the modification.  T</p>
 <p>I'll chalk this one up to it being pre-release software.  It's encouraging to see the PowerShell team continue to deliver new and exciting features with the speed that they have.  </p>
 <p>-Mike</p>
-<p></body></html></p>
+
+

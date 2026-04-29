@@ -32,8 +32,6 @@ excerpt: |-
 
   In this post, I'll try to explain why I did that.
 ---
-<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
-<html><body></p>
 <p>In a <a href="https://powershellstation.com/2009/09/10/getting-scheduled-tasks-in-powershell/">recent post</a> , I showed how to get a list of Scheduled Tasks as objects using PowerShell and Import-CSV.   In that, I included the following line of code:</p>
 <pre class="brush: powershell; gutter: false">$task.PSObject.TypeNames.Insert(0,"DBA_ScheduledTask")</pre>
 <p>In this post, I'll try to explain why I did that.</p>
@@ -75,4 +73,5 @@ excerpt: |-
 <p>With this in a file (for instance c:typesscheduledTasks_type.ps1xml), you would issue the command "update-typedata c:typesscheduledTasks_type.ps1xml", and the Run and Delete methods would be added to items of that type.  Of course, you'd want to modify the code in the previous post to not add those methods with add-member.</p>
 <p>I tend to use a mix of add-member and ETS to create the objects I want.  You have to be careful when using ETS to remember that if you want the extra properties, you have to have loaded the ps1xml file in the session you're running.  This often isn't the case if you're remoted into a server troubleshooting something.  For that reason, it's usually preferrable (in my opinion) to use add-member most of the time.  I use a custom PowerShell host that allows me to use ETS data to specify context menus for different types of objects and customize them through the ps1xml files.  Since I don't expect to find those context menus when I'm in the text console on a server, it doesn't get me into trouble.</p>
 <p>Let me know if you have any questions, comments, or complaints.</p>
-<p>Mike</body></html></p>
+<p>Mike</p>
+

@@ -1,0 +1,32 @@
+---
+layout: default
+---
+
+<article class="post type-post status-publish format-standard hentry single-post">
+  <header class="entry-header">
+    <h1 class="entry-title">{{ page.title }}</h1>
+    <div class="entry-meta">
+      <span class="sep">Posted by </span>
+      {%- assign author_name = page.author.display_name | default: page.author | default: site.author | default: 'mike' -%}
+      <span class="author vcard"><span class="url fn n">{{ author_name }}</span></span>
+      <span class="sep"> on </span>
+      <a href="{{ page.url | relative_url }}" rel="bookmark">
+        <time class="entry-date" datetime="{{ page.date | date_to_xmlschema }}">{{ page.date | date: "%e %B %Y, %-I:%M %P" | strip }}</time>
+      </a>
+    </div>
+  </header>
+
+  {%- capture cleaned_content -%}{%- include clean_content.html content=content -%}{%- endcapture -%}
+  <div class="entry-content">
+    {{ cleaned_content }}
+  </div>
+
+  <footer class="entry-meta">
+    {%- if page.categories and page.categories.size > 0 -%}
+      <span class="cat-links">Filed under {% for category in page.categories %}<a href="{{ '/categories/' | relative_url }}#{{ category | slugify }}">{{ category }}</a>{% unless forloop.last %}, {% endunless %}{% endfor %}</span>
+    {%- endif -%}
+    {%- if page.tags and page.tags.size > 0 -%}
+      <span class="tag-links">Tagged {% for tag in page.tags %}<a href="{{ '/tags/' | relative_url }}#{{ tag | slugify }}">{{ tag }}</a>{% unless forloop.last %}, {% endunless %}{% endfor %}</span>
+    {%- endif -%}
+  </footer>
+</article>

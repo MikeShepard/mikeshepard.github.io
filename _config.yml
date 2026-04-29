@@ -21,16 +21,33 @@
 title: PowerShell Station
 email: mshepard70@gmail.com
 description: >- # this means to ignore newlines until "baseurl:"
-  Write an awesome description for your new site here. You can edit this
-  line in _config.yml. It will appear in your document head meta (for
-  Google search results) and in your feed.xml site description.
+  Mike's PowerShell Musings
+tagline: Mike's PowerShell Musings
 baseurl: "" # the subpath of your site, e.g. /blog
-url: "" # the base hostname & protocol for your site, e.g. http://example.com
-twitter_username: jekyllrb
-github_username:  jekyll
+url: "https://powershellstation.com"
+author: mike
+search_domain: powershellstation.com
+navigation:
+  - title: About Mike
+    url: /about-2/
+  - title: Blogs
+    url: /blogs/
+  - title: Books
+    url: /books/
+  - title: Downloads!
+    url: /downloads/
+  - title: Glossary
+    url: /glossary/
+  - title: IDEs
+    url: /ides/
+  - title: Policies
+    url: /policies/
+  - title: Sites
+    url: /sites/
+  - title: Tools
+    url: /tools/
 
 # Build settings
-theme: minima
 plugins:
   - jekyll-feed
 

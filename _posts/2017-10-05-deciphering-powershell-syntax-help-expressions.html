@@ -29,8 +29,6 @@ author:
   last_name: ''
 permalink: "/2017/10/05/deciphering-powershell-syntax-help-expressions/"
 ---
-<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
-<html><body></p>
 <p>In my <a href="https://powershellstation.com/2017/10/04/specifying-powershell-parameter-position/">last post</a> I showed several instances of the syntax help that you get when you use get-help or -? with a cmdlet.</p>
 <p>For instance:</p>
 <p><img class="size-full wp-image-1234 alignleft" src="{{site.baseurl}}/assets/2017/10/positional1.png" alt="" width="1487" height="177"></p>
@@ -39,25 +37,34 @@ permalink: "/2017/10/05/deciphering-powershell-syntax-help-expressions/"
 <ul>
 <li>An optional parameter that can be used by position or name:</li>
 </ul>
-<p>[powershell][[-Foo] &lt;Bar&gt;][/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+[[-Foo] &lt;Bar&gt;]
+</code></pre>
 <ul>
 <li>An optional parameter that can only be used by name:</li>
 </ul>
-<p>[powershell][-Foo &lt;bar&gt;][/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+[-Foo &lt;bar&gt;]
+</code></pre>
 <ul>
 <li>A required parameter that can be used by position or name:</li>
 </ul>
-<p>[powershell][-Foo] &lt;Bar&gt;[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+[-Foo] &lt;Bar&gt;
+</code></pre>
 <ul>
 <li>An optional parameter that can be used only by name:</li>
 </ul>
-<p>[powershell]-Foo &lt;Bar&gt;[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+-Foo &lt;Bar&gt;
+</code></pre>
 <ul>
 <li>A switch parameter (switches are always optional and can only be used by name)</li>
 </ul>
-<p>[powershell][-Foo]</p>
-<p>[-Foo &lt;Switchparameter&gt;]  #odd, but you may see this in the help sometimes</p>
-<p>[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+[-Foo]
+[-Foo &lt;Switchparameter&gt;]&#160; #odd, but you may see this in the help sometimes
+</code></pre>
 <p>So, in the example above we see that we have</p>
 <ul>
 <li>parm1, which is a parameter of type Object (i.e. no type specified), is optional and can be used by name or position</li>
@@ -67,4 +74,6 @@ permalink: "/2017/10/05/deciphering-powershell-syntax-help-expressions/"
 </ul>
 <p>With some practice, you will be reading more complex syntax examples like a pro.</p>
 <p>Let me know if this helps!</p>
-<p>--Mike</body></html></p>
+<p>--Mike</p>
+
+

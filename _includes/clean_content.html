@@ -1,0 +1,32 @@
+{%- assign cleaned = include.content
+  | replace: '<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />', ''
+  | replace: '<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />', ''
+  | replace: '<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">', ''
+  | replace: '<html><body></p>', ''
+  | replace: '<html><body><br />', ''
+  | replace: '<html><body>', ''
+  | replace: '<p></body></html></p>', ''
+  | replace: '</body></html></p>', ''
+  | replace: '</body></html>', ''
+  | replace: '<p>[powershell]<br />', '<pre class="wp-code language-powershell"><code>'
+  | replace: '<p>[powershell]', '<pre class="wp-code language-powershell"><code>'
+  | replace: '[powershell]<br />', '<pre class="wp-code language-powershell"><code>'
+  | replace: '[powershell]', '<pre class="wp-code language-powershell"><code>'
+  | replace: '[/powershell]</p>', '</code></pre>'
+  | replace: '[/powershell]<br />', '</code></pre>'
+  | replace: '[/powershell]', '</code></pre>'
+  | replace: '<br />
+<a href', '</p>
+<p><a href'
+  | replace: '<br />
+<img', '</p>
+<p><img'
+  | replace: '</a>
+<p>', '</a></p>
+<p>'
+  | replace: '<p>&nbsp;</p>', ''
+  | replace: '<p> </p>', ''
+  | replace: '<p><br />', '<p>'
+  | replace: '<p></p>', ''
+-%}
+{{ cleaned }}

@@ -23,10 +23,10 @@ author:
   last_name: ''
 permalink: "/2015/10/07/powershell-and-mysql-posh_ado_mysql/"
 ---
-<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
-<html><body></p>
 <p>Using PowerShell and MySQL together with <a href="https://github.com/MikeShepard/POSH_Ado">POSH_Ado</a> is just as easy as SQL Server.  You'll need the POSH_Ado and POSH_Ado_MySQL Modules, and use this command to get started:<br />
-[powershell]Import-Module POSH_Ado_MySQL[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+Import-Module POSH_Ado_MySQL
+</code></pre>
 <p>Once you've done that you'll have the following functions at your disposal:</p>
 <ul>
 <li><strong>New-MySQLCommand</strong></li>
@@ -38,13 +38,15 @@ permalink: "/2015/10/07/powershell-and-mysql-posh_ado_mysql/"
 </ul>
 <p>These functions work just like the ones for SQLServer in AdoLib or POSH_Ado_SQLServer, except that they work with MySQL.  </p>
 <p>Inside POSH_Ado_MySQL, you'll see that (just like POSH_Ado_SQLServer), it is simply importing the POSH_Ado module, specifying the MySQL ADO.NET provider name and the prefix (MySQL).  Then, it calls the <strong>Set-MySQLADONetParameters</strong> function to add an option to the connection strings that are generated and to specify that there is no prefix for parameter names.</p>
-<p>[powershell]<br />
-import-module POSH_Ado -args MySql.Data.MySqlClient -Prefix MySQL -force</p>
-<p># .NET (and PowerShell) do not like zero datetime values by default.  This option helps with that.<br />
-# http://dev.mysql.com/doc/refman/5.5/en/connector-net-connection-options.html<br />
-Set-MySQLADONetParameters -option @{'Allow Zero Datetime'='true'} -ParameterPrefix ''</p>
-<p>Export-ModuleMember *-MySQL*<br />
-[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+import-module POSH_Ado -args MySql.Data.MySqlClient -Prefix MySQL -force
+# .NET (and PowerShell) do not like zero datetime values by default.  This option helps with that.
+
+# http://dev.mysql.com/doc/refman/5.5/en/connector-net-connection-options.html
+
+Set-MySQLADONetParameters -option @{&#39;Allow Zero Datetime&#39;=&#39;true&#39;} -ParameterPrefix &#39;&#39;
+Export-ModuleMember *-MySQL*
+</code></pre>
 <p>Hopefully by now you can see the power of the POSH_Ado project:</p>
 <ol>
 <li>All of the ADO.NET logic is in one place</li>
@@ -56,4 +58,7 @@ Set-MySQLADONetParameters -option @{'Allow Zero Datetime'='true'} -ParameterPref
 <p>Let me know your thoughts in the comments.</p>
 <p>-Mike</p>
 <p>P.S.  POSH_Ado and the platform-specific modules can be found <a href="https://github.com/MikeShepard/POSH_Ado">here</a><br />
-</body></html></p>
+</p>
+
+
+

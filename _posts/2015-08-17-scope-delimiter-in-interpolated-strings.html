@@ -21,18 +21,21 @@ author:
   last_name: ''
 permalink: "/2015/08/17/scope-delimiter-in-interpolated-strings/"
 ---
-<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
-<html><body>
 <p>I've been meaning to write about this for a while.  It's a simple thing that broke some code from PowerShell 1.0.  Yes, I still have some code running in production that was written back before 2.0 came out. And before I go any further let me say that PowerShell has done a remarkable job in keeping backward compatibility. I very rarely have old code break due to new PowerShell features or parsing.</p>
 <p>Anyway, when writing messages out to the screen to show what's going on in a script, I would often use a pattern like this:</p>
-<p>[powershell]write-host "$setting1 and $setting2"[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+write-host &quot;$setting1&#160;and&#160;$setting2&quot;
+</code></pre>
 <p>This code upgraded just fine and is not a problem.</p>
 <p>Where I ran into a problem was when I varied the pattern slightly.  The following code is not so happy:</p>
-<p>[powershell]write-host "`$setting1:$setting2"[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+write-host &quot;`$setting1:$setting2&quot;
+</code></pre>
 <p>This was valid 1.0 code, but it doesn't run in 2.0 or above.</p>
 <p><a href="https://powershellstation.com/wp-content/uploads/2015/08/screenshot_variables.png"><img class="alignnone size-full wp-image-695" src="{{site.baseurl}}/assets/2015/08/screenshot_variables.png" alt="screenshot_variables" width="949" height="117"></a></p>
 <p>The problem stems from the addition of scope labels for variables in 2.0. To refer to scoped variables, you prefix the name of the variable with the scope modifier (local, global, script, private) followed by a colon. So the parser is seeing $setting1:$setting2 and thinking that "setting1" is a scope modifier.</p>
 <p>Easy workarounds for this are adding a space before the colon or escaping it with a backtick. Also, I guess you could use subexpressions $() for setting1.</p>
 <p>Have you run into this before? What other problems have you found in old code running in newer versions of PowerShell?</p>
 <p>--Mike</p>
-<p></body></html></p>
+
+

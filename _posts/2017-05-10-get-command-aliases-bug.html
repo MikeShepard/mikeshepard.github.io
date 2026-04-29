@@ -30,27 +30,30 @@ author:
   last_name: ''
 permalink: "/2017/05/10/get-command-aliases-bug/"
 ---
-<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
-<html><body>
 <p>I stumbled across some interesting behavior the other day as I was demonstrating something that I understand pretty well.<img src="{{site.baseurl}}/assets/2017/05/bug-162019_640.png" alt="" width="192" height="190" class="alignright size-full wp-image-1182"></p>
 <p>[Side note...this is a great way to find out things that you don't know...confidently explain how something works, and demo it.]</p>
 <p>I was asked to give an overview of how modules work in PowerShell.  I've been writing and using modules since PowerShell 2.0 came out (2009?) so I didn't think there was anything (at least anything basic) that I wasn't comfortable with.  Not to say that there aren't module concepts I'm not super-clear on, but the basics should have been all worked out.</p>
 <p>After explaining the concepts of modules (encapsulating functions, variables, aliases) and showing how PowerShell knows where to look for modules, I turned to an example module I had written.</p>
 <p>I won't replicate that module here, because the contents don't really matter.  I've boiled the "weirdness" into a simple example and it looks like this:</p>
-<p>[powershell]<br />
-function Get-Thing{<br />
-}</p>
-<p>new-alias -Name MyDir -Value Get-ChildItem<br />
-new-alias -Name Func  -Value Get-Thing<br />
-new-alias -Name File -Value Get-Item<br />
-new-alias -Name Get-TheThing -Value Get-Thing<br />
-Export-ModuleMember -Function * -Alias *<br />
-[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+function Get-Thing{
+
+}
+new-alias -Name MyDir -Value Get-ChildItem
+
+new-alias -Name Func  -Value Get-Thing
+
+new-alias -Name File -Value Get-Item
+
+new-alias -Name Get-TheThing -Value Get-Thing
+
+Export-ModuleMember -Function * -Alias *
+</code></pre>
 <p>If you save that as SampleModule.psm1 file (and put it in a same-named folder in the PSModulePath), you will be able to play along with me.</p>
 <p>I showed the group that <strong>Import-Module</strong> was able to import the module using the name only, not requiring the user to know what path the module was installed into.  Then, I thought "I'll show them how to use Get-Command to find the items that were imported from the module!"</p>
-<p>[powershell]<br />
-Get-Command -module SampleModule<br />
-[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+Get-Command -module SampleModule
+</code></pre>
 <p>Imagine my surprise when I saw the following output:<br />
 <img src="{{site.baseurl}}/assets/2017/05/SampleModuleGetCommand.png" alt="" width="1003" height="207" class="alignright size-full wp-image-1179"></p>
 <p>Only one of the three aliases showed up.</p>
@@ -61,4 +64,5 @@ Get-Command -module SampleModule<br />
 <p>What do you think?  Surprised by this result?  </p>
 <p>Let me know in the comments.</p>
 <p>--Mike</p>
-<p></body></html></p>
+
+

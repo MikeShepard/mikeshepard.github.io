@@ -21,8 +21,6 @@ author:
   last_name: ''
 permalink: "/2010/08/18/my-new-favorite-cmdlet-set-strictmode/"
 ---
-<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
-<html><body></p>
 <p>If you’ve ever written Visual Basic or VB.Net code, you’re aware that it’s highly recommended that you use “Option Strict” in all of your code.  Similarly, Perl scripters have a “use strict” that comes highly suggested.</p>
 <p>The idea of these options is that there’s quite a bit of flexibility built into these languages, and sometimes that flexibility backfires on you.  Using these options actually limits the flexibility of the languages in question in ways that help coders to keep from making certain types of mistakes in their code.  Writing code professionally in VB.Net (you may scoff, but it happens quite a lot) or Perl (it’s not my language of choice, but again, there’s a lot out there) without using these options is not a good idea at all.</p>
 <p>I’ve been writing code in PowerShell for about 2 years, and have probably written about 10,000 lines, mostly code that’s used on a daily basis.  I’ve read several PowerShell books, online tutorials, and watched several webcasts.  I may have not been paying attention, but I’ve completely missed any emphasis on the analogous option in PowerShell, “set-strictmode”.  One of my co-workers asked if there was something like this in PowerShell, and I found it almost instantly.  Google, and the PowerShell help file both explain how the cmdlet works.  He and I started using it, and to our dismay, found dozens of errors in code that we had been trusting, in some case, for over a year.</p>
@@ -59,12 +57,18 @@ permalink: "/2010/08/18/my-new-favorite-cmdlet-set-strictmode/"
 </table>
 <p>I would advise that you use “set-strictmode –version Latest” in your profile.</p>
 <p>Let’s look at the different restrictions.  First, if you’ve written any PowerShell scripts, you’re aware that you don’t have to declare your variables.  That’s a “good thing”, and strictmode 1.0 doesn’t change that in any way.  What it does do is make sure that you’re not retrieving values from variables you haven’t assigned anything to.  Here’s some sample code that strictmode will choke on.</p>
-<p>  [powershell]$servername=read-host -prompt &amp;quot;Enter name of server&amp;quot;<br />
-$wmi=get-wmiobject -class Win32_Service -computername $server_name[/powershell]</p>
+<p>  <pre class="wp-code language-powershell"><code>
+$servername=read-host -prompt &amp;quot;Enter name of server&amp;quot;
+
+$wmi=get-wmiobject -class Win32_Service -computername $server_name
+</code></pre>
 <p>This is a pretty simple example, but it’s almost certain that sooner or later you’ll typo a variable name in a script.  Strictmode will help keep you from getting in this kind of trouble.  With strictmode Version 1.0, you won’t be warned about using uninitialized variables in double-quoted string, e.g. “Server=$server_name”…(they’ll be replaced with $null).  Version 2.0 will cause references to uninitialized variablesinside strings to be an error as well.</p>
 <p>Here’s an example of code that illustrates property restrictions in StrictMode 2.0.</p>
-<p>[powershell]$servername=&amp;quot;Server123&amp;quot;<br />
-$length=$servername.lenght[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+$servername=&amp;quot;Server123&amp;quot;
+
+$length=$servername.lenght
+</code></pre>
 <p>I would write up an example of using the method-call syntax for a function, but Thomas Lee just <a href="http://tfl09.blogspot.com/2010/09/calling-functions-in-powershell.html">blogged about this</a> in his blog <a href="http://tfl09.blogspot.com/">Under the Stairs</a>.</p>
 <p>The final “restriction” in strict mode 2.0 says that you can’t have a variable with no name.  The syntax ${varname} is a way of expressing $varname, when varname contains characters that are not generally allowed in variable names.  I haven’t ever had a really convincing use for this syntax (I’ve thought about using it to associate variables with filenames using the full path as the variable name, but it seems like a dictionary would be cleaner).</p>
 <p>I should note that <a href="http://leeholmes.com/blog/">Lee Holmes</a> has done a great thing in his recently published <a href="http://www.leeholmes.com/blog/PowerShellCookbookV2NowAvailable.aspx">PowerShell Cookbook V2</a>.  Each script in the cookbook starts with “set-strictmode –version Latest”.   In my opinion, this is a best practice.</p>
@@ -78,4 +82,6 @@ $length=$servername.lenght[/powershell]</p>
 <p>If you are just starting to build a PowerShell script library, I would recommend turning strictmode on in the profile on every machine that you run PowerShell scripts.  You’ll be glad you did.</p>
 <p>Hopefully this was not too much of a rant.  Please let me know what experiences you’ve had with with set-strictmode.</p>
 <p>Mike</p>
-<p></body></html></p>
+
+
+

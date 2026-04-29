@@ -1,0 +1,96 @@
+---
+layout: page
+title: Blogs
+permalink: /blogs/
+---
+
+This list has not been updated since around 2009, so treat it as historical rather than current.
+
+- [$cript Fanatic](http://blogs.microsoft.co.il/blogs/scriptfanatic/) - Shay Levy's blog
+- [.NET wonders (and alike)](https://weblogs.asp.net/efrancobisi/) - Efran Cobisi's blog
+- [A Taste Of PowerShell](https://tasteofpowershell.blogspot.com/)
+- [Active Directory Powershell Blog](http://blogs.msdn.com/b/adpowershell/)
+- [Adam's AD Admin](https://adadmin.blogspot.com/) - Adam Stone's blog
+- [beefyCode.com](http://www.beefycode.com/default.aspx) - Jim Christopher's blog
+- [Benp's Guide to Stuff](http://blogs.technet.com/b/benp/)
+- [Bjorn Osterman's Infrastructural Programming?](http://itbloggen.se/cs/blogs/bjrn_stermans_blog/)
+- [blog.powershell.no](http://blog.powershell.no/) - Jan Egil Ring's blog
+- [BSonPoSH](http://bsonposh.com/) - Brandon Shell's blog
+- [Computer Performance](http://computerperformance.co.uk/powershell/index.htm) - Guy Thomas's blog
+- [Dalle & DXter](http://poweradmin.se/blog/)
+- [Development in a Blink](http://dougfinke.com/blog/) - Doug Finke's blog
+- [DevInfra-US](https://devinfra-us.blogspot.com/) - Antoine Habert's blog
+- [Dmitry's PowerBlog: PowerShell and beyond](http://dmitrysotnikov.wordpress.com/)
+- [Dreaming in PowerShell](http://powershell.com/cs/blogs/tobias/default.aspx) - Dr. Tobias Weltner's blog
+- [Exchange Exchange](http://exchangeexchange.com/)
+- [get-admin](http://get-admin.com/blog/tag/powershell/) - Glenn Sizemore's blog
+- [Get-PowerShell](http://get-powershell.com/) - Andy Schneider's blog
+- [get-powershellblog](https://marcoshaw.blogspot.com/) - Marco Shaw's blog
+- [Get-World | ConvertTo-PowerShell](http://powershell.cz/)
+- [ghjconan's blog](http://blogs.itecn.net/blogs/ghjconan/)
+- [Hey, Scripting Guy! Blog](http://blogs.technet.com/b/heyscriptingguy/)
+- [Huddled Masses](http://huddledmasses.org/) - Joel Bennett's blog
+- [I Love Powershell](http://ilovepowershell.com/) - Michael Simmons's blog
+- [Indented!](http://www.indented.co.uk/index.php/category/powershell/) - Chris Dent's blog
+- [JBs Powershell](https://mspowershell.blogspot.com/) - Jakob Bindslet's blog
+- [Joe Pruitt - A Software Architect's take on Networking](http://devcentral.f5.com/weblogs/Joe/)
+- [Jonathan Medd's Blog](http://www.jonathanmedd.net/)
+- [Keith Hill's Blog](http://keithhill.spaces.live.com/)
+- [Knowledge Is Power(shell)](http://spowser.wordpress.com/)
+- [Lead, Follow, or Move](http://www.leadfollowmove.com/) - Adam Bell's blog
+- [Lee Desmond's blog](http://www.leedesmond.com/weblog/)
+- [Life of a techno-guru](http://trevorsullivan.net/) - Trevor Sullivan's blog
+- [Live Powershell](http://powershell.com/cs/blogs/karl-prosser/)
+- [Media And Microcode](http://blogs.msdn.com/b/mediaandmicrocode/) - James Brundage's blog
+- [Mike Pfeiffer's Blog](http://www.mikepfeiffer.net/)
+- [msgoodies](https://msgoodies.blogspot.com/)
+- [Nathan's Musings on IT and Life](https://myitpath.blogspot.com/) - Nathan Linley's blog
+- [Nick's Unified Communications and Scripting Blog](http://blogs.msdn.com/b/karsmith/)
+- [Nivot Ink](http://www.nivot.org/) - Oisin Grehan's blog
+- [out-web.net](http://www.out-web.net/?author=3) - Martin Zugec's blog
+- [PauerSchell](https://pauerschell.blogspot.com/) - Bernd Kriszio's blog
+- [PoSH Fan](https://winpowershell.blogspot.com/)
+- [Poshoholic](http://poshoholic.com/) - Kirk Munro's blog
+- [PoshTips - PowerShell Tips and Scripting Samples](http://poshtips.com/)
+- [PowerShell Basics](http://powershell-basics.com/) - Steven Murawski's blog
+- [PowerShell Downunder](http://powershelldownunder.com/) - Shane Hoey's blog
+- [Powershell for Testers](http://ageras.wordpress.com/)
+- [PowerShell In GUI Blog](http://powershelldevtools.wordpress.com/)
+- [PowerShell powered](http://en-us.sysadmins.lv/default.aspx) - Vadims Podans's blog
+- [PowerShell Pro!](http://www.powershellpro.com/) - Jesse Hamrick's blog
+- [PowerShell Scripting Weblog](http://blogs.wankuma.com/mutaguchi/)
+- [PowerShell Team Blog](http://blogs.msdn.com/b/powershell/)
+- [PowerShell with a Purpose Blog](http://www.windowsitpro.com/blogs/PowerShellwithaPurpose.aspx) - Don Jones's blog
+- [PowerShell.nu](http://www.powershell.nu/) - Niklas Goude's blog
+- [PowerShellers](https://powershellers.blogspot.com/) - Aleksandar Nikolic's blog
+- [PowerShellStation](https://powershellstation.com/) - Mike Shepard's blog
+- [Precision Computing](http://www.leeholmes.com/blog/) - Lee Holmes's blog
+- [PS >Blog-PowerShell | Where{$_.Blog -ge $Helpful}](https://blog-powershell.blogspot.com/)
+- [Ragnar Harper's blog on Microsoft technology and security](http://blog.crayon.no/blogs/ragnar/)
+- [Ravikanth Chaganti](http://www.ravichaganti.com/blog/)
+- [Richard Siddaway's Blog](http://richardspowershellblog.wordpress.com/)
+- [Rick Bielawski](http://rickbielawski.wordpress.com/)
+- [Scripting Operations Framework](https://scriptingof.blogspot.com/) - Gregory Schiro's blog
+- [Sev17](http://sev17.com/) - Chad Miller's blog
+- [Shell Shocked](http://cjoprey.wordpress.com/) - Chris O'Prey's blog
+- [Sly PowerShell](http://robertrobelo.wordpress.com/)
+- [String Theory](http://www.cmschill.net/StringTheory/) - Mark Schill's blog
+- [tech, mobile, powershell, stuff](http://www.jonoble.com/) - Jonathan Noble's blog
+- [tech-comments](https://tech-comments.blogspot.com/)
+- [TechProsaic](http://halr9000.com/) - Hal Rottenberg's blog
+- [The Arabian PowerShell](http://arabianpowershell.wordpress.com/)
+- [The Energized Tech](http://www.energizedtech.com/) - Sean Kearney's blog
+- [The lonely Administrator](http://jdhitsolutions.com/blog/) - Jeffery Hicks's blog
+- [The PowerShell Front](http://www.maxtblog.com/) - Max Trinidad's blog
+- [The PowerShell Guy](http://thepowershellguy.com/blogs/posh/)
+- [The Powershell Workbench](http://mjolinor.wordpress.com/) - Rob Campbell's blog
+- [Tome's Land of IT](http://powertoe.wordpress.com/)
+- [Under the Stairs](https://tfl09.blogspot.com/) - Thomas Lee's blog
+- [Unlock-PowerShell](http://unlockpowershell.wordpress.com/) - Karl Mitschke's blog
+- [Use PowerShell](http://blog.usepowershell.com/) - Steven Murawski's blog
+- [Vinicius Canto's Blog](https://viniciuscanto.blogspot.com/)
+- [www.powershell-scripting.com](http://www.powershell-scripting.com/) - Arnaud Petitjean's blog
+- [Xenophane's Blog](http://www.xipher.dk/WordPress/) - Claus Nielsen's blog
+- [Yang Li - PowerShell and System Center](http://myitforum.com/cs2/blogs/yli628/)
+
+This list is also available as an [OPML file](http://files.powershellstation.com/blogs.opml) for importing into your feed reader.

@@ -23,8 +23,6 @@ author:
   last_name: ''
 permalink: "/2009/10/22/writing-your-own-powershell-hosting-app-part-2/"
 ---
-<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
-<html><body></p>
 <p>In the last <a title="post" href="https://powershellstation.com/2009/10/12/writing-your-own-powershell-hosting-app-part-1-introduction/">post</a>, I discussed some of the reasons why you might want to write your own PowerShell hosting app.  I realized later that I didn't define what that meant.</p>
 <p>In general, there are 2 ways to include PowerShell technology in an application.</p>
 <ol>
@@ -42,30 +40,44 @@ permalink: "/2009/10/22/writing-your-own-powershell-hosting-app-part-2/"
 </ol>
 <p>And now, on to the code.  I'm going to use <a title="SharpDevelop" href="http://www.icsharpcode.net/OpenSource/SD/">SharpDevelop</a>, because it's possible that you want to do something like this, but don't have the budget (as an admin) to have development tools.  SharpDevelop is a free, open-source IDE for .NET languages.  It is very similar to Visual Studio, and includes a lot of features.  Did I mention that it's free?</p>
 <p>Now, on to coding.  I'm envisioning a simple screen with an area to enter PowerShell code, and an area to view the output.  I started by creating a new VB.NET Windows Application.  I then added a menustrip, a splitter, and two textboxes (one above the splitter, and one below).  I set both textboxes to multiline and set their dock property to fill.  I also right-clicked on the menustrip and selected "Insert Standard Items"  Clicking the Run button should give you something that looks like this:</p>
-<p>[caption id="attachment_119" align="alignnone" width="674" caption="Screenshot 1"]<img class="size-full wp-image-119" title="screenshot0007 2009-10-22-20_52_37" src="{{site.baseurl}}/assets/2009/10/screenshot0007-2009-10-22-20_52_37.jpg" alt="Screenshot 1" width="674" height="338">[/caption]</p>
+<p><img class="size-full wp-image-119" title="screenshot0007 2009-10-22-20_52_37" src="{{site.baseurl}}/assets/2009/10/screenshot0007-2009-10-22-20_52_37.jpg" alt="Screenshot 1" width="674" height="338"></p>
 <p>It's nothing spectacular, but this isn't a post about writing a spectacular interface.  This is about PowerShell in a GUI.  Now to add the PowerShell.</p>
 <p>You're going to need to reference to System.Management.Automation (right-click on the References node in the Projects window, select Add Reference, and select System.Management.Automation from the list on the GAC tab).   You will probably want to add the following to the top of the .vb file:<br />
-[vbnet]<br />
-Imports System.Management.Automation<br />
-Imports System.Management.Automation.Runspaces<br />
-imports System.Collections.ObjectModel<br />
-[/vbnet]</p>
+<pre class="wp-code language-vbnet"><code>
+Imports System.Management.Automation
+
+Imports System.Management.Automation.Runspaces
+
+imports System.Collections.ObjectModel
+</code></pre>
 <p>Now, we're going to need to add a menu item to run the code.  I added a "Run" menu with an item under it called "Run Script" that has a shortcut key of F5.  Double-clicking on the "Run Script" menu item brings up the code editor in the handler for the menu item.  Here's the code I put in it.<br />
-[vbnet]    Sub RunToolStripMenuItem1Click(sender As Object, e As EventArgs)<br />
-        Dim r As Runspace=RunspaceFactory.CreateRunspace<br />
-        r.Open<br />
-        Dim p As Pipeline=r.CreatePipeline(txtScript.Text)</p>
-<p>        Dim output As Collection(Of PSObject)<br />
-        output=p.Invoke()<br />
-        For Each o As PSObject In output<br />
-            txtOutput.AppendText(o.ToString()+vbcrlf)<br />
-        Next<br />
-    End Sub[/vbnet]<br />
+<pre class="wp-code language-vbnet"><code>
+Sub RunToolStripMenuItem1Click(sender As Object, e As EventArgs)
+
+        Dim r As Runspace=RunspaceFactory.CreateRunspace
+
+        r.Open
+
+        Dim p As Pipeline=r.CreatePipeline(txtScript.Text)
+        Dim output As Collection(Of PSObject)
+
+        output=p.Invoke()
+
+        For Each o As PSObject In output
+
+            txtOutput.AppendText(o.ToString()+vbcrlf)
+
+        Next
+
+    End Sub
+</code></pre><br />
 With that, I clicked the run button in SharpDevelop, and behold:</p>
-<p>[caption id="attachment_120" align="alignnone" width="674" caption="The Finished(?) App"]<img class="size-full wp-image-120" title="Screenshot 2" src="{{site.baseurl}}/assets/2009/10/screenshot0009-2009-10-22-21_30_01.jpg" alt="The Finished(?) App" width="674" height="338">[/caption]</p>
+<p><img class="size-full wp-image-120" title="Screenshot 2" src="{{site.baseurl}}/assets/2009/10/screenshot0009-2009-10-22-21_30_01.jpg" alt="The Finished(?) App" width="674" height="338"></p>
 <p>Typing the simplest PowerShell script I could think of (dir) and selecting Run (or hitting F5) provides the desired output.  That's a good start, but to see a shortcoming, look what happens when I try something more adventurous (After shrinking the size of the app so the screenshots aren't so obnoxious):</p>
 <p><img src="{{site.baseurl}}/assets/2009/10/moz-screenshot.png" alt=""></p>
-<p>[caption id="attachment_121" align="alignnone" width="261" caption="Not So Useful Output"]<img class="size-full wp-image-121" title="BadOutput" src="{{site.baseurl}}/assets/2009/10/screenshot0011-2009-10-22-21_34_12.jpg" alt="Not So Useful Output" width="261" height="265">[/caption]</p>
+<p><img class="size-full wp-image-121" title="BadOutput" src="{{site.baseurl}}/assets/2009/10/screenshot0011-2009-10-22-21_34_12.jpg" alt="Not So Useful Output" width="261" height="265"></p>
 <p>Since the System.Process.ServiceController class didn't have a very friendly ToString() method, we're kind of out of luck.  And hey, the output from the "dir" example wasn't anywhere close to what you would normally see in a PowerShell prompt.  What's up with that?</p>
 <p>Tune in next time for the reason.  I'll try to get it written Saturday, but no promises.</p>
-<p>In the meantime, play around with the code and see what you can accomplish.  And let me know what you think of my choice of VB.NET and SharpDevelop.</body></html></p>
+<p>In the meantime, play around with the code and see what you can accomplish.  And let me know what you think of my choice of VB.NET and SharpDevelop.</p>
+
+

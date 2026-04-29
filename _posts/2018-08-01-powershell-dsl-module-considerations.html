@@ -22,8 +22,6 @@ author:
   last_name: ''
 permalink: "/2018/08/01/powershell-dsl-module-considerations/"
 ---
-<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
-<html><body></p>
 <p>Just a quick note to mention a couple of things I've come across with PowerShell modules that encapsulate DSLs (Domain Specific Languages, specifically WPFBot3000).</p>
 <h2>PowerShell Command Name Warnings</h2>
 <p>PowerShell modules have always issued warnings if they contain commands that don't use approved verbs.  What's fun with modules for DSLs is that the commands in general don't use verbs at all.  Since these commands aren't "proper", you might expect a warning.  You won't get one, though.</p>
@@ -33,6 +31,7 @@ permalink: "/2018/08/01/powershell-dsl-module-considerations/"
 <p>DSLs generally have commands that aren't in the verb-noun form that PowerShell is expecting for a cmdlet, so it doesn't try to look for the command at all.</p>
 <p>The fix for this is simple (for WPFBot3000, at least).  All I've done is replace the two top-level commands (<strong>Window</strong> and <strong>Dialog</strong>) with well-formed cmdlet names (<strong>New-WPFBotWindow</strong> and <strong>Invoke-WPFBotDialog</strong>).  Then, I create aliases (<strong>Window</strong> and <strong>Dialog</strong>) pointing to these commands.</p>
 <p>Now that I think of it, I'm not sure why that works.  If PowerShell is looking for the aliases, why wasn't it finding the commands?  Nevertheless, it works.</p>
-<p> </p>
 <p>That's all for today, just a couple of oddities.</p>
-<p>--Mike</body></html></p>
+<p>--Mike</p>
+
+

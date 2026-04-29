@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="{{ page.lang | default: site.lang | default: 'en' }}">
+  {%- include head.html -%}
+  <body class="home blog wp-theme-f2 one-sidebar-right medium-sidebar small-font-sidebar large-font-content{% if page.layout == 'post' %} single single-post{% endif %}{% if page.layout == 'page' %} page{% endif %}">
+    <a class="skip-link assistive-text" href="#content">Skip to content</a>
+    <div id="page" class="hfeed site-shell">
+      {%- include header.html -%}
+
+      <div id="main" class="site-main">
+        <div id="primary" class="content-area">
+          <div id="content" class="site-content" role="main">
+            {{ content }}
+          </div>
+        </div>
+
+        {%- include sidebar.html -%}
+      </div>
+
+      {%- include footer.html -%}
+    </div>
+  </body>
+</html>

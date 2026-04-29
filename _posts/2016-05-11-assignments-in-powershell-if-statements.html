@@ -21,41 +21,48 @@ author:
   last_name: ''
 permalink: "/2016/05/11/assignments-in-powershell-if-statements/"
 ---
-<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
-<html><body>
 <p>You probably learned early on in your PowerShell experience that -eq and = were very different things.</p>
 <p>I still occasionally write<br />
-[powershell]<br />
-if($x=5)<br />
-[/powershell]<br />
+<pre class="wp-code language-powershell"><code>
+if($x=5)
+</code></pre><br />
 when I mean to write<br />
-[powershell]<br />
-if($x -eq 5)<br />
-[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+if($x -eq 5)
+</code></pre>
 <p>The first will always evaluate to <strong>$true</strong>, which is generally not what you want.</p>
 <p>One trick I've seen before is to put the constant (if there is one) on the left-hand side, which causes the assignment to fail with an error, alerting you to the fact that you did something wrong:<br />
-[powershell]<br />
-if(5 -eq $x)<br />
-or<br />
-if(5=$x)<br />
-[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+if(5 -eq $x)
+
+or
+
+if(5=$x)
+</code></pre>
 <p>I don't know if I would be able to even type the second without seeing the problem.  Anyway, the point of this post isn't that you shouldn't use = in an if statement, but a useful situation where you might consider using it.</p>
 <p>As a scenario, consider looking for services that are set to automatically start, but are currently stopped.  I know I've done that before.  What if you wanted to write the list of services meeting that criteria to a log file, but only if there were some that matched.</p>
 <p>You might do something like this:<br />
-[powershell]<br />
-$services=get-ciminstance win32_service -filter "StartMode='Automatic' and State='Stopped'"<br />
-if($services){<br />
-   $Services | out-csv c:\temp\StoppedServices.csv<br />
-}<br />
-[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+$services=get-ciminstance win32_service -filter &quot;StartMode=&#39;Automatic&#39; and State=&#39;Stopped&#39;&quot;
+
+if($services){
+
+   $Services | out-csv c:\temp\StoppedServices.csv
+
+}
+</code></pre>
 <p>Putting the assignment in the if statement saves you a line:<br />
-[powershell]<br />
-if($services=get-ciminstance win32_service -filter "StartMode='Automatic' and State='Stopped'"){<br />
-   $Services | out-csv c:\temp\StoppedServices.csv<br />
-}<br />
-[/powershell]<br />
+<pre class="wp-code language-powershell"><code>
+if($services=get-ciminstance win32_service -filter &quot;StartMode=&#39;Automatic&#39; and State=&#39;Stopped&#39;&quot;){
+
+   $Services | out-csv c:\temp\StoppedServices.csv
+
+}
+</code></pre><br />
 The value of the assignment statement is the value of the right-hand side.  If there aren't any services, the condition is false and we don't try to write an empty file.</p>
 <p>This isn't a world-changer, but it might come in handy.  </p>
 <p>What do you think?</p>
 <p>--Mike</p>
-<p></body></html></p>
+
+
+

@@ -21,15 +21,15 @@ author:
   last_name: ''
 permalink: "/2016/01/11/powershell-code-smells-boolean-parameters/"
 ---
-<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
-<html><body>
 <p>This is a real quick one.  In PowerShell, the "native" way to express a two-state variable is with Switch parameters.</p>
 <p>For instance:<br />
-[powershell]<br />
-function Test-Thing{<br />
-Param([switch]$Recurse)<br />
-  #Code goes here<br />
-[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+function Test-Thing{
+
+Param([switch]$Recurse)
+
+  #Code goes here
+</code></pre>
 <p>When calling Test-Thing, you can either supply -Recurse or leave it off.  It's a flag.</p>
 <p>This is PowerShell 101.</p>
 <p>Programmers coming from other languages are used to Boolean variables.  Sometimes, one slips through and makes its way into a parameter list. </p>
@@ -40,4 +40,6 @@ Param([switch]$Recurse)<br />
 <p>What do you think?  Do you ever see parameters like this?</p>
 <p>Let me know in the comments.</p>
 <p>--Mike</p>
-<p></body></html></p>
+
+
+

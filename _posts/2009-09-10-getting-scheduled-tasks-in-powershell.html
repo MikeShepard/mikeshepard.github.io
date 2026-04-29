@@ -32,8 +32,6 @@ excerpt: |-
       * SCHTASKS.EXE - Works ok, but has a somewhat arcane syntax, and is a text-only tool.
       * Task Scheduler API -Best of both worlds, but only on Vista (not XP).
 ---
-<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
-<html><body></p>
 <p>There are a few approaches to manipulating scheduled tasks in PowerShell.</p>
 <ul>
 <li>WMI - Useful if you are only going to manipulate them via script.  The tasks will not be visible in the control panel applet.</li>
@@ -43,55 +41,100 @@ excerpt: |-
 <p>My current environment is an XP laptop, and hundreds of W2k3 and W2k8 servers.  I really need to be able to hit the tasks from the control panel (don't have PowerShell installed everywhere...but that's in process).  Since I have to use SCHTASKS.EXE , I figured I should write a PowerShell interface that makes things a bit easier.</p>
 <p>The main thing I wanted was to get objects back.  Once you've started using PowerShell, you realize that "everything returns objects" makes for a very powerful scripting experience.  So, when you have to fall back to an external command like SCHTASKS.EXE, you really feel the pain.  The approach I took was to ask SCHTASKS for a verbose output (no reason not to get all of the properties), and also to write the output as CSV.  I then send the output into a file.  A problem that arises when trying to get PowerShell to import the CSV is that the column headers are not very friendly (e.g. "Repeat: Until: Time").  So, before importing we need to "massage" a little bit.  I simply removed spaces (leaving Pascal-cased words) and replaced colons with underscores.  Another issue was that different versions of SCHTASKS.EXE would sometimes include an extra blank line in the file.  Finally, I decided that I should add some methods using <strong><span style="font-family: Verdana,sans-serif;">Add-Member</span></strong><span style="font-family: inherit;"> to allow me to run or delete the task without having to remember the syntax. </span></p>
 <p>I hope you find this script useful.  If you have suggestions for improvements, or questions about how part of it works, feel free to leave a comment.<br />
-[powershell]function get-tasks($server="", $taskname="",[switch]$help){<br />
-  if ($help)<br />
-    {<br />
-        $msg = @"<br />
-Get scheduled tasks from a remote server as objects.  Optionally you may supply a substring to be found in the task names.</p>
-<p>Usage: get-tasks [Server] [substring] [-help]<br />
-ex:  get-tasks MACHINE1 LOGS    #to get all scheduled tasks from MACHINE1 containing LOGS<br />
-"@<br />
-        Write-Host $msg<br />
-        return<br />
-    }<br />
-    $filename = [System.IO.Path]::GetTempFileName()<br />
- if ($server){<br />
-     schtasks /query /fo csv /s $server /v &amp;amp;gt; $filename<br />
- } else {<br />
-    schtasks /query /fo csv /v &amp;amp;gt; $filename<br />
- }<br />
-    $lines=Get-Content $filename<br />
- if ($lines -is [string]){<br />
-    return $null<br />
- } else {<br />
-        if ($lines[0] -ne ''){<br />
-   Set-Content -path $filename -Value ([string]$lines[0]).Replace(" ","").Replace(":","_")<br />
-   $start=1</p>
-<p>  } else {<br />
-   Set-Content -path $filename -Value ([string]$lines[1]).Replace(" ","").Replace(":","_")<br />
-   $start=2<br />
-  }<br />
-  if ($lines.Count -ge $start){<br />
-   Add-content  -Path $filename -Value $lines[$start..(($lines.count)-1)]<br />
-  }<br />
-  $tasks=Import-Csv $filename<br />
-  Remove-Item $filename<br />
-  $retval=@()<br />
-  foreach ($task in $tasks){<br />
-   if (($taskname -eq '') -or $task.TaskName.contains($taskname)){<br />
-    $task.PSObject.TypeNames.Insert(0,"DBA_ScheduledTask")<br />
-    Add-Member -InputObject $task -membertype scriptmethod -Name Run -Value { schtasks.exe /RUN /TN $this.TaskName /S $this.HostName}<br />
-    Add-Member -InputObject $task -membertype scriptmethod -Name Delete -Value { schtasks.exe /DELETE /TN $this.TaskName /S $this.HostName}<br />
-    $retval += $task<br />
-   }<br />
-  }<br />
-  return $retval<br />
- }<br />
-}[/powershell]<br />
+<pre class="wp-code language-powershell"><code>
+function get-tasks($server=&quot;&quot;, $taskname=&quot;&quot;,[switch]$help){
+
+  if ($help)
+
+    {
+
+        $msg = @&quot;
+
+Get scheduled tasks from a remote server as objects.  Optionally you may supply a substring to be found in the task names.
+Usage: get-tasks [Server] [substring] [-help]
+
+ex:  get-tasks MACHINE1 LOGS    #to get all scheduled tasks from MACHINE1 containing LOGS
+
+&quot;@
+
+        Write-Host $msg
+
+        return
+
+    }
+
+    $filename = [System.IO.Path]::GetTempFileName()
+
+ if ($server){
+
+     schtasks /query /fo csv /s $server /v &amp;amp;gt; $filename
+
+ } else {
+
+    schtasks /query /fo csv /v &amp;amp;gt; $filename
+
+ }
+
+    $lines=Get-Content $filename
+
+ if ($lines -is [string]){
+
+    return $null
+
+ } else {
+
+        if ($lines[0] -ne &#39;&#39;){
+
+   Set-Content -path $filename -Value ([string]$lines[0]).Replace(&quot; &quot;,&quot;&quot;).Replace(&quot;:&quot;,&quot;_&quot;)
+
+   $start=1
+  } else {
+
+   Set-Content -path $filename -Value ([string]$lines[1]).Replace(&quot; &quot;,&quot;&quot;).Replace(&quot;:&quot;,&quot;_&quot;)
+
+   $start=2
+
+  }
+
+  if ($lines.Count -ge $start){
+
+   Add-content  -Path $filename -Value $lines[$start..(($lines.count)-1)]
+
+  }
+
+  $tasks=Import-Csv $filename
+
+  Remove-Item $filename
+
+  $retval=@()
+
+  foreach ($task in $tasks){
+
+   if (($taskname -eq &#39;&#39;) -or $task.TaskName.contains($taskname)){
+
+    $task.PSObject.TypeNames.Insert(0,&quot;DBA_ScheduledTask&quot;)
+
+    Add-Member -InputObject $task -membertype scriptmethod -Name Run -Value { schtasks.exe /RUN /TN $this.TaskName /S $this.HostName}
+
+    Add-Member -InputObject $task -membertype scriptmethod -Name Delete -Value { schtasks.exe /DELETE /TN $this.TaskName /S $this.HostName}
+
+    $retval += $task
+
+   }
+
+  }
+
+  return $retval
+
+ }
+
+}
+</code></pre><br />
 Links:</p>
 <ul>
 <li><a href="http://msdn.microsoft.com/en-us/library/aa394399%28VS.85%29.aspx">WMI for scheduled tasks (MSDN)</a></li>
 <li><a href="http://myitforum.com/cs2/blogs/yli628/archive/2008/07/28/powershell-script-to-retrieve-scheduled-tasks-on-a-remote-machine-task-scheduler-api.aspx">Using the Task Scheduler API (in Vista)</a></li>
 <li><a href="http://www.peetersonline.nl/index.php/powershell/managing-scheduled-tasks-remotely-using-powershell/">Another take on scripting SCHTASKS.EXE</a></li>
 </ul>
-<p></body></html></p>
+
+

@@ -22,18 +22,18 @@ author:
   last_name: ''
 permalink: "/2009/09/20/a-handy-trick-ive-started-to-use-a-lot/"
 ---
-<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
-<html><body>
 <p>If you're like me, you hate to do the same thing over and over.  That's what programming is for, right?  To handle automating tedious procedures?  Unfortunately, it's not at all appropriate to run off and build an app every time you need to do the same thing 3 times.  If you try that, you'll have a lot of chances to write apps,  but probably will be looking for a new job because it takes you way too long to get anything accomplished.</p>
 <p>Scripting is the short answer to the dilemma above.  PowerShell is one of the latest entries into the scripting world, and to my tastes, one of the best.</p>
 <p>Here's something I used several times in the last few days.  I can't remember quite where I saw it first, but it was in a PowerShell blog about looping (I think).</p>
 <p>Anyway, the problem is that I needed to edit config files on the servers in a farm.  Fortunately, the servers were numbered sequentially.  So, what I wrote was (suitably sanitized for public consumption):<br />
-[powershell gutter="false"]1..9 | % { notepad "server$_`c$path_to_config_file\config.file" }[/powershell]<br />
+[powershell gutter="false"]1..9 | % { notepad "server$_`c$path_to_config_file\config.file" }<br />
 That popped the first 9 files up in notepad, ready to be edited.  The trick is to use the range syntax to create a list of numbers, and use % to loop through them.</p>
 <p>If you need a longer range (with leading zeroes, of course), it's not too hard.<br />
-[powershell gutter="false"]1..20 | % {notepad ("server{0:D2}\c$\path_to_config_fileconfig.file" -f $_)}[/powershell]<br />
+[powershell gutter="false"]1..20 | % {notepad ("server{0:D2}\c$\path_to_config_fileconfig.file" -f $_)}<br />
 Here, we use the format operator with a D2 format specifier (2 digits, leading zeros).  See <a href="http://www.microsoft.com/technet/scriptcenter/resources/pstips/jul07/pstip0720.mspx">here</a> for more examples of format operators in PowerShell.</p>
 <p>When you're dealing with dozens of servers, tricks like this can save you a lot of time.</p>
 <p>Let me know what you think.  What "idioms" in PowerShell do you find yourself using a lot?</p>
 <p>Mike</p>
-<p></body></html></p>
+
+
+

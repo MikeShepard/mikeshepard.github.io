@@ -22,13 +22,11 @@ author:
   last_name: ''
 permalink: "/2013/12/10/a-powershell-puzzler/"
 ---
-<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
-<html><body></p>
 <p>It has been said that you can write BASIC code in any language.  When I look at PowerShell code, I tend to see a lot of code that looks like transplanted C# code. It's easy to get confused sometimes, since C# and PowerShell syntax are similar, and when you are dealing with .NET framework objects the code is often nearly identical. Most of the time, though, the differences between the semantics are small and there aren't a lot of surprises.</p>
 <p>I recently found one case, however, that stumped me for a while. What makes it more painful is that I found it while conducting a PowerShell training session and was at a loss to explain it at the time. Please read the following line and try to figure out what will happen without running the code in a PowerShell session.</p>
-<p>[powershell]<br />
-$services=get-wmiobject -class Win32_Service -computername localhost,NOSUCHCOMPUTER -ErrorAction STOP<br />
-[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+$services=get-wmiobject -class Win32_Service -computername localhost,NOSUCHCOMPUTER -ErrorAction STOP
+</code></pre>
 <p>.<br />
 .<br />
 .<br />
@@ -52,10 +50,11 @@ Once you've thought about this for a few minutes, throw it in a command-line som
 <ul>
 <li>The function call succeeds for a while (generating output) and then fails, leaving the variable unchanged but <strong>sending output to the console</strong> (or to be captured by an enclosing scope).</li>
 </ul>
-<p>Here's what the output looks like when it's run (note: I abbreviated some to make the command fit a line):<br />
-<a href="https://powershellstation.com/wp-content/uploads/2013/12/Puzzler.png"><img src="{{site.baseurl}}/assets/2013/12/Puzzler-300x137.png" alt="Puzzler" width="300" height="137" class="alignright size-medium wp-image-576"></a></p>
+<p>Here's what the output looks like when it's run, note that I abbreviated some to make the command fit a line:</p>
+<p><a href="https://powershellstation.com/wp-content/uploads/2013/12/Puzzler.png"><img src="{{site.baseurl}}/assets/2013/12/Puzzler-300x137.png" alt="Puzzler" width="300" height="137" class="alignright size-medium wp-image-576"></a></p>
 <p>Not shown in the screenshot is that at the end of the list of localhost services is the expected exception.</p>
 <p>How this makes sense is that an assignment statement in PowerShell assigns the <em>final results</em> of the pipeline on the RHS to the variable on the LHS.  In this case, the pipeline started generating output when it used the localhost parameter value.  As is generally the case with PowerShell cmdlets, that output was not batched.  When the get-wmiobject cmdlet tried to use the NOSUCHCOMPUTER value for the ComputerName parameter, it obviously failed and since we specified -ErrorAction Stop, the pipeline execution immediately terminated by throwing an exception.  Since we didn't reach the "end" of the pipeline, the assignment never happens, but there is already output in the output stream.  The rule for PowerShell is that any data in the output stream that isn't captured (by piping it to a cmdlet, assigning it, or casting to [void]) is sent to the console, so the localhost services are sent to the console.</p>
 <p>It all makes sense if you're wearing your PowerShell goggles (note to self---buy some PowerShell goggles), but if you're trying to interpret PowerShell as any other language this behavior is really unexpected.</p>
 <p>Let me know what you think.  Does this interpretation make sense or is there an easier way to see what's happening here?</p>
-<p>-Mike</body></html></p>
+<p>-Mike</p>
+

@@ -23,28 +23,35 @@ author:
   last_name: ''
 permalink: "/2020/09/01/dude-wheres-my-command/"
 ---
-<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
-<html><body></p>
 <h1>The Dilemma</h1>
 <p>This post was inspired by a recent occurrence at work.  I have built a framework which constructs documents based on a lists of functions in a module specific to that kind of document.</p>
 <p>I found myself running into an issue where even though I knew there was a command named a certain thing, and that the function was correctly exported from the module, PowerShell wasn't finding the command.</p>
 <p>My code looked something like this:</p>
-<p>[powershell]<br />
-$module='Module1'<br />
-$Steps='Get-CustomerData','Get-MarketingData','New-CustomerMarketingDocument'<br />
-# each function takes a hashtable as a parameter and outputs a hashtable<br />
-$state=@{}<br />
-foreach($Step in $Steps){<br />
-    $stepCmd=Get-Command -Name $step -module $module<br />
-    $state=&amp;amp; $StepCmd -state @State<br />
-}<br />
-[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+$module=&#39;Module1&#39;
+
+$Steps=&#39;Get-CustomerData&#39;,&#39;Get-MarketingData&#39;,&#39;New-CustomerMarketingDocument&#39;
+
+# each function takes a hashtable as a parameter and outputs a hashtable
+
+$state=@{}
+
+foreach($Step in $Steps){
+
+    $stepCmd=Get-Command -Name $step -module $module
+
+    $state=&amp;amp; $StepCmd -state @State
+
+}
+</code></pre>
 <p>So why was PowerShell not working nicely for me? The problems has to do with how PowerShell loads functions. Let's take a step back</p>
 <h1>PowerShell's Command-Loading Procedure</h1>
 <p>For now, let's assume we have a simple script module called Module1.</p>
 <p>For a script module to be "discoverable" by PowerShell, it must exist in one of the folders listed in the <strong>PSModulePath</strong> environment variable.</p>
 <p>This PowerShell will show you the folders that PowwerShell will look in:</p>
-<p>[powershell]$env:PSModulePath.Split(';')[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+$env:PSModulePath.Split(&#39;;&#39;)
+</code></pre>
 <p>Here are the results from a PowerShell 7 instance:<br />
 <img class="alignnone wp-image-1446 size-full" src="{{site.baseurl}}/assets/2020/09/PSModulePath.png" alt="" width="831" height="262"></p>
 <p>When you try to run a command (or use <strong>Get-Command</strong>), PowerShell will first look to see if the command is already loaded. IF so, then it just runs (or outputs) the command you asked for.</p>
@@ -65,17 +72,21 @@ foreach($Step in $Steps){<br />
 <p>Let's see an example of what I'm talking about.</p>
 <p>Consider two modules, module1 and module2.</p>
 <p>Module1 has a single command, <strong>Get-Stuff</strong></p>
-<p>[powershell]<br />
-function Get-Stuff{<br />
-    'in module1'<br />
-}<br />
-[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+function Get-Stuff{
+
+    &#39;in module1&#39;
+
+}
+</code></pre>
 <p>Similarly, Module2 has a <strong>Get-Stuff</strong> command which outputs 'in module2'.</p>
 <p>If I were to open a new PowerShell session and type <strong>Get-Stuff</strong>, PowerShell would find module1's copy of Get-Stuff first and load it (that is, module1).</p>
 <p>If that were the only<strong> Get-Stuff</strong>, the story would be over.</p>
 <p>In this case, I have two different modules with Get-Stuff functions.</p>
 <p>To get to the second, I can import the module explicitly:</p>
-<p>[powershell]Import-Module module2[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+Import-Module module2
+</code></pre>
 <p>You can verify the output below:<br />
 <img class="alignnone size-full wp-image-1450" src="{{site.baseurl}}/assets/2020/09/twomodules.png" alt="" width="375" height="129"></p>
 <p>Now, we've imported both modules and executed both functions. What does Get-Command tell us?<br />
@@ -93,6 +104,7 @@ First, it only shows us the command from module2, that is, the most recently loa
 <p>Note that there's another way to get a module-specific command, and that's by using a fully-qualified command reference like <strong>module1\get-stuff</strong>:<br />
 <img class="alignnone size-full wp-image-1456" src="{{site.baseurl}}/assets/2020/09/fullyqualified.png" alt="" width="355" height="45"></p>
 <p>I beat my head against this one for quite a while.  I was even considering writing a blog post about it when I read the about_command_precedence help topic (for research) and figured out the "issue".</p>
-<p> </p>
 <p>Thanks for reading,</p>
-<p>Mike</body></html></p>
+<p>Mike</p>
+
+

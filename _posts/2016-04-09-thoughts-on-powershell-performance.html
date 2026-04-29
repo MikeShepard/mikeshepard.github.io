@@ -23,8 +23,6 @@ author:
   last_name: ''
 permalink: "/2016/04/09/thoughts-on-powershell-performance/"
 ---
-<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
-<html><body></p>
 <p>Last night Rob Campbell (@mjolinor) and I were talking after his presentation on performance when using Get-Content with -ReadCount and different string matching techniques and I realized it's time to verbalize my thoughts on performance in PowerShell.</p>
 <h2>Part 1 - It doesn't matter</h2>
 <p>When people ask me if PowerShell is fast, my first response is usually either "It doesn't matter" or "I don't care".  It's not so much that I don't care about it being fast (I kind of do) or that it isn't fast (it is), but that when writing PowerShell solutions the primary goal in my mind should always be operator efficiency.  That is, does this make my life as a PowerShell user easier.  The main points for me are:</p>
@@ -45,4 +43,5 @@ permalink: "/2016/04/09/thoughts-on-powershell-performance/"
 <p>Don't just use "technique X" because it's the fastest performing.  Consider code readability, and maintainability along with things like how often the code is run.  No point in optimizing a process that only runs once and takes 10 minutes.  Who cares if it ran in 3 minutes instead?  You probably spent more than 7 minutes "optimizing" the code.</p>
 <p>PowerShell optimizes the user, not the code.  Make sure when you spend time making the code fast, you haven't made the user slow.</p>
 <p>Feel free to disagree in the comments!</p>
-<p>--Mike</body></html></p>
+<p>--Mike</p>
+

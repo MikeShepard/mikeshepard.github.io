@@ -21,26 +21,36 @@ author:
   last_name: ''
 permalink: "/2016/01/14/copying-properties-to-another-object/"
 ---
-<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
-<html><body></p>
 <p>I had a thought today that it would be interesting to write a function to copy properties from one object to another. Specifically I was thinking about doing a join operation on two arrays and that it would be good to be able to say "copy these properties from the object on the right to the object on the left". Since I couldn't think immediately about how that function would look, I wrote it. Here's the code I came up with:</p>
-<p>[powershell]<br />
-function Copy-Property{<br />
-[CmdletBinding()]<br />
-param([Parameter(ValueFromPipeline=$true)]$InputObject,<br />
-      $SourceObject,<br />
-      [string[]]$Property,<br />
-      [switch]$Passthru)</p>
-<p>      $passthruHash=@{Passthru=$passthru.IsPresent}</p>
-<p>      $propHash=@{}<br />
-      $property | Foreach-Object {<br />
-                    $propHash+=@{$_=$SourceObject.$_}<br />
-                  }<br />
-      $inputObject | Add-Member -NotePropertyMembers $propHash @passthruHash<br />
-    }<br />
-[/powershell]</p>
-<p>And here's a screenshot showing it in use.<br />
-<a href="https://powershellstation.com/wp-content/uploads/2016/01/CopyProperty.png" rel="attachment wp-att-868"><img class="alignnone size-full wp-image-868" src="{{site.baseurl}}/assets/2016/01/CopyProperty.png" alt="CopyProperty" width="733" height="308"></a></p>
+<pre class="wp-code language-powershell"><code>
+function Copy-Property{
+
+[CmdletBinding()]
+
+param([Parameter(ValueFromPipeline=$true)]$InputObject,
+
+      $SourceObject,
+
+      [string[]]$Property,
+
+  [switch]$Passthru)
+
+  $passthruHash=@{Passthru=$passthru.IsPresent}
+
+  $propHash=@{}
+
+      $property | Foreach-Object {
+
+                    $propHash+=@{$_=$SourceObject.$_}
+
+                  }
+
+      $inputObject | Add-Member -NotePropertyMembers $propHash @passthruHash
+
+    }
+</code></pre>
+<p>And here's a screenshot showing it in use.</p>
+<p><a href="https://powershellstation.com/wp-content/uploads/2016/01/CopyProperty.png" rel="attachment wp-att-868"><img class="alignnone size-full wp-image-868" src="{{site.baseurl}}/assets/2016/01/CopyProperty.png" alt="CopyProperty" width="733" height="308"></a></p>
 <p>I haven't "finished" the function because I'm not sure that I'm ever going to use it, but here are a few things to notice:</p>
 <ul>
 <li>This is an advanced function.</li>
@@ -55,5 +65,6 @@ param([Parameter(ValueFromPipeline=$true)]$InputObject,<br />
 <p>So, this was a fun exercise.  I don't think that it will be useful in anything, but it was fun to write so I thought I'd share.</p>
 <p>Having a blast in PowerShell!</p>
 <p>--Mike</p>
-<p> </p>
-<p>P.S.  I know that there are several implementations of <strong>Join-Object</strong> out there.  I will probably end up using one of them.</body></html></p>
+<p>P.S.  I know that there are several implementations of <strong>Join-Object</strong> out there.  I will probably end up using one of them.</p>
+
+

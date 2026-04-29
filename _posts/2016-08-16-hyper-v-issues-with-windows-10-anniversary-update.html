@@ -21,8 +21,6 @@ author:
   last_name: ''
 permalink: "/2016/08/16/hyper-v-issues-with-windows-10-anniversary-update/"
 ---
-<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
-<html><body></p>
 <p>My main home computer is running Windows 10 and Hyper-V, and I was really looking forward to the anniversary update.  PowerShell Direct, nested virtualization, and containers all sound awesome.  I've played with them in a test box, but not on my main box.</p>
 <p>So...I got home after work the day of the update, installed it (took an hour or so) and rebooted.</p>
 <p>First problem...Hyper-V management services wouldn't start.  This was a problem with a driver...took a bit to find it, but got it solved that night.</p>
@@ -36,10 +34,11 @@ permalink: "/2016/08/16/hyper-v-issues-with-windows-10-anniversary-update/"
 <li>Version 8.0 firmware</li>
 </ul>
 <p>If you have a VM (let's say it's called TheBadVM) you can get it to boot with the following command (with the VM stopped of course):</p>
-<p>[powershell]<br />
-Get-VM -Name TheBadVM | Set-VMFirmware -EnableSecureBoot Off -SecureBootTemplate MicrosoftUEFICertificateAuthority<br />
-[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+Get-VM -Name TheBadVM | Set-VMFirmware -EnableSecureBoot Off -SecureBootTemplate MicrosoftUEFICertificateAuthority
+</code></pre>
 <p>Then, the VM will start.</p>
 <p>I hope this helps you.  I figured this might be easier to find than the original (thanks to Ryan Yates!).</p>
 <p>--Mike<br />
-</body></html></p>
+</p>
+

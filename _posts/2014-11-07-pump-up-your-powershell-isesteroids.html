@@ -23,20 +23,18 @@ author:
   last_name: ''
 permalink: "/2014/11/07/pump-up-your-powershell-isesteroids/"
 ---
-<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
-<html><body></p>
 <p>I've mentioned before that although there are several free PowerShell development environments, I always seem to come back to using the ISE. With each release, the ISE becomes more stable and functional. With the other tools, I always seem to bump up against bugs that keep me from enjoying the many features they provide.</p>
 <p>I was excited when I heard that Tobias Weltner was in the process of releasing a new version of his ISESteroids product. The 1.0 product had a number of useful features, but the 2.0 version (which is still in beta) is crammed so full of features that it's hard to comprehend. And best of all, it feels like a natural extension of the ISE, so I don't have to relearn anything.</p>
 <p>The trial package can be downloaded from <a href="http://www.powertheshell.com/isesteroids/">here</a>. It comes pacakaged as a zip file, and the download page has clear instructions on how to unblock the file and get it extracted to the appropriate place on your hard drive. Once it's there, you start ISESteroids by simply importing the module:</p>
-<p>[powershell]import-module ISESteroids[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+import-module ISESteroids
+</code></pre>
 <p>The first thing you will notice is that the toolbar just got fancy. Here's the initial toolbar:</p>
 <p><a href="https://powershellstation.com/wp-content/uploads/2014/11/TopToolbar.png"><img class="alignleft wp-image-601 size-full" src="{{site.baseurl}}/assets/2014/11/TopToolbar.png" alt="TopToolbar" width="975" height="33"></a></p>
 <p>Clicking the down-arrow on the left brings up another toolbar:</p>
 <p><a href="https://powershellstation.com/wp-content/uploads/2014/11/BottomToolbar.png"><img class="alignleft wp-image-608 size-full" src="{{site.baseurl}}/assets/2014/11/BottomToolbar.png" alt="BottomToolbar" width="883" height="32"></a></p>
 <p>Clicking the settings button (the gear) brings up a drop-down panel:</p>
 <p><a href="https://powershellstation.com/wp-content/uploads/2014/11/SettingsToolbar.png"><img class="alignleft size-full wp-image-605" src="{{site.baseurl}}/assets/2014/11/SettingsToolbar.png" alt="SettingsToolbar" width="500" height="58"></a></p>
-<p> </p>
-<p> </p>
 <p>At the bottom of the screen, you will see that the status bar is no longer so bare (it usually only has the line/col and zoom slider):</p>
 <p><a href="https://powershellstation.com/wp-content/uploads/2014/11/StatusBar.png"><img class="alignleft size-full wp-image-609" src="{{site.baseurl}}/assets/2014/11/StatusBar.png" alt="StatusBar" width="887" height="43"></a></p>
 <p>The menus are similarly enhanced. I'll just show you the file menu to give you some idea of the kinds of changes:</p>
@@ -58,48 +56,20 @@ permalink: "/2014/11/07/pump-up-your-powershell-isesteroids/"
 <p>This is barely scratching the surface. In the few days that I've used ISESteroids, the main thing that I have noticed is that it is not in my way. Even with gadgets turned on and all of it updating in realtime, I don't notice a lag or any kind of performance hit. The features feel like they were built in to the ISE. The product is still a beta, so some of the features aren't connected or don't have documentation, but even with these shortcomings the experience is still something that is hard to imagine.</p>
 <p>Opening a script, you immediately see feedback about problems (squiggle underlining), and references (small text just above function declaration).  I've zoomed in on this function definition so you can see the "3 references"</p>
 <p><a href="https://powershellstation.com/wp-content/uploads/2014/11/functionref.png"><img class="alignleft size-full wp-image-619" src="{{site.baseurl}}/assets/2014/11/functionref.png" alt="functionref" width="554" height="69"></a></p>
-<p> </p>
-<p> </p>
 <p>Clicking on the "3 references" brings up a "pinnable" reference window:</p>
 <p><a href="https://powershellstation.com/wp-content/uploads/2014/11/ReferenceWindow.png"><img class="alignleft size-full wp-image-620" src="{{site.baseurl}}/assets/2014/11/ReferenceWindow.png" alt="ReferenceWindow" width="393" height="112"></a></p>
-<p> </p>
-<p> </p>
-<p> </p>
-<p> </p>
 <p>If you place the cursor on one of the underlined sections, you get instructions in the status bar about what the problem is and have an opportunity to fix it there or everywhere in your script:</p>
 <p><img class="alignleft wp-image-615 " src="{{site.baseurl}}/assets/2014/11/squiggle.png" alt="squiggle" width="303" height="28"></p>
 <p><a href="https://powershellstation.com/wp-content/uploads/2014/11/FixSquiggle.png"><img class="alignleft size-full wp-image-616" src="{{site.baseurl}}/assets/2014/11/FixSquiggle.png" alt="FixSquiggle" width="645" height="22"></a></p>
-<p> </p>
-<p> </p>
 <p>The "variable monitor addon" (usually called a watch window) is one of the reasons that I occasionally stray to one of the other editors.  No need to do that now!</p>
 <p><a href="https://powershellstation.com/wp-content/uploads/2014/11/watchWindow.png"><img class="alignleft size-full wp-image-623" src="{{site.baseurl}}/assets/2014/11/watchWindow.png" alt="watchWindow" width="501" height="437"></a></p>
-<p> </p>
-<p> </p>
-<p> </p>
-<p> </p>
-<p> </p>
-<p> </p>
-<p> </p>
-<p> </p>
-<p> </p>
-<p> </p>
-<p> </p>
-<p> </p>
-<p> </p>
 <p>It's not so obvious in the screenshot, but there's a button in the left side just under the title  (Variables) which clears all user-defined variables. I've wanted something like that for debugging a number of times. Clearing variables between troubleshooting runs can really help out.</p>
-<p>One other "random" thing that I just found is accessed by right-clicking on the filename in the editor. In the "stock" ISE, you don't get any menu at all. Look at all of the options now:<br />
-<a href="https://powershellstation.com/wp-content/uploads/2014/11/FileTabMenu.png"><img class="alignleft size-full wp-image-624" src="{{site.baseurl}}/assets/2014/11/FileTabMenu.png" alt="FileTabMenu" width="286" height="269"></a></p>
-<p> </p>
-<p> </p>
-<p> </p>
-<p> </p>
-<p> </p>
-<p> </p>
-<p> </p>
-<p> </p>
-<p> </p>
+<p>One other "random" thing that I just found is accessed by right-clicking on the filename in the editor. In the "stock" ISE, you don't get any menu at all. Look at all of the options now:</p>
+<p><a href="https://powershellstation.com/wp-content/uploads/2014/11/FileTabMenu.png"><img class="alignleft size-full wp-image-624" src="{{site.baseurl}}/assets/2014/11/FileTabMenu.png" alt="FileTabMenu" width="286" height="269"></a></p>
 <p>I haven't come close to showing all of the features that are included. In fact, while preparing for this post I took over 70 screenshots of different features in action. I'll take pity on you and not go through every one of them individually . Rest assured that you'll find ISESteroids to be amazingly helpful right out of the box (so to speak) and be delighted often as you continue to encounter new features.  The features seem to be well thought out and are implemented very smoothly.</p>
 <p>Since this is a beta product it's not all sunshine and roses. I did encounter one ISE crash which I think was related to ISESteroids, and a few of the features didn't work or didn't match the documentation. That didn't stop me from showing everyone around me how cool it was.  They were all suitably impressed.</p>
 <p>I heartily recommend ISESteroids for every PowerShell scripter.  The ISE with ISESteroids feels like a Version 10.0 product instead of a 2.0 product.   It can be downloaded from the <a href="http://www.powertheshell.com/isesteroids2/">PowerTheShell</a> site.  A trial version is available or licenses can be purchased.</p>
 <p>My hat is off to Tobias Weltner, who has now been featured twice in my blog (<a title="Speeding up Powershell Webcast by Dr. Tobias Weltner" href="https://powershellstation.com/2012/03/13/speeding-up-powershell-webcast-by-dr-tobias-weltner/">here</a> is the previous instance). Both times I have been very happy to see what he is providing and I can't wait to see what he has coming up next.</p>
-<p>--Mike</body></html></p>
+<p>--Mike</p>
+
+

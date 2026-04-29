@@ -26,8 +26,6 @@ author:
   last_name: ''
 permalink: "/2015/09/14/getting-started-with-posh_ado/"
 ---
-<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
-<html><body></p>
 <p>This is kind of long-winded, if you want, skip down to the code and it should be clear (I hope).</p>
 <p><strong>Where the story starts</strong><br />
 As I mentioned <a href="https://powershellstation.com/2015/08/31/executing-sql-in-powershell-revisited/">here</a>, the original adolib module got copied a few times and with cut-and-paste programming got turned into modules for other database platforms.  While it was cool that it worked, I felt for a long time that this wasn't the right solution.  It felt like an object-oriented exercise where a parent class (abstract?) was called for to implement the ADO.NET pattern.  Then, "child" modules could somehow cause the parent module functions to use the correct platform.  </p>
@@ -51,18 +49,28 @@ Query a database on the local machine (.) with an windows-authenticated ad-hoc c
 
 <pre class="brush: powershell">invoke-SQLServerQuery -sql 'select top 1 * from AdventureWorks2012.Person.Person' -server . </pre>
 <p>Query a database on the local machine (.) with a windows-authenticated persistent connection</p>
-<p>[powershell]$conn=new-SQLServerConnection -server '.'</p>
-<p>invoke-SQLServerQuery -sql 'select top 1 * from AdventureWorks2012.Person.Person' -connection $conn[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+$conn=new-SQLServerConnection -server &#39;.&#39;
+invoke-SQLServerQuery&#160;-sql &#39;select top 1 * from AdventureWorks2012.Person.Person&#39; -connection $conn
+</code></pre>
 <p>Note that we can include the database in the connection as well:</p>
-<p>[powershell]$conn=new-SQLServerConnection -server '.' -database AdventureWorks2012</p>
-<p>invoke-SQLServerQuery -sql 'select top 1 * from Person.Person' -connection $conn[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+$conn=new-SQLServerConnection -server &#39;.&#39; -database AdventureWorks2012
+invoke-SQLServerQuery -sql &#39;select top 1 * from Person.Person&#39; -connection $conn
+</code></pre>
 <p>If we need to use SQL Security, we can supply a -User and -Password (in plaintext :-()</p>
-<p>[powershell]$conn=new-SQLServerConnection -server '.' -User MyUser -Password P@ssword[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+$conn=new-SQLServerConnection -server &#39;.&#39; -User MyUser -Password P@ssword
+</code></pre>
 <p>We can run sql statements that don't return rows (like INSERT, UPDATE, DELETE) with Invoke-SQL:</p>
-<p>[powershell]invoke-SQLServerCommand -sql "Update Person.Person set MiddleName='F' where BusinessEntityID=@ID" -parameters @{ID=1} -connection $conn[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+invoke-SQLServerCommand -sql &quot;Update Person.Person set MiddleName=&#39;F&#39; where BusinessEntityID=@ID&quot; -parameters @{ID=1} -connection $conn
+</code></pre>
 <p>Here I'm also using SQL parameters. It's pretty simple. You just include the parameters prefixed with @ in the SQL statement and then provide a -Parameters hashtable including values for each of the parameters you use. Here I only used a single parameter (ID), so there was only one entry in the hashtable. Invoke-SQL returns the number of rows affected by the SQL statement, by the way.</p>
 <p>There's a cmdlet for executing Stored Procedures called Invoke-SQLServerStoredProcedure (with parameters that match Invoke-SQLServerQuery):</p>
-<p>[powershell]invoke-SQLServerStoredProcedure -storedProcName sp_who2 -connection $conn[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+invoke-SQLServerStoredProcedure -storedProcName sp_who2 -connection $conn
+</code></pre>
 <p><strong>What's next?</strong><br />
 So, all of that work and I've basically got a module which works just like adolib did.  Why bother?  In the next post, I'll show you:</p>
 <ul>What the POSH_Ado_SQLServer module looks like</ul>
@@ -73,4 +81,6 @@ So, all of that work and I've basically got a module which works just like adoli
 <p>Let me know what you think!</p>
 <p>-Mike</p>
 <p>P.S.  You can find the source <a href="https://github.com/MikeShepard/POSH_Ado">here</a></prefix>
-</body></html></p>
+</p>
+
+

@@ -28,35 +28,41 @@ author:
   last_name: ''
 permalink: "/2017/04/05/powershell-parameter-disambiguation-surprise/"
 ---
-<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
-<html><body></p>
 <p>When you're learning PowerShell one of the first things you will notice is that you don't have to use the full parameter name.  This is because of something called <em>parameter disambiguation</em>.</p>
 <h2>When it works</h2>
 <p>For instance, instead of saying <strong>Get-ChildItem -Recurse</strong>, you can say <strong>Get-ChildItem -R</strong>.  <strong>Get-ChildItem</strong> only has one (non-dynamic) parameter that started with the letter 'R'..  Since only one parameter matches, PowerShell figures you must mean that one.  As a side note, dynamic parameters like <strong>-ReadOnly</strong> are created at run-time and are treated a bit differently.</p>
 <p>Here's the error message.  Notice that it included a couple of other parameters as possibilities:</p>
-<p>[caption id="attachment_1141" align="alignleft" width="300"]<a href="https://powershellstation.com/wp-content/uploads/2017/04/AmbiguousParameter.png"><img class="wp-image-1141 size-medium" src="{{site.baseurl}}/assets/2017/04/AmbiguousParameter-300x27.png" alt="AmbiguousParameter error" width="300" height="27"></a> AmbiguousParameter error[/caption]</p>
+<p><a href="https://powershellstation.com/wp-content/uploads/2017/04/AmbiguousParameter.png"><img class="wp-image-1141 size-medium" src="{{site.baseurl}}/assets/2017/04/AmbiguousParameter-300x27.png" alt="AmbiguousParameter error" width="300" height="27"></a></p>
+<p class="wp-caption-text">AmbiguousParameter error</p>
 <h2></h2>
 <h2></h2>
 <h2>When it doesn't work</h2>
 <p>This doesn't always work, though. An easy example is with <strong>Get-Service</strong>. You can't say <strong>Get-Service -In</strong> because you haven't specified enough of the parameter name for PowerShell to work out what parameter you meant.  With <strong>Get-Service</strong>, both <strong>-Include</strong> and <strong>-InputObject</strong> start with -In, so PowerShell can't tell which of these you meant.</p>
 <h2>Trying it ourselves</h2>
 <p>Let's write a quick function to make sure we understand what's going on.</p>
-<p>[powershell]<br />
-function test-param{<br />
-Param($da,$de)<br />
-$true<br />
-}<br />
-[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+function test-param{
+
+Param($da,$de)
+
+$true
+
+}
+</code></pre>
 <p>Calling this function with <strong>test-param -d</strong> gives us the same kind of error as before:</p>
 <p><a href="https://powershellstation.com/wp-content/uploads/2017/04/AmbiguousParameter2.png"><img class="alignnone size-medium wp-image-1143" src="{{site.baseurl}}/assets/2017/04/AmbiguousParameter2-300x41.png" alt="" width="300" height="41"></a></p>
 <p>Interestingly (this is the surprise) if we make this an advanced function (and we should almost always do that), something strange happens.</p>
-<p>[powershell]<br />
-function test-param{<br />
-[CmdletBinding()]<br />
-Param($da,$de)<br />
-$true<br />
-}<br />
-[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+function test-param{
+
+[CmdletBinding()]
+
+Param($da,$de)
+
+$true
+
+}
+</code></pre>
 <p>Remember that one of the benefits of having an advanced function is that it now supports common parameters (like -debug).</p>
 <p>When we call it with test-param -de, however, we don't get an ambiguous parameter message! It's asking for a value for -de!<br />
 <a href="https://powershellstation.com/wp-content/uploads/2017/04/AmbiguousParameter3.png"><img class="alignnone size-medium wp-image-1144" src="{{site.baseurl}}/assets/2017/04/AmbiguousParameter3-300x39.png" alt="" width="300" height="39"></a></p>
@@ -64,4 +70,6 @@ $true<br />
 <p>Not earth-shattering, but something to take note of.</p>
 <p>If I'm missing something (and it's entirely possible), let me know in the comments.</p>
 <p>-Mike</p>
-<p>P.S.  Remember that it is a best practice to spell out parameter names fully when writing a script.  Abbreviating (and aliases) are considered fair game for the command-line, though.</body></html></p>
+<p>P.S.  Remember that it is a best practice to spell out parameter names fully when writing a script.  Abbreviating (and aliases) are considered fair game for the command-line, though.</p>
+
+

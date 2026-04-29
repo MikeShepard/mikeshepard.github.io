@@ -23,8 +23,6 @@ author:
   last_name: ''
 permalink: "/2015/10/02/breaking-the-rules-with-helper-functions/"
 ---
-<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
-<html><body><br />
 <a href="http://stackoverflow.com/questions/6032344/how-to-hide-helper-functions-in-powershell-modules/6032855#6032855">One of my most popular answers</a> on StackOverflow is also one which has a <em>tiny</em> bit of controversy. It involves how to "hide" helper functions in a module in order to keep them from being exported.</p>
 <p><strong>Export-ModuleMember Details</strong><br />
 In case you're unfamiliar with how exporting functions from a module works, here are the basic rules:</p>
@@ -44,28 +42,47 @@ PowerShell was designed and delivered as a very discoverable system.  That is, y
 <p>By using Verb-Noun in your functions you make them fit nicely into the PowerShell ecosystem.  Running into improperly named (either not following the convention or using unapproved verbs) is uncommon, and because of this things work nicely and everyone is happy.</p>
 <p>Helper functions are not meant to be discoverable.  They exist only in the private implementation of a module, and users never need to know that they exist, let alone try to figure out how to use them.  For this reason, I don't really mind breaking the rule.</p>
 <p>I'd rather have this:<br />
-[powershell]Export-ModuleMember *-*[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+Export-ModuleMember *-*
+</code></pre>
 <p>Than this:<br />
-[powershell]Add-Type -Path "${env:ProgramFiles(x86)}\Reference Assemblies\Microsoft\WindowsPowerShell\3.0\System.Management.Automation.dll"</p>
-<p>Function Get-PSFunctionNames([string]$Path) {<br />
-    $ast = [System.Management.Automation.Language.Parser]::ParseFile($Path, [ref]$null, [ref]$null)<br />
-    $functionDefAsts = $ast.FindAll({ $args[0] -is [System.Management.Automation.Language.FunctionDefinitionAst] }, $true)<br />
-    $functionDefAsts | ForEach-Object { $_.Name }<br />
-}<br />
-Export-ModuleMember -Function ( (Get-PSFunctionNames $PSCommandPath) | Where { $_ -ne 'MyPrivateFunction' } )<br />
-[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+Add-Type -Path &quot;${env:ProgramFiles(x86)}\Reference Assemblies\Microsoft\WindowsPowerShell\3.0\System.Management.Automation.dll&quot;
+Function Get-PSFunctionNames([string]$Path) {
+
+    $ast = [System.Management.Automation.Language.Parser]::ParseFile($Path, [ref]$null, [ref]$null)
+
+    $functionDefAsts = $ast.FindAll({ $args[0] -is [System.Management.Automation.Language.FunctionDefinitionAst] }, $true)
+
+    $functionDefAsts | ForEach-Object { $_.Name }
+
+}
+
+Export-ModuleMember -Function ( (Get-PSFunctionNames $PSCommandPath) | Where { $_ -ne &#39;MyPrivateFunction&#39; } )
+</code></pre>
 <p>or this:<br />
-[powershell]<br />
-$errors = $null<br />
-$functions = [system.management.automation.psparser]::Tokenize($psISE.CurrentFile.Editor.Text, [ref]$errors) `<br />
-    | ?{(($_.Content -Eq "Function") -or ($_.Content -eq "Filter")) -and $_.Type -eq "Keyword" } `<br />
-    | Select-Object @{"Name"="FunctionName"; "Expression"={<br />
-        $psISE.CurrentFile.Editor.Select($_.StartLine,$_.EndColumn+1,$_.StartLine,$psISE.CurrentFile.Editor.GetLineLength($_.StartLine))<br />
-        $psISE.CurrentFile.Editor.SelectedText<br />
-    }<br />
-}<br />
-$functions | ?{ $_.FunctionName -ne "your-excluded-function" }<br />
-[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+$errors = $null
+
+$functions = [system.management.automation.psparser]::Tokenize($psISE.CurrentFile.Editor.Text, [ref]$errors) `
+
+    | ?{(($_.Content -Eq &quot;Function&quot;) -or ($_.Content -eq &quot;Filter&quot;)) -and $_.Type -eq &quot;Keyword&quot; } `
+
+    | Select-Object @{&quot;Name&quot;=&quot;FunctionName&quot;; &quot;Expression&quot;={
+
+        $psISE.CurrentFile.Editor.Select($_.StartLine,$_.EndColumn+1,$_.StartLine,$psISE.CurrentFile.Editor.GetLineLength($_.StartLine))
+
+        $psISE.CurrentFile.Editor.SelectedText
+
+    }
+
+}
+
+$functions | ?{ $_.FunctionName -ne &quot;your-excluded-function&quot; }
+</code></pre>
 <p>I'm really interested in feedback on this, since I'm coloring outside the lines.  Do you favor practicality or do you think I should follow the rule.</p>
 <p>Let me know your thoughts in the comments.</p>
-<p>-Mike</body></html></p>
+<p>-Mike</p>
+
+
+

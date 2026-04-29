@@ -29,8 +29,6 @@ author:
   last_name: ''
 permalink: "/2017/04/12/hyper-v-homelab-intro/"
 ---
-<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
-<html><body></p>
 <p>So  I've been playing with Hyper-V for a while now.  If you recall it was one of my <a href="https://powershellstation.com/2016/01/06/my-2016-powershell-goals/">2016 goals</a> to build a virtualization lab.</p>
 <p>I've done that, building out the base <a href="https://social.technet.microsoft.com/wiki/contents/articles/1262.test-lab-guides.aspx#Base_Configuration_TLG">Microsoft Test Lab Guide</a> several times:</p>
 <ul>
@@ -54,38 +52,57 @@ permalink: "/2017/04/12/hyper-v-homelab-intro/"
 <p>With that information, it converts the windows image from the ISO to a VHDX, creates a VM with the right specs and using the VHDX, sets up the networking (or starts to, anyway), and starts the VM.</p>
 <p>The bulk of the interesting work is done by <a href="https://gallery.technet.microsoft.com/scriptcenter/Convert-WindowsImageps1-0fe23a8f">Convert-WindowsImage</a>, a function that pulls the correct image from an ISO and creates a virtual disk.</p>
 <p>There are some problems with that script (read the Q&amp;A on the Technet site and you'll see what I mean).  The main one is when it tries to find the edition you ask for (by number or name).  The code is in lines 4087-4095, and should look like this:</p>
-<p>[powershell]<br />
-                $Edition | ForEach-Object -Process {</p>
-<p>                    $Edtn = $PSItem</p>
-<p>                    if ([Int32]::TryParse($Edtn, [ref]$null)) {<br />
-                        $openImage = $openWim[[Int32]($Edtn)]<br />
-                    } else {<br />
-                        $openImage = $openWim[$Edtn]<br />
-                    }<br />
-[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+$Edition | ForEach-Object -Process {
+                    $Edtn = $PSItem
+                    if ([Int32]::TryParse($Edtn, [ref]$null)) {
+
+                        $openImage = $openWim[[Int32]($Edtn)]
+
+                    } else {
+
+                        $openImage = $openWim[$Edtn]
+
+                    }
+</code></pre>
 <p>There's a more recent copy of the function on github, but it has slightly different parameters and seems to be stale as well (according to the page it's on).  I've got an email out to find the "live" version.</p>
 <p>With that, here's my function:</p>
-<p>[powershell]<br />
-function new-BootableVM {<br />
-    param($ISOPath = 'E:\isos\2012R2_x64_EN_Eval.iso',<br />
-        $Name,<br />
-        $MemoryInGB,<br />
-        $vCPUs,<br />
-        [switch]$Stopped)</p>
-<p>    $switch = 'LabNet'<br />
-    $vhdpath = "c:\users\Public\Documents\Hyper-V\Virtual hard disks\$name.vhdx"</p>
-<p>    Convert-WindowsImage -SourcePath $ISOPath -Edition $edition -VHDPath $vhdpath -VHDFormat VHDX -VHDType Dynamic -SizeBytes 8GB<br />
-    $vm = New-VM -Name $name -MemoryStartupBytes ($memoryInGB * 1GB) -VHDPath $vhdpath -Generation 2<br />
-    Set-VMProcessor -VM $vm -Count $vCPUs<br />
-    Add-VMNetworkAdapter -vm $vm -SwitchName $switch</p>
-<p>    if (!$stopped) {<br />
-        Start-VM -VM $vm<br />
-    }<br />
-    $vm<br />
-}<br />
-[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+function new-BootableVM {
+
+    param($ISOPath = &#39;E:\isos\2012R2_x64_EN_Eval.iso&#39;,
+
+        $Name,
+
+        $MemoryInGB,
+
+        $vCPUs,
+
+        [switch]$Stopped)
+    $switch = &#39;LabNet&#39;
+
+    $vhdpath = &quot;c:\users\Public\Documents\Hyper-V\Virtual hard disks\$name.vhdx&quot;
+    Convert-WindowsImage -SourcePath $ISOPath -Edition $edition -VHDPath $vhdpath -VHDFormat VHDX -VHDType Dynamic -SizeBytes 8GB
+
+    $vm = New-VM -Name $name -MemoryStartupBytes ($memoryInGB * 1GB) -VHDPath $vhdpath -Generation 2
+
+    Set-VMProcessor -VM $vm -Count $vCPUs
+
+    Add-VMNetworkAdapter -vm $vm -SwitchName $switch
+    if (!$stopped) {
+
+        Start-VM -VM $vm
+
+    }
+
+    $vm
+
+}
+</code></pre>
 <p>Once the function is done running (assuming it didn't have any issues), a VM will be created and ready for you.  You will need to accept the license, set the locale, and set the administrators password, but that only takes a minute.  I'll be adding functions (or adding to this function) to take care of those as well as things like renaming the guest, joining a domain, copying files to the drive, etc.</p>
 <p>It's still a work in progress, so you will see some hardcoded values.  Hopefully you can see what's going on and adapt it to your needs.</p>
 <p>I'll be writing more as I play more with Hyper-V, DSC, and containers.</p>
 <p>Let me know what you think</p>
-<p>--Mike</body></html></p>
+<p>--Mike</p>
+
+

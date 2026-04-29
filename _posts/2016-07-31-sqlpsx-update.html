@@ -26,8 +26,6 @@ author:
   last_name: ''
 permalink: "/2016/07/31/sqlpsx-update/"
 ---
-<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
-<html><body>
 <p>Ok. I finally pulled the trigger on a major update (structurally, at least) to <a href="https://github.com/MikeShepard/SQLPSX">SQLSPX</a>. This is the first big change in about 5 years. If you missed the <a href="https://powershellstation.com/2016/07/13/the-future-of-sqlpsx/">post from a couple of weeks ago</a> warning about this you might want to go back and read it.</p>
 <p>In short, SQLPSX hadn't been updated in a long time. The main downfall (besides not incorporating new SQLServer features) of that delay was that SQLPSX was still trying to load very old SMO DLLs. In the meantime, the SQL Client tools team released an updated PowerShell module for SQL Server as part of the <a href="https://msdn.microsoft.com/en-us/library/mt238290.aspx?f=255&amp;MSPPError=-2147217396">SSMS July 2016 update</a> named SQLServer, which was the name of one of the modules in SQLPSX. So, it was time to do something.</p>
 <p>I could have simply renamed the module (and the two functions in it) that collided with the official MS module.  I've done that, but I also made some other changes which I'll explain now.</p>
@@ -53,4 +51,5 @@ permalink: "/2016/07/31/sqlpsx-update/"
 <p>If you have questions about what's going on or why I made the changes I did, feel free to reach out to me.  If you want to help with the project in any capacity, I'd love to hear from you.</p>
 <p>Hopefully I didn't step on too many toes.  If yours were stepped on, I apologize.  Let me know what I did and I'll try to make it right.  The community works better if it communicates.</p>
 <p>--Mike</p>
-<p></body></html></p>
+
+

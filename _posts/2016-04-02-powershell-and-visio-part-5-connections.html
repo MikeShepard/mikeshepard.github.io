@@ -23,74 +23,69 @@ author:
   last_name: ''
 permalink: "/2016/04/02/powershell-and-visio-part-5-connections/"
 ---
-<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
-<html><body></p>
 <p>It's been a while since the last post.  I decided that if I had to chose between writing PowerShell and writing <em>about</em> PowerShell, I should favor the former.</p>
 <p>In this episode, I'll talk about how to create connections between objects in a Visio diagram.  Turns out it's not really that hard (just like most things with Visio so far), but there some interesting things we can do with the connections once they exist.</p>
 <p>So, to start with, let's get a some shapes on a page.  If this doesn't look familiar, refer back to the earlier posts in this series <a href="https://powershellstation.com/tag/visio/">here</a>:</p>
-<p> <br />
-[powershell]<br />
-$visio=New-Object -ComObject Visio.Application<br />
-$Document=$Visio.Documents.Add('')<br />
-$rect1=$Visio.ActivePage.DrawRectangle(1,1,2,2)<br />
-$rect2=$Visio.ActivePage.DrawRectangle(4,4,5,5)<br />
-[/powershell]</p>
-<p>Here's what that got us:<br />
-<a href="https://powershellstation.com/wp-content/uploads/2016/04/2Rectangles.png" rel="attachment wp-att-934"><img src="{{site.baseurl}}/assets/2016/04/2Rectangles-236x300.png" alt="2Rectangles" width="236" height="300" class="alignnone size-medium wp-image-934"></a></p>
-<p>Now, we have 2 shapes (<strong>$rect1</strong> and <strong>$rect2</strong>).  To connect them, we'll use the <strong>AutoConnect()</strong> method on one of the 2 shapes.  Since Visio connectors are directional (that is, they have a start and an end), it matters which one we use.</p>
-<p>[powershell]<br />
-$rect1.AutoConnect($rect2,0)<br />
-[/powershell]</p>
-<p>The AutoConnect() method takes three arguments:</p>
+<pre class="wp-code language-powershell"><code>
+$visio=New-Object -ComObject Visio.Application
+
+$Document=$Visio.Documents.Add('')
+
+$rect1=$Visio.ActivePage.DrawRectangle(1,1,2,2)
+
+$rect2=$Visio.ActivePage.DrawRectangle(4,4,5,5)
+Here's what that got us:
+<a href="https://powershellstation.com/wp-content/uploads/2016/04/2Rectangles.png" rel="attachment wp-att-934"><img src="{{site.baseurl}}/assets/2016/04/2Rectangles-236x300.png" alt="2Rectangles" width="236" height="300" class="alignnone size-medium wp-image-934"></a>
+Now, we have 2 shapes, <strong>$rect1</strong> and <strong>$rect2</strong>. To connect them, we'll use the <strong>AutoConnect()</strong> method on one of the 2 shapes. Since Visio connectors are directional, that is, they have a start and an end, it matters which one we use.
+<pre class="wp-code language-powershell"><code>
+$rect1.AutoConnect($rect2,0)
+The AutoConnect() method takes three arguments:
 <ol>
 <li>The shape you want to connect to</li>
 <li>The <a href="https://msdn.microsoft.com/en-us/library/office/ff765912.aspx" target="_blank">direction</a> (relative to the first shape) you want to move the connected shape to (0 means don't move the second shape)</li>
 <li>The shape you want to use as a connector</li>
 </ol>
-<p>In this example, we chose to not move the second shape, and used the default connector.</p>
-<p>The result looks like this:<br />
-<a href="https://powershellstation.com/wp-content/uploads/2016/04/ConnectedRectangles.png" rel="attachment wp-att-936"><img src="{{site.baseurl}}/assets/2016/04/ConnectedRectangles-238x300.png" alt="ConnectedRectangles" width="238" height="300" class="alignnone size-medium wp-image-936"></a></p>
-<p>There are several interesting things about this connector:</p>
+In this example, we chose to not move the second shape, and used the default connector.
+The result looks like this:
+<a href="https://powershellstation.com/wp-content/uploads/2016/04/ConnectedRectangles.png" rel="attachment wp-att-936"><img src="{{site.baseurl}}/assets/2016/04/ConnectedRectangles-238x300.png" alt="ConnectedRectangles" width="238" height="300" class="alignnone size-medium wp-image-936"></a>
+There are several interesting things about this connector:
 <ol>
 <li>It doesn't indicate direction (you can't tell which way the connector goes)</li>
 <li>It's dynamic (it will move/route as you move the two shapes)</li>
 <li>We didn't get a reference to it as a result of the AutoConnect() method</li>
 </ol>
-<p>We'll start by addressing the last point.  Since we didn't get a reference to the connector, how can we find it?  It turns out that just about everything in Visio is a shape, so we can look at the Shapes collection on the page:<br />
-[powershell]<br />
-$Visio.ActivePage.Shapes | Select-Object Name<br />
-[/powershell]<br />
-In the output, you will see (at the end) a shape called "Dynamic connector".  That's our new connector (duh).</p>
-<p>[powershell]<br />
-$connector = $Visio.ActivePage.Shapes['Dynamic connector'] | select -Last 1<br />
-[/powershell]<br />
-I picked the last one in the collection in case there were others.  Visio adds to this collection as shapes are added to the list, so this should be safe.</p>
-<p>Now that we've got a reference to the connector, how can we designate which end is which?  In the Visio GUI, we would click the Line drop-down on the ribbon and select the arrows (or dots) that we wanted.  In PowerShell, it's a different story altogether.</p>
-<p>First of all, there's not an Arrows property that we can use.  That would be too easy.  It turns out that in Visio, everything has what's called a ShapeSheet, which is kind of like a bunch of little spreadsheets that control every aspect of how the object behaves in Visio.  Accessing cells in the ShapeSheet can be done several ways, but typically you either use the Section, Row, Column reference (SRC) or a special Named Cell.  These references look something like this:<br />
-[powershell]<br />
-$Shape.CellsSRC($section,$row,$column)<br />
-[/powershell]<br />
-and<br />
-[powershell]<br />
-$Shape.Cells('CellName')<br />
-[/powershell]</p>
-<p>To set the ending arrow for a connector, there's a "named cell" called EndArrow which tells Visio what symbol to draw at the end of the connector.  We're going to set the cell to 4.  The number can apparently be anywhere from 1-45 to display different arrows.  </p>
-<p>[powershell]<br />
-$connector.Cells('EndArrow')=4<br />
-[/powershell]</p>
-<p>And the resulting arrow (zoomed in so you can see it):<br />
-<a href="https://powershellstation.com/wp-content/uploads/2016/04/Arrow.png" rel="attachment wp-att-937"><img src="{{site.baseurl}}/assets/2016/04/Arrow-300x264.png" alt="Arrow" width="300" height="264" class="alignnone size-medium wp-image-937"></a></p>
-<p>If we wanted the arrow to be bi-directional, we could also set the "BeginArrow" cell.<br />
-[powershell]<br />
-$connector.Cells('BeginArrow')=4<br />
-[/powershell]</p>
-<p><a href="https://powershellstation.com/wp-content/uploads/2016/04/BeginArrow.png" rel="attachment wp-att-938"><img src="{{site.baseurl}}/assets/2016/04/BeginArrow-300x272.png" alt="BeginArrow" width="300" height="272" class="alignnone size-medium wp-image-938"></a></p>
-<p>Ok.  Now for #2.  Can we change how the connector routes?  I often like to use straight lines because they're easier to follow.  Change the connector to be straight, we have to resort to the ShapeSheet again.  However, there's no named cell this time (see P.S...I found names).  Now, we have to know the SRC to where the cell is.  In fact, for this there are 2 cells that we have to set, so we need to know both SRCs.</p>
-<p>[powershell]<br />
- $connector.CellsSRC(1,23,10) = 16<br />
- $connector.CellsSRC(1,23,19) = 1<br />
-[/powershell]</p>
-<p>That's pretty cryptic, right?  Absolutely.  It turns out with Visio, there are about 40 bajillion different constants to use.  This <a href="http://powershell.com/cs/media/p/19301.aspx" target="_blank">link</a> will help you with some, but they aren't organized much.  This <a href="https://msdn.microsoft.com/en-us/library/office/dn480947.aspx" target="_blank">page</a> is organized a little better, but it's still hard to know where to look.  The constants in this example are:</p>
+We'll start by addressing the last point. Since we didn't get a reference to the connector, how can we find it? It turns out that just about everything in Visio is a shape, so we can look at the Shapes collection on the page:
+<pre class="wp-code language-powershell"><code>
+$Visio.ActivePage.Shapes | Select-Object Name
+In the output, you will see, at the end, a shape called "Dynamic connector". That's our new connector, duh.
+<pre class="wp-code language-powershell"><code>
+$connector = $Visio.ActivePage.Shapes['Dynamic connector'] | select -Last 1
+<p>I picked the last one in the collection in case there were others. Visio adds to this collection as shapes are added to the list, so this should be safe.</p>
+<p>Now that we've got a reference to the connector, how can we designate which end is which? In the Visio GUI, we would click the Line drop-down on the ribbon and select the arrows, or dots, that we wanted. In PowerShell, it's a different story altogether.</p>
+<p>First of all, there's not an Arrows property that we can use. That would be too easy. It turns out that in Visio, everything has what's called a ShapeSheet, which is kind of like a bunch of little spreadsheets that control every aspect of how the object behaves in Visio. Accessing cells in the ShapeSheet can be done several ways, but typically you either use the Section, Row, Column reference, SRC, or a special named cell. These references look something like this:</p>
+<pre class="wp-code language-powershell"><code>
+$Shape.CellsSRC($section,$row,$column)
+<p>and</p>
+<pre class="wp-code language-powershell"><code>
+$Shape.Cells('CellName')
+<p>To set the ending arrow for a connector, there's a named cell called EndArrow which tells Visio what symbol to draw at the end of the connector. We're going to set the cell to 4. The number can apparently be anywhere from 1-45 to display different arrows.</p>
+<pre class="wp-code language-powershell"><code>
+$connector.Cells('EndArrow')=4
+<p>And the resulting arrow, zoomed in so you can see it:</p>
+<p>
+<a href="https://powershellstation.com/wp-content/uploads/2016/04/Arrow.png" rel="attachment wp-att-937"><img src="{{site.baseurl}}/assets/2016/04/Arrow-300x264.png" alt="Arrow" width="300" height="264" class="alignnone size-medium wp-image-937"></a>
+<p>If we wanted the arrow to be bi-directional, we could also set the BeginArrow cell.</p>
+<pre class="wp-code language-powershell"><code>
+$connector.Cells('BeginArrow')=4
+<p>
+<a href="https://powershellstation.com/wp-content/uploads/2016/04/BeginArrow.png" rel="attachment wp-att-938"><img src="{{site.baseurl}}/assets/2016/04/BeginArrow-300x272.png" alt="BeginArrow" width="300" height="272" class="alignnone size-medium wp-image-938"></a>
+<p>Ok. Now for #2. Can we change how the connector routes? I often like to use straight lines because they're easier to follow. To change the connector to be straight, we have to resort to the ShapeSheet again. However, there's no named cell this time, see P.S...I found names. Now, we have to know the SRC to where the cell is. In fact, for this there are 2 cells that we have to set, so we need to know both SRCs.</p>
+<pre class="wp-code language-powershell"><code>
+$connector.CellsSRC(1,23,10) = 16
+
+$connector.CellsSRC(1,23,19) = 1
+<p>That's pretty cryptic, right? Absolutely. It turns out with Visio, there are about 40 bajillion different constants to use. This 
+<a href="http://powershell.com/cs/media/p/19301.aspx" target="_blank">link</a> will help you with some, but they aren't organized much. This <a href="https://msdn.microsoft.com/en-us/library/office/dn480947.aspx" target="_blank">page</a> is organized a little better, but it's still hard to know where to look. The constants in this example are:</p>
 <ul>
 <li>visSectionObject = 1</li>
 <li>visRowShapeLayout = 23</li>
@@ -99,14 +94,22 @@ $connector.Cells('BeginArrow')=4<br />
 <li>visSLOLineRouteExt = 19</li>
 <li>visLORouteExtStraight = 1</li>
 </ul>
-<p>So that's a mess (at least to me).  How in the world do we figure these out?  The easiest way is to record a macro and do what you want to find out about, then look at the VBA.  The VBA code for setting a connector to a straight line looks like this:<br />
-[vb]<br />
-Application.ActiveWindow.Page.Shapes.ItemFromID(3).CellsSRC(visSectionObject, visRowShapeLayout, visSLOLineRouteExt).FormulaU = "1"<br />
-Application.ActiveWindow.Page.Shapes.ItemFromID(3).CellsSRC(visSectionObject, visRowShapeLayout, visSLORouteStyle).FormulaU = "16"<br />
-[/vb]</p>
-<p>That, with some googling, can get you what you need.  I'm working on a better solution, but it's not ready quite yet.  :-)</p>
-<p>That's enough about connectors.  </p>
-<p>Let me know what you think in the comments (or on Twitter)</p>
+<p>So that's a mess, at least to me. How in the world do we figure these out? The easiest way is to record a macro and do what you want to find out about, then look at the VBA. The VBA code for setting a connector to a straight line looks like this:</p>
+<pre class="wp-code language-vb"><code>
+Application.ActiveWindow.Page.Shapes.ItemFromID(3).CellsSRC(visSectionObject, visRowShapeLayout, visSLOLineRouteExt).FormulaU = "1"
+Application.ActiveWindow.Page.Shapes.ItemFromID(3).CellsSRC(visSectionObject, visRowShapeLayout, visSLORouteStyle).FormulaU = "16"
+<p>That, with some googling, can get you what you need. I'm working on a better solution, but it's not ready quite yet. :-)</p>
+<p>That's enough about connectors.</p>
+<p>Let me know what you think in the comments, or on Twitter.</p>
 <p>Mike<br />
-<a href="https://twitter.com/MikeShepard70" target="_blank">@MikeShepard70</a></p>
-<p><strong>P.S. </strong> Found the "named cells" for making straight lines:  <strong>ShapeRouteStyle</strong> and <strong>ConLineRouteExt</strong>.</body></html></p>
+<a href="https://twitter.com/MikeShepard70" target="_blank">@MikeShepard70</a>
+<p><strong>P.S.</strong> Found the named cells for making straight lines: <strong>ShapeRouteStyle</strong> and <strong>ConLineRouteExt</strong>.</p>
+
+
+
+
+
+
+
+
+

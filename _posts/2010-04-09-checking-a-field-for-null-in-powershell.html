@@ -25,26 +25,41 @@ author:
   last_name: ''
 permalink: "/2010/04/09/checking-a-field-for-null-in-powershell/"
 ---
-<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
-<html><body>
 <p>It’s been a long time (over 2 months) since I last posted.  I’ll try to get back into a rhythm of posting at least weekly.  Anyway, this is something that occurred to me at work when writing a script.</p>
 <p>I usually avoid nullable columns, but sometimes date fields make sense to be null (rather than use sentinel values like 1/1/1900).  In this case, I had a nullable date column and I needed to check in PowerShell whether the field was in fact null or not.  In SQL, I would have just used an IS NULL, or used the IsNull() function to replace the null value with something a little easier to deal with.  My first (feeble) attempt was to do this:<br />
-[powershell]if (!$_.completedDate){<br />
-# it’s null<br />
-}[/powershell]<br />
+<pre class="wp-code language-powershell"><code>
+if (!$_.completedDate){
+
+# it’s null
+
+}
+</code></pre><br />
 Unfortunately for me, that doesn’t work.  Next, I used this (which worked, but wasn’t very satisfactory either):<br />
-[powershell]if ($_.completedDate.ToString() -eq ''){<br />
-# it’s null<br />
-}[/powershell]<br />
+<pre class="wp-code language-powershell"><code>
+if ($_.completedDate.ToString() -eq &#39;&#39;){
+
+# it’s null
+
+}
+</code></pre><br />
 Realizing that I was being stupid, I googled “PowerShell SQL NULL and after looking at several pages which didn’t really address the issue, I found <a href="http://blogs.technet.com/industry_insiders/pages/testing-for-database-null-values-from-powershell.aspx">this.</a> A little work to change it into a function, and voilà.<br />
-[powershell]function is-null($value){<br />
-  return  [System.DBNull]::Value.Equals($value)<br />
-}[/powershell]<br />
+<pre class="wp-code language-powershell"><code>
+function is-null($value){
+
+  return  [System.DBNull]::Value.Equals($value)
+
+}
+</code></pre><br />
 A few quick tests and this is what I wanted. Now, my code looks like this:<br />
-[powershell]if (is-null $_.completedDate){<br />
-# it’s null<br />
-}[/powershell]<br />
+<pre class="wp-code language-powershell"><code>
+if (is-null $_.completedDate){
+
+# it’s null
+
+}
+</code></pre><br />
 I find it hard to believe I haven’t written this function before (or seen it).</p>
 <p>By the way…be watching the <a href="http://sqlpsx.codeplex.com">SQL PowerShell Extensions</a> project.  Chad released version 2.1, which includes SQL mode for the ISE (really nice).  I know he and several others are collaborating on an update which should be out sometime soon.</p>
 <p>-Mike</p>
-<p></body></html></p>
+
+

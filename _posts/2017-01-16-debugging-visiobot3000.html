@@ -29,8 +29,6 @@ author:
   last_name: ''
 permalink: "/2017/01/16/debugging-visiobot3000/"
 ---
-<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
-<html><body></p>
 <h2>
 <a href="https://powershellstation.com/wp-content/uploads/2017/01/magnifying-glass-145942_640.png"><img class="size-medium wp-image-1109 alignright" src="{{site.baseurl}}/assets/2017/01/magnifying-glass-145942_640-300x279.png" alt="magnifying glass" width="300" height="279"></a>The Setup</h2>
 <p>Sometime around late August of 2016, <a href="https://github.com/MikeShepard/VisioBot3000">VisioBot3000</a> stopped working.  It was sometime after the Windows 10 anniversary update, and I noticed that when I ran any of the examples in the repo, PowerShell hung whenever it tried to place a container on the page.</p>
@@ -47,55 +45,80 @@ permalink: "/2017/01/16/debugging-visiobot3000/"
 <p>After Thanksgiving, I posted a question on <a href="https://www.reddit.com/r/PowerShell/comments/5fn0gg/problems_with_dropcontainer_method/">/r/Powershell</a> explaining the situation.  I got one reply, suggesting that I watch things in ProcMon while debugging.  Seemed like a great thing to do,  When I got around to trying it, however, it didn't show anything useful (at least to me...digging through the thousands of lines of output is somewhat difficult).</p>
 <h2>Making it Simple</h2>
 <p>Late last year, I thought, I should come up with a minimal verifiable example.  Rather than say "all of my code breaks", I should be able to come up with the smallest possible example that breaks.  To that end, I wanted to include as little VisioBot3000 code as I could, and show that something's up with Visio's COM interface (or something like that).  To that end, I went back to the slides I used when demonstrating Visio automation to the St. Louis PSUG back in March of 2016 and cobbled together an example:</p>
-<p> </p>
-<p>[powershell]$Visio = New-Object –ComObject Visio.Application<br />
-$doc= $Visio.Documents.Add('')<br />
-$page= $doc.Pages[1]<br />
-$stencilPath='SERVER_U.VSSX'<br />
-$stencil=$Visio.Documents.OpenEx($stencilPath,64)<br />
-$ServerMaster=$stencil.Masters['Server']<br />
-$bert=$page.Drop($ServerMaster,5,5)<br />
-$containerStencil=$Visio.Documents.OpenEx($Visio.GetBuiltinStencilFile(2,2),64)<br />
-$ContainerMaster=$containerStencil.Masters['Plain']<br />
-$container=$page.DropContainer($ContainerMaster,$Bert)<br />
-[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+$Visio = New-Object –ComObject Visio.Application
+
+$doc= $Visio.Documents.Add(&#39;&#39;)
+
+$page= $doc.Pages[1]
+
+$stencilPath=&#39;SERVER_U.VSSX&#39;
+
+$stencil=$Visio.Documents.OpenEx($stencilPath,64)
+
+$ServerMaster=$stencil.Masters[&#39;Server&#39;]
+
+$bert=$page.Drop($ServerMaster,5,5)
+
+$containerStencil=$Visio.Documents.OpenEx($Visio.GetBuiltinStencilFile(2,2),64)
+
+$ContainerMaster=$containerStencil.Masters[&#39;Plain&#39;]
+
+$container=$page.DropContainer($ContainerMaster,$Bert)
+</code></pre>
 <p>And of course, that worked just fine on all of the boxes I had. That meant I had code that worked and code that didn't work on the same box. Sounds like a great opportunity for debugging. I just needed to slowly change the working code until it didn't work, right? That's how my brain works, anyway.</p>
 <p>Here's what I came up with:</p>
-<p>[powershell]<br />
-Import-Module c:\temp\VisioBot3000 -Force</p>
-<p>New-VisioApplication  </p>
-<p>New-VisioDocument C:\temp\VisioPrimitives1.vsdx<br />
-$visio=get-visioapplication<br />
-$doc= $visio.ActiveDocument</p>
-<p>Register-VisioStencil -Name Containers -BuiltIn Containers<br />
-Register-VisioStencil -path SERVER_U.VSSX -name Servers<br />
-Register-VisioShape -Name WebServer -From Servers -MasterName Server<br />
-Register-VisioContainer -Name Domain -From Containers -MasterName 'Plain'</p>
-<p>$foo=$doc.Pages['Page-1']</p>
-<p>New-VisioContainer -shape Domain -Label MyDomain -contents {<br />
-		    New-VisioShape -master WebServer -Label PrimaryServer -x 5 -y 5<br />
-}<br />
-[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+Import-Module c:\temp\VisioBot3000 -Force
+New-VisioApplication  
+New-VisioDocument C:\temp\VisioPrimitives1.vsdx
+
+$visio=get-visioapplication
+
+$doc= $visio.ActiveDocument
+Register-VisioStencil -Name Containers -BuiltIn Containers
+
+Register-VisioStencil -path SERVER_U.VSSX -name Servers
+
+Register-VisioShape -Name WebServer -From Servers -MasterName Server
+
+Register-VisioContainer -Name Domain -From Containers -MasterName &#39;Plain&#39;
+$foo=$doc.Pages[&#39;Page-1&#39;]
+New-VisioContainer -shape Domain -Label MyDomain -contents {
+
+		    New-VisioShape -master WebServer -Label PrimaryServer -x 5 -y 5
+
+}
+</code></pre>
 <p>That code works, and uses VisioBot3000 functions for just about everything. Notice the three variable assignment lines. They don't have any logical effect on the code. The $foo variable is not used. However, if I leave the line assigning to $foo out, it stops working.</p>
-<p>[powershell]<br />
-Import-Module c:\temp\VisioBot3000 -Force</p>
-<p>New-VisioApplication  </p>
-<p>New-VisioDocument C:\temp\VisioPrimitives1.vsdx<br />
-$visio=get-visioapplication<br />
-$doc= $visio.ActiveDocument</p>
-<p>Register-VisioStencil -Name Containers -BuiltIn Containers<br />
-Register-VisioStencil -path SERVER_U.VSSX -name Servers<br />
-Register-VisioShape -Name WebServer -From Servers -MasterName Server<br />
-Register-VisioContainer -Name Domain -From Containers -MasterName 'Plain'</p>
-<p>#Commenting out the following line makes the code hang when dropping the container<br />
-#$foo=$doc.Pages['Page-1']</p>
-<p>New-VisioContainer -shape Domain -Label MyDomain -contents {<br />
-		    New-VisioShape -master WebServer -Label PrimaryServer -x 5 -y 5<br />
-}<br />
-[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+Import-Module c:\temp\VisioBot3000 -Force
+New-VisioApplication  
+New-VisioDocument C:\temp\VisioPrimitives1.vsdx
+
+$visio=get-visioapplication
+
+$doc= $visio.ActiveDocument
+Register-VisioStencil -Name Containers -BuiltIn Containers
+
+Register-VisioStencil -path SERVER_U.VSSX -name Servers
+
+Register-VisioShape -Name WebServer -From Servers -MasterName Server
+
+Register-VisioContainer -Name Domain -From Containers -MasterName &#39;Plain&#39;
+#Commenting out the following line makes the code hang when dropping the container
+
+#$foo=$doc.Pages[&#39;Page-1&#39;]
+New-VisioContainer -shape Domain -Label MyDomain -contents {
+
+		    New-VisioShape -master WebServer -Label PrimaryServer -x 5 -y 5
+
+}
+</code></pre>
 <p>To add insult to injury, changing that line to [void]$doc.Pages['Page-1'] or [void]$doc.Pages[1] both result in a script that doesn't hang.</p>
 <p>So...somehow accessing the Pages property of the current document is fixing the problem.</p>
 <p>My brain hurts.</p>
 <p>Anyone have any ideas about this?  I'd love to get some feedback on what in the world is going on.</p>
-<p> </p>
-<p>--Mike</body></html></p>
+<p>--Mike</p>
+
+

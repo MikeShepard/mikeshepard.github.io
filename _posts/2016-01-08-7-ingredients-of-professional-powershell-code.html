@@ -22,8 +22,6 @@ author:
   last_name: ''
 permalink: "/2016/01/08/7-ingredients-of-professional-powershell-code/"
 ---
-<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
-<html><body></p>
 <p>If you've been using PowerShell for any amount of time you've probably written a lot of code. Here are some guidelines I've come up with for what I consider "Professional" code. I should note that I'm assuming some basic things like correct verb-noun naming, commented code, reasonable variable names, etc. Also, the code should work! Once you've got that going, try to make sure you've got these as well.</p>
 <ol>
 <h3> </h3>
@@ -48,9 +46,13 @@ permalink: "/2016/01/08/7-ingredients-of-professional-powershell-code/"
 </li>
 <li>Pipeline input
 <p>Pipeline input isn't always necessary, but it really makes using a function easier. You've got to have an advanced function to do this, but you did that already, right? I'd much rather have this:</p>
-<p>[powershell]Get-Thing | Stop-Thing[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+Get-Thing | Stop-Thing
+</code></pre>
 <p>Than this:</p>
-<p>[powershell]Get-Thing | foreach-object {Stop-Thing $_}[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+Get-Thing | foreach-object {Stop-Thing $_}
+</code></pre>
 <p>If you've used cmdlets that didn't allow pipeline input you've undoubtedly written some code like this.</p>
 <h3> </h3>
 </li>
@@ -73,4 +75,5 @@ permalink: "/2016/01/08/7-ingredients-of-professional-powershell-code/"
 <p>How does your code fare against this list? I know most of mine has some room for improvements.</p>
 <p>What do you think of this list? Did I miss something important? Let me know in the comments!</p>
 <p>--Mike</p>
-<p></body></html></p>
+
+

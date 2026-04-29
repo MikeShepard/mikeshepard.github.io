@@ -1,0 +1,396 @@
+:root {
+  --page-width: 1110px;
+  --content-width: 770px;
+  --sidebar-width: 300px;
+  --site-blue: #6d97b7;
+  --site-blue-dark: #537996;
+  --border-color: #d7d7d7;
+  --text-color: #404040;
+  --muted-color: #888;
+  --paper: #ffffff;
+  --page-bg: #f0f0f0;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 62.5%;
+}
+
+body {
+  margin: 0;
+  background: linear-gradient(180deg, #f6f6f6 0, #ececec 240px, #f7f7f7 100%);
+  color: var(--text-color);
+  font-family: "Gudea", sans-serif;
+  font-size: 1.6rem;
+  line-height: 1.5;
+}
+
+a {
+  color: var(--text-color);
+  text-decoration: none;
+}
+
+a:hover,
+a:focus {
+  color: #111;
+  text-decoration: underline;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+.assistive-text {
+  position: absolute;
+  left: -9999px;
+}
+
+.skip-link:focus {
+  left: 2rem;
+  top: 1rem;
+  z-index: 1000;
+  background: #fff;
+  color: #000;
+  padding: 0.8rem 1.2rem;
+  border: 0.1rem solid #000;
+}
+
+#page {
+  max-width: var(--page-width);
+  margin: 2.8rem auto;
+  border-radius: 0.5rem;
+  box-shadow: rgba(0, 0, 0, 0.4) 0 0 1rem 0;
+  overflow: hidden;
+  background: var(--paper);
+}
+
+#masthead {
+  background: var(--site-blue);
+  box-shadow: rgba(0, 0, 0, 0.1) 0 0 2rem 0 inset;
+  margin: 0;
+  padding: 2.4rem 2rem 0;
+  text-align: center;
+}
+
+.site-title {
+  margin: 0;
+  font-family: "Patua One", serif;
+  font-size: 3.2rem;
+  font-weight: 400;
+  letter-spacing: 0.12rem;
+  text-transform: uppercase;
+}
+
+.site-title a {
+  color: #fff;
+  text-shadow: rgba(0, 0, 0, 0.25) 0 0.1rem 0.1rem;
+}
+
+.site-description {
+  margin: 0.5rem 0 1.8rem;
+  font-size: 1.6rem;
+  font-weight: 400;
+  color: #eff5fb;
+  text-shadow: rgba(0, 0, 0, 0.2) 0 0 0.1rem;
+}
+
+#access {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.16), rgba(0, 0, 0, 0.08));
+  border-top: 0.1rem solid rgba(255, 255, 255, 0.15);
+}
+
+.nav-menu {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.menu-item {
+  margin: 0;
+}
+
+.menu-item a {
+  display: block;
+  padding: 1rem 1.4rem;
+  color: #fff;
+  font-size: 1.4rem;
+  letter-spacing: 0.04rem;
+  text-transform: uppercase;
+}
+
+.menu-item a:hover,
+.menu-item a:focus {
+  background: rgba(0, 0, 0, 0.12);
+  text-decoration: none;
+}
+
+#main {
+  background: #fff;
+  clear: both;
+  overflow: hidden;
+  box-shadow: rgba(0, 0, 0, 0.1) 0 0 0 0.1rem inset;
+}
+
+#primary {
+  float: left;
+  width: calc(100% - var(--sidebar-width));
+}
+
+#content {
+  padding: 2.5rem 3rem;
+}
+
+#secondary {
+  float: right;
+  width: var(--sidebar-width);
+  padding: 2rem;
+  background: #fbfbfb;
+  border-left: 0.1rem solid #e4e4e4;
+  box-shadow: rgba(0, 0, 0, 0.04) 0 0 0 0.1rem inset;
+}
+
+.page-header,
+.entry-header {
+  margin-bottom: 1.2rem;
+}
+
+.page-title,
+.entry-title {
+  margin: 0 0 0.4rem;
+  font-family: "Patua One", serif;
+  font-size: 2.8rem;
+  font-weight: 400;
+  line-height: 1.2;
+  word-wrap: break-word;
+}
+
+.entry-title a {
+  color: #1f1f1f;
+}
+
+.entry-meta {
+  clear: both;
+  color: var(--muted-color);
+  font-size: 1.1rem;
+  letter-spacing: 0.03rem;
+  text-transform: uppercase;
+}
+
+.entry-meta a {
+  color: var(--muted-color);
+}
+
+.entry-content {
+  margin: 0;
+}
+
+.entry-content::after {
+  content: "";
+  display: block;
+  clear: both;
+}
+
+.entry-content h1,
+.entry-content h2,
+.entry-content h3,
+.entry-content h4 {
+  font-family: "Patua One", serif;
+  font-weight: 400;
+  line-height: 1.25;
+  color: #222;
+}
+
+.entry-content p,
+.entry-content ul,
+.entry-content ol,
+.entry-content blockquote,
+.entry-content pre {
+  margin: 0 0 1.6rem;
+}
+
+.entry-content ul,
+.entry-content ol {
+  padding-left: 2.2rem;
+}
+
+.entry-content blockquote {
+  margin-left: 0;
+  padding: 1rem 1.4rem;
+  border-left: 0.4rem solid #c9d7e5;
+  background: #f7fbff;
+  color: #4a4a4a;
+}
+
+.entry-content pre,
+.entry-content code {
+  font-family: Consolas, "Courier New", monospace;
+}
+
+.entry-content pre {
+  padding: 1.4rem;
+  overflow-x: auto;
+  background: #f5f5f5;
+  border: 0.1rem solid #e2e2e2;
+}
+
+.entry-content .wp-caption-text {
+  margin-top: -0.6rem;
+  color: var(--muted-color);
+  font-size: 1.3rem;
+  font-style: italic;
+  text-align: center;
+}
+
+.entry-content .wp-code {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+article.post,
+article.page {
+  margin-bottom: 3.6rem;
+  padding-bottom: 2.8rem;
+  border-bottom: 0.1rem solid #e8e8e8;
+}
+
+article.post:last-of-type,
+article.page:last-of-type {
+  margin-bottom: 0;
+  border-bottom: 0;
+}
+
+.widget {
+  margin: 0 0 2.4rem;
+  font-size: 1.4rem;
+}
+
+.widget-title {
+  margin: 0 0 1rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 0.1rem solid var(--border-color);
+  font-family: "Patua One", serif;
+  font-size: 1.9rem;
+  font-weight: 400;
+}
+
+.widget ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.widget li {
+  margin: 0 0 0.8rem;
+}
+
+.tagcloud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+}
+
+.tag-cloud-link {
+  display: inline-block;
+  padding: 0.3rem 0.7rem;
+  background: #eef4f8;
+  border: 0.1rem solid #d8e4ee;
+  border-radius: 999px;
+  color: #49657b;
+  font-size: 1.2rem;
+}
+
+.archive-list,
+.taxonomy-list {
+  margin: 0 0 2.4rem;
+  padding-left: 2rem;
+}
+
+.archive-date {
+  color: var(--muted-color);
+  font-size: 1.3rem;
+}
+
+#searchform {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.8rem;
+}
+
+#searchform .field {
+  min-width: 0;
+  padding: 0.8rem 1rem;
+  border: 0.1rem solid #c8d2da;
+  background: #fff;
+  font: inherit;
+}
+
+#searchform .submit {
+  padding: 0.8rem 1.1rem;
+  border: 0.1rem solid var(--site-blue-dark);
+  background: var(--site-blue);
+  color: #fff;
+  font: inherit;
+  cursor: pointer;
+}
+
+#searchform .submit:hover,
+#searchform .submit:focus {
+  background: var(--site-blue-dark);
+}
+
+#colophon {
+  padding: 1.6rem 2rem;
+  border-top: 0.1rem solid #d9d9d9;
+  background: #f8f8f8;
+  color: #686868;
+  font-size: 1.3rem;
+  text-align: center;
+}
+
+@media (max-width: 900px) {
+  #primary,
+  #secondary {
+    float: none;
+    width: 100%;
+  }
+
+  #secondary {
+    border-left: 0;
+    border-top: 0.1rem solid #e4e4e4;
+  }
+}
+
+@media (max-width: 640px) {
+  #page {
+    margin: 0;
+    border-radius: 0;
+  }
+
+  #masthead {
+    padding-top: 1.8rem;
+  }
+
+  .site-title {
+    font-size: 2.5rem;
+  }
+
+  .nav-menu {
+    display: block;
+  }
+
+  .menu-item a {
+    border-top: 0.1rem solid rgba(255, 255, 255, 0.12);
+  }
+
+  #content,
+  #secondary {
+    padding: 2rem 1.6rem;
+  }
+}

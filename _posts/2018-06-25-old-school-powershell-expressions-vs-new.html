@@ -24,45 +24,54 @@ author:
   last_name: ''
 permalink: "/2018/06/25/old-school-powershell-expressions-vs-new/"
 ---
-<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
-<html><body></p>
 <p>In a recent StackOverflow answer, I wrote the following PowerShell to find parameters that were in a given parameter set (edited somewhat for purposes of this post):</p>
-<p>[powershell]<br />
-$commandName='Get-ChildItem'<br />
-$ParameterSetToMatch='LiteralItems'</p>
-<p>$ParameterList = (Get-Command -Name $commandName).Parameters.Values</p>
-<p>foreach($parameter in $parameterList){<br />
-    $parameterSets=$parameter.ParameterSets.Keys<br />
-   if ($parameterSets -contains $parameterSetToMatch ){<br />
-        write-output $parameter.Name<br />
-    }<br />
-}<br />
-[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+$commandName=&#39;Get-ChildItem&#39;
+
+$ParameterSetToMatch=&#39;LiteralItems&#39;
+$ParameterList = (Get-Command -Name $commandName).Parameters.Values
+foreach($parameter in $parameterList){
+
+    $parameterSets=$parameter.ParameterSets.Keys
+
+   if ($parameterSets -contains $parameterSetToMatch ){
+
+        write-output $parameter.Name
+
+    }
+
+}
+</code></pre>
 <p>A quick note...it's not correct.  It only shows parameters that are <em>explicitly</em> in the parameter set.  Items that aren't marked with any parameter set are in all parameter sets, and this doesn't include them.  That is beside the point.</p>
 <p>Note that I'm looking through collections with a loop and an if statement.</p>
 <h2>A bit better</h2>
 <p>I could have made it a bit better with Where-Object (it's still a bit bad because hashtable iteration isn't nice):<br />
-[powershell]<br />
-$ParameterList.GetEnumerator() |<br />
-   Where-Object {$_.Value.parameterSets.Keys  -contains 'Items'} |<br />
-   Select-Object -Property Key<br />
-[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+$ParameterList.GetEnumerator() |
+
+   Where-Object {$_.Value.parameterSets.Keys  -contains &#39;Items&#39;} |
+
+   Select-Object -Property Key
+</code></pre>
 <h2>The "new" way</h2>
 <p>When I say new, I mean "PowerShell 3.0 new".  I still have a lot of PowerShell 1.0 muscle-memory that I need to get rid of.  This post is part of the attempt.  :-)</p>
 <p>Now, I'm going to use two features that were added to PowerShell 3.0 that I don't use often enough:  Member Enumeration and Where().</p>
 <p>Member Enumeration says I can refer to members of the items in the collection through the collection.</p>
 <p>For instance,<br />
-[powershell]<br />
-(Get-ChildItem -file).Length<br />
-[/powershell]<br />
+<pre class="wp-code language-powershell"><code>
+(Get-ChildItem -file).Length
+</code></pre><br />
 Get-ChildItem returned a collection of files which each have a length property.</p>
 <p>So instead of using ForEach-Object or Select-Object, I can use dot-notation against the collection and get the properties of the items in the collection.  Nifty shortcut.</p>
 <p>The second feature I'm going to use is the Where() method.  This method is available with any collection object, and is (in the simplest case) just like using Where-Object.  </p>
 <p>Putting those two together, I get this:<br />
-[powershell]<br />
-$ParameterList.GetEnumerator().Where{$_.Value.parameterSets.Keys  -contains 'Items'}.Key<br />
-[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+$ParameterList.GetEnumerator().Where{$_.Value.parameterSets.Keys  -contains &#39;Items&#39;}.Key
+</code></pre>
 <p>What is amazing about this to me isn't how short it is (although it is short).</p>
 <p>The amazing part is that I logically looped through a collection of objects looking for items in the collection which matched specific criteria, then extracted a particular property of those objects....and I didn't need to use a pipeline at all.</p>
 <p>I'm a big fan of pipelines, and the general-purpose *-Object cmdlets allow us to manipulate data with ease.  However, that power comes at a price.  Pipelines cost memory and time.  This expression doesn't incur the "penalties" of using a pipeline but gets us all of the benefit.</p>
-<p>What do you think?  Is the new version better?</body></html></p>
+<p>What do you think?  Is the new version better?</p>
+
+
+

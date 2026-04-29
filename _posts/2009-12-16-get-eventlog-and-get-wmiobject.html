@@ -26,19 +26,18 @@ author:
   last_name: ''
 permalink: "/2009/12/16/get-eventlog-and-get-wmiobject/"
 ---
-<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
-<html><body></p>
 <p>Recently, we had an occasion to write a process to read event logs on several sql servers to try to determine login times for different sql and Windows logins.  Since we have begun using PowerShell v2.0, and since get-eventlog now has a -computername parameter, it seemed like an obvious solution.</p>
 <p>The event message we were interested in looked something like "Login succeeeded for uesr 'UserName' ....".  The code we were trying to use was:</p>
-<p>[powershell]<br />
-get-eventlog -computername $servername -logname Application -message "Login succeeded for user*" -after ((get-date).AddDays(-1))<br />
-[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+get-eventlog -computername $servername -logname Application -message &quot;Login succeeded for user*&quot; -after ((get-date).AddDays(-1))
+</code></pre>
 <p>I expected that, given a date parameter and a leading string to match wouldn't be too bad, but this ended up taking several minutes per server.  As there are over a hundred servers to scan, that didn't work well for us.</p>
 <p>We ended up falling back to get-wmiobject.</p>
-<p>[powershell]<br />
-$BeginDate=[System.Management.ManagementDateTimeConverter]::ToDMTFDateTime((get-date).AddDays(-1))<br />
-get-wmiobject -class win32_ntlogevent -computerName $servername -filter "(EventCode=18453)  and (LogFile='Application') and (TimeGenerated &amp;gt;'$BeginDate')"<br />
-[/powershell]<br />
+<pre class="wp-code language-powershell"><code>
+$BeginDate=[System.Management.ManagementDateTimeConverter]::ToDMTFDateTime((get-date).AddDays(-1))
+
+get-wmiobject -class win32_ntlogevent -computerName $servername -filter &quot;(EventCode=18453)&#160; and (LogFile=&#39;Application&#39;) and (TimeGenerated &amp;gt;&#39;$BeginDate&#39;)&quot;
+</code></pre><br />
 Cons:</p>
 <ul>
 <li><span style="color: #000000;">We have to encode the date parameter (instead of using a nice datetime parameter like get-eventlog has)</span></li>
@@ -54,4 +53,6 @@ Cons:</p>
 <p><span style="color: #000000;"> I think that you might have a positive experience using get-eventlog if you need to scan a range of time (for instance if you're reporting on what happened on the server), but if you need to look for a specific event (or set of events) you're probably going to want to use get-wmiobject.</span></p>
 <p><span style="color: #000000;">-Mike<br />
 </span><br />
-</body></html></p>
+</p>
+
+

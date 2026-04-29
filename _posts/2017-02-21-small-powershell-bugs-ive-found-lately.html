@@ -28,32 +28,44 @@ author:
   last_name: ''
 permalink: "/2017/02/21/small-powershell-bugs-ive-found-lately/"
 ---
-<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
-<html><body></p>
 <p>I love PowerShell.  Everyone who knows me knows that.  Recently, though, I seem to be running into more bugs.  I'm not complaining, because PowerShell does tons of amazing things and the problems I'm encountering don't have a huge impact.  With that said, here they are.</p>
 <h2>Pathological properties in <b>Out-GridView</b><br />
 </h2>
 <p>PowerShell has always allowed us to use properties with names that aren't kosher.  For instance, we can create an object that has properties with spaces and symbols in the name like this:<br />
-[powershell]$obj=[pscustomobject]@{'test property #1'='hello'}[/powershell]<br />
+<pre class="wp-code language-powershell"><code>
+$obj=[pscustomobject]@{&#39;test property #1&#39;=&#39;hello&#39;}
+</code></pre><br />
 This capability is essential, since we often find ourselves importing a CSV file that we don't have any control over.  (As an exercise, look at the expanded CSV output from schtasks.exe).  To access those properties we can use quotes where most languages doesn't like them.<br />
-[powershell]$obj.'test property #1'[/powershell]<br />
+<pre class="wp-code language-powershell"><code>
+$obj.&#39;test property #1&#39;
+</code></pre><br />
 Or we can use variables (again, something most languages won't let you do this easily):<br />
-[powershell]$prop='test property #1'; $obj.$prop[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+$prop=&#39;test property #1&#39;; $obj.$prop
+</code></pre>
 <p>A friend called me last week with an interesting issue which turned out to be related to this kind of behavior.  He had a SQL query which renamed output columns in "pathological" ways.  When he piped the output of the SQL to <b>Out-GridView</b>, the ugly columns showed up in the output, but the columns were empty.  </p>
 <p>Here's a minimal case to reproduce the issue:<br />
-[powershell][pscustomobject]@{'test property.'='hello'} | out-gridview[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+[pscustomobject]@{&#39;test property.&#39;=&#39;hello&#39;} | out-gridview
+</code></pre>
 <p>The problem here is that the property name ends with a dot.  <a href="https://windowsserver.uservoice.com/forums/301869-powershell/suggestions/11718579-out-gridview-fails-to-display-data-for-properties">Here's a UserVoice entry</a> that explains that Out-GridView doesn't like property names that end in whitespace, either.  I added a comment about dots for completeness' sake.</p>
 <h2>Formatting remote Select-String output</h2>
 <p>Another minor issue I've run into is that deserialized select-string output doesn't format nicely.  The issue looks to be that the format.ps1xml for MatchInfo objects uses a custom ToString() method that doesn't survive the serialization.  What happens is that you just get blank lines instead of any helpful output.  The objects are intact, though, all of the properties are there.  So using the output is fine, just that the formatting is broken.  Here's a minimal example:</p>
-<p>[powershell]<br />
-"hello`r`n"*6 | Out-File c:\temp\testFile.txt<br />
-write-host 'Local execution'<br />
-select-string -Path c:\temp\testfile.txt -Pattern hello -SimpleMatch  </p>
-<p>write-host 'Remote execution'<br />
-invoke-command -ScriptBlock{ select-string -Path c:\temp\testfile.txt -Pattern hello -SimpleMatch} -ComputerName localhost<br />
-[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+&quot;hello`r`n&quot;*6 | Out-File c:\temp\testFile.txt
+
+write-host &#39;Local execution&#39;
+
+select-string -Path c:\temp\testfile.txt -Pattern hello -SimpleMatch  
+write-host &#39;Remote execution&#39;
+
+invoke-command -ScriptBlock{ select-string -Path c:\temp\testfile.txt -Pattern hello -SimpleMatch} -ComputerName localhost
+</code></pre>
 <p>I didn't find anything close on UserVoice, so I posted <a href="https://windowsserver.uservoice.com/forums/295047-general-feedback/suggestions/18399211-select-string-output-matchinfo-should-be-formatt">a new entry</a>.<br />
 Neither of these caused any real problem, but they were fun to dig into.</p>
 <p>What bugs have you found lately?  Have you reported them?</p>
 <p>-Mike<br />
-</body></html></p>
+</p>
+
+
+

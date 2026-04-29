@@ -22,10 +22,10 @@ author:
   last_name: ''
 permalink: "/2015/08/10/quick-tip-abbrev/"
 ---
-<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
-<html><body>
 <p>Looking at some of the solutions to the July scripting games problems (<a href="http://powershell.org/wp/2015/07/29/2015-july-scripting-games-wrap-up/" target="_blank">here</a>) I noticed that several of them used abbreviations for parameter names.  For instance:</p>
-<p>[powershell]gwmi win32_operatingsystem -co @(".")[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+gwmi win32_operatingsystem -co @(&quot;.&quot;)
+</code></pre>
 <p>I understand that this is a competition of sorts and that part of the challenge is to get a solution with the smallest number of characters, but I realized that I really, really don't like abbreviated parameter names.</p>
 <p>To be clear, these are fine on the command-line (as are aliases, for instance), but I really want to avoid using parameter name abbreviations in my code. For one thing, since PowerShell allows you to use as short an abbreviation as you want as long as it is unambiguous, there is not a single "short form" for a given parameter. In the code above, for example, -co could have been -co, -com, -comp, etc. That leads to inconsistent code and reduces readability in my opinion.<br />
 Second, parameter abbreviations are not necessarily stable across PowerShell versions. It's entirely possible, for instance, that a parameter starting with "co" could be added to in the next version of PowerShell which would make the parameter ambiguous.  At that point, the code is invalid (as well as not very readable).</p>
@@ -33,4 +33,5 @@ Second, parameter abbreviations are not necessarily stable across PowerShell ver
 <p>Let me know what you think.</p>
 <p>p.s.  somehow this got published without the ending.  I just now noticed and updated so it didn't end in the middle of a sentence.</p>
 <p>-Mike</p>
-<p></body></html></p>
+
+

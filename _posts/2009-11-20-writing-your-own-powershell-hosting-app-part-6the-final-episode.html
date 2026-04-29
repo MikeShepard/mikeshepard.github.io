@@ -26,28 +26,29 @@ author:
   last_name: ''
 permalink: "/2009/11/20/writing-your-own-powershell-hosting-app-part-6the-final-episode/"
 ---
-<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
-<html><body></p>
 <p>Before we proceed with putting powershell objects in a treeview (which I promised last time), I need to explain some changes I have made to the code.</p>
 <ul>
 <li>Refactoring the InvokeString functionality ouf of the menu item event</li>
 <li>Merging the error stream into the output stream</li>
 <li>Replacing the clear-host function with a custom cmdlet</li>
 </ul>
-<p>First, we had been calling the invoke method in the OnClick event of the menu item. While that works fine as a proof-of-concept, we’re going to need that functionality elsewhere, so it’s a simple matter to extract the logic into a function as follows:<br />
-[vbnet highlight="10"]Sub RunToolStripMenuItem1Click(sender As Object, e As EventArgs)<br />
-  	InvokeString(txtScript.Text)<br />
-End Sub</p>
-<p>Private Sub InvokeString(strScript As String)<br />
-	dim ps As powershell=PowerShell.Create()<br />
-        ps.Runspace=r<br />
-        ps.AddScript(strScript)<br />
-        ps.AddCommand("out-default")<br />
-        ps.Commands.Commands.Item(ps.Commands.Commands.Count-1).MergeUnclaimedPreviousCommandResults = PipelineResultTypes.Error + PipelineResultTypes.Output<br />
-        Dim output As Collection(Of psobject)<br />
-        output=ps.Invoke()</p>
-<p>End Sub[/vbnet]<br />
-In this new InvokeString method you see highlighted (if you allow javascript :-)) the line of code that merges the error stream into the output stream (so that errors we throw with our new cmdlets will show up in the console).  We’ll still need to update the our PSHostUserInterface class to handle the WriteError method, but that’s pretty easy (as are the debug, verbose, and warning methods):</p>
+<p>First, we had been calling the invoke method in the OnClick event of the menu item. While that works fine as a proof-of-concept, we’re going to need that functionality elsewhere, so it’s a simple matter to extract the logic into a function as follows:</p>
+<pre class="wp-code language-vbnet"><code>
+Sub RunToolStripMenuItem1Click(sender As Object, e As EventArgs)
+	InvokeString(txtScript.Text)
+End Sub
+
+Private Sub InvokeString(strScript As String)
+	Dim ps As PowerShell = PowerShell.Create()
+    ps.Runspace = r
+    ps.AddScript(strScript)
+    ps.AddCommand("out-default")
+    ps.Commands.Commands.Item(ps.Commands.Commands.Count - 1).MergeUnclaimedPreviousCommandResults = PipelineResultTypes.Error + PipelineResultTypes.Output
+    Dim output As Collection(Of PSObject)
+    output = ps.Invoke()
+End Sub
+</code></pre>
+<p>In this new InvokeString method you see highlighted, if you allow JavaScript, the line of code that merges the error stream into the output stream so that errors we throw with our new cmdlets will show up in the console.  We’ll still need to update the our PSHostUserInterface class to handle the WriteError method, but that’s pretty easy, as are the debug, verbose, and warning methods:</p>
 <pre class="brush: vbnet">Public Overloads Overrides Sub WriteErrorLine(value As String)
 	MainForm.PowerShellOutput.AppendText("ERROR:"+value +vbcrlf)
 End Sub
@@ -210,4 +211,5 @@ private r As Runspace=RunspaceFactory.CreateRunspace(host)
 		End If
 		return rtn
 	End Function</pre>
-<p></body></html></p>
+
+

@@ -26,72 +26,85 @@ author:
   last_name: ''
 permalink: "/2018/06/24/getting-data-from-the-middle-of-a-powershell-pipeline/"
 ---
-<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
-<html><body></p>
 <h2>Pipeline Output</h2>
 <p style="font-family: Georgia, 'Times New Roman', 'Bitstream Charter', Times, serif; white-space: normal;"><img class="size-medium wp-image-1296 alignright" src="{{site.baseurl}}/assets/2018/06/pipeline-1566044_640-300x207.png" alt="" width="300" height="207"></p>
-<p> </p>
 <p>If you've used PowerShell for very long, you know how to get values of of a pipeline.</p>
-<p>[powershell]<br />
-$values= a | b | c<br />
-[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+$values= a | b | c
+</code></pre>
 <p>Nothing too difficult there.</p>
 <p>Where things get interesting is if you want to get data from the middle of the pipeline. In this post I'll give you some options (some better than others) and we'll look briefly at the performance of each.</p>
 <h2>Method #1</h2>
 <p>First, there's the lovely and often overlooked <strong>Tee-Object</strong> cmdlet. You can pass the <em>name</em> of a variable (i.e. without the $) to the <strong>-Variable</strong> parameter and the valu</p>
 <p>es coming into the cmdlet will be written to the variable.</p>
 <p>For instance:</p>
-<p>[powershell]<br />
-Get-ChildItem c:\ -Recurse |<br />
-                   Select-Object -Property FullName,Length |<br />
-                   Tee-Object -Variable Files |<br />
-Sort-Object -Property Length -Descending<br />
-[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+Get-ChildItem c:\ -Recurse |
+
+                   Select-Object -Property FullName,Length |
+
+                   Tee-Object -Variable Files |
+
+Sort-Object -Property Length -Descending
+</code></pre>
 <p>After this code has executed, the variable $Files will contain the filenames and lengths <strong>before</strong> they were sorted.  To append the values to an existing variable, include the <strong>-Append </strong>switch.</p>
 <p><strong>Tee-Object</strong> is easy to use, but it's an entire command that's essentially not doing anything "productive" in the pipeline. If you need to get values from multiple places in the pipeline, each would add an additional <strong>Tee-Object</strong> segment to the pipeline. Yuck.</p>
 <h2>Method #2</h2>
 <p>If the commands you're using in the pipeline are advanced functions or cmdlets (and you're only writing advanced functions and cmdlets, right?), you can use the <strong>-OutVariable</strong> common parameter to send the output of the command to a variable.  Just like with <strong>Tee-Object</strong>, you only want to use the name of the variable.</p>
 <p>If you're dealing with cmdlets or advanced functions, this is the easiest and most flexible solution. Getting values from multiple places would just involve adding <strong>-OutVariable</strong> parameters to the appropriate places.</p>
-<p>[powershell]<br />
-Get-ChildItem c:\ -Recurse |<br />
-    Select-Object -Property FullName,Length -OutVariable Files |<br />
-    Sort-Object -Property Length -Descending<br />
-[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+Get-ChildItem c:\ -Recurse |
+
+    Select-Object -Property FullName,Length -OutVariable Files |
+
+    Sort-Object -Property Length -Descending
+</code></pre>
 <p>This has the benefit of one less command in the pipeline, so that's a nice bonus. If you want to append to an existing variable, here you would use a plus (+) in front of the variable name (like +Files).</p>
 <h2>Method #3</h2>
 <p>This method is simply to break the pipeline at the point you want to get the values and assign to a variable. Then, pipe the variable to the "remainder" of the pipeline. Nothing crazy. Here's the code.</p>
-<p>[powershell]<br />
-$files=Get-ChildItem c:\ -Recurse |<br />
-    Select-Object -Property FullName,Length<br />
-$files | Sort-Object -Property Length -Descending<br />
-[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+$files=Get-ChildItem c:\ -Recurse |
+
+    Select-Object -Property FullName,Length
+
+$files | Sort-Object -Property Length -Descending
+</code></pre>
 <p>If you want to append, you could use the += operator instead of the assignment operator.</p>
 <p>If you want to capture multiple "stages" in the pipeline, you could end up with a bunch of assignments and not much pipeline left.</p>
 <h2>Method #4</h2>
 <p>This method is similar to method #3, but uses the fact that assignment statements are also expressions. It's easier to explain after you've seen it, so here's the code:</p>
-<p>[powershell]<br />
-($files=Get-ChildItem c:\ -Recurse |<br />
-    Select-Object -Property FullName,Length) |<br />
-    Sort-Object -Property Length -Descending<br />
-[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+($files=Get-ChildItem c:\ -Recurse |
+
+    Select-Object -Property FullName,Length) |
+
+    Sort-Object -Property Length -Descending
+</code></pre>
 <p>Notice how the first part of the pipeline (and the assignment) are inside parentheses? The value of the assignment expression is the value that was assigned, so this has the benefit of getting the variable set and passing the values on to the remainder of the pipeline.</p>
 <p>If you want to get multiple sets of values from the pipeline, you would need to nest these parenthesized assignments multiple times. Statements like this can only be used as the first part of a pipeline, so don't try something like this:</p>
-<p>[powershell]<br />
-#  THIS WON'T WORK!!!!!<br />
-Get-ChildItem c:\ -Recurse |<br />
-    Select-Object -Property FullName,Length) |<br />
-    ($Sortedfiles=Sort-Object -Property Length -Descending)<br />
-[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+#  THIS WON&#39;T WORK!!!!!
+
+Get-ChildItem c:\ -Recurse |
+
+    Select-Object -Property FullName,Length) |
+
+    ($Sortedfiles=Sort-Object -Property Length -Descending)
+</code></pre>
 <h2>Performance</h2>
 <p>I used the <a href="https://www.powershellgallery.com/packages/Benchmark/">benchmark</a> module from the gallery to measure the performance of these 4 techniques. I limited the number of objects to 1000 and staged those values in a variable to isolate the pipeline code from the data-gathering.</p>
-<p>[powershell]<br />
-$files=dir c:\ -ErrorAction Ignore -Recurse | select-object -first 1000</p>
-<p>$sb1={$files | select-object FullName,Length -OutVariable v1 | sort-object Length -Descending}<br />
-$sb2={$files | select-object FullName,Length | tee-object -Variable v2| sort-object Length -Descending}<br />
-$sb3={$v2=$files| select-object FullName,Length;$files | sort-object Length -Descending}<br />
-$sb4={($v2=$files| select-object FullName,Length)|sort-object Length -Descending}<br />
-Measure-These -ScriptBlock $sb1,$sb2,$sb3,$sb4 -Count 100 | Format-Table</p>
-<p>[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+$files=dir c:\ -ErrorAction Ignore -Recurse | select-object -first 1000
+$sb1={$files | select-object FullName,Length -OutVariable v1 | sort-object Length -Descending}
+
+$sb2={$files | select-object FullName,Length | tee-object -Variable v2| sort-object Length -Descending}
+
+$sb3={$v2=$files| select-object FullName,Length;$files | sort-object Length -Descending}
+
+$sb4={($v2=$files| select-object FullName,Length)|sort-object Length -Descending}
+
+Measure-These -ScriptBlock $sb1,$sb2,$sb3,$sb4 -Count 100 | Format-Table
+</code></pre>
 <pre>Title/no. Average (ms) Count   Sum (ms) Maximum (ms) Minimum (ms)
 --------- ------------ -----   -------- ------------ ------------
         1     98.60119   100   9860.119     131.7581      87.6203
@@ -110,4 +123,6 @@ Measure-These -ScriptBlock $sb1,$sb2,$sb3,$sb4 -Count 100 | Format-Table</p>
 </pre>
 <p>Here we see slightly less spread (17%), but all of the numbers are a bit higher.</p>
 <p>I'll probably continue to use <strong>-OutVariable</strong>.</p>
-<p>What about you?</body></html></p>
+<p>What about you?</p>
+
+

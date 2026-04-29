@@ -26,14 +26,12 @@ author:
   last_name: ''
 permalink: "/2015/11/25/run-button/"
 ---
-<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
-<html><body>
 <p>I love the ISE. I've used other "environments", but always end up using the good old ISE. I do use the awesome ISESteroids module by Tobias Weltner (<a href="http://powertheshell.com">powertheshell.com</a>), but most of the time you can find me in the unadorned, vanilla ISE.</p>
 <p>With that bit of disclaimer out of the way, there is something that came to my attention recently. The Run button on the toolbar does two different things, although it doesn't make a big deal about it. The two things are similar enough that it's easy to miss, and subtle enough that the difference isn't important most of the time.</p>
 <p>The two things are, unsurprisingly, both concerned with running what's in the current tab. Since it's the Run button, you'd expect that to be the case.</p>
-<p><strong>Face Number 1</strong><br />
-The first thing that the Run button does, is that it runs the code that's in the current editor tab. It does this by copying the text as input down in the console area. An example is seen in the image below:<br />
-<a href="https://powershellstation.com/wp-content/uploads/2014/10/Screenshot_run_unsaved.png"><img class="alignnone size-full wp-image-761" src="{{site.baseurl}}/assets/2015/11/Screenshot_run_unsaved.png" alt="Screenshot_run_unsaved" width="732" height="250"></a></p>
+<p><strong>Face Number 1</strong></p>
+<p>The first thing that the Run button does, is that it runs the code that's in the current editor tab. It does this by copying the text as input down in the console area. An example is seen in the image below:</p>
+<p><a href="https://powershellstation.com/wp-content/uploads/2014/10/Screenshot_run_unsaved.png"><img class="alignnone size-full wp-image-761" src="{{site.baseurl}}/assets/2015/11/Screenshot_run_unsaved.png" alt="Screenshot_run_unsaved" width="732" height="250"></a></p>
 <p>You can clearly see that the text in the editor has been copied to the command-line.</p>
 <p><strong>Face Number 2</strong></p>
 <p>The second thing it does it it runs the <em>script</em> that's loaded in the current tab. It doesn't just run the script either, it actually dot-sources it (i.e. runs the script in the global scope).</p>
@@ -44,28 +42,39 @@ The first thing that the Run button does, is that it runs the code that's in the
 <p>NEWSBREAK!</p>
 <p>Typing the above <del>confession</del> paragraph was enough to dislodge the bad thinking!  Rubber duck debugging to the rescue.</p>
 <p>Here's the simplified code that I started to blog about 13 months ago:</p>
-<p>[powershell]<br />
-$values =<br />
-$processed=@()<br />
-function ProcessValue{<br />
-Param($value)<br />
- if($processed -contains $value){<br />
-    "$value already processed"<br />
- } else {<br />
-    "Processing $value"<br />
-    $global:processed+=$value<br />
- }<br />
-}<br />
-'Value1','Value2','Value3','Value1'| foreach {ProcessValue $_}<br />
-[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+$values =
+
+$processed=@()
+
+function ProcessValue{
+
+Param($value)
+
+ if($processed -contains $value){
+
+    &quot;$value already processed&quot;
+
+ } else {
+
+    &quot;Processing $value&quot;
+
+    $global:processed+=$value
+
+ }
+
+}
+
+&#39;Value1&#39;,&#39;Value2&#39;,&#39;Value3&#39;,&#39;Value1&#39;| foreach {ProcessValue $_}
+</code></pre>
 <p>The code is pretty simple. It "processes" values as long as they haven't already been "processed" by the function.</p>
-<p>My expectation running the script (and example at the bottom) is that it would show that it processed the first three values and then reported that "value1" was already processed. Pretty simple, and that's what it shows in the ISE when you click run.<br />
-<a href="https://powershellstation.com/wp-content/uploads/2014/10/screenshot_testscope_ISE.ps1_.png"><img class="alignnone size-full wp-image-765" src="{{site.baseurl}}/assets/2015/11/screenshot_testscope_ISE.ps1_.png" alt="screenshot_testscope_ISE.ps1" width="662" height="434"></a></p>
+<p>My expectation running the script, and example at the bottom, is that it would show that it processed the first three values and then reported that "value1" was already processed. Pretty simple, and that's what it shows in the ISE when you click run.</p>
+<p><a href="https://powershellstation.com/wp-content/uploads/2014/10/screenshot_testscope_ISE.ps1_.png"><img class="alignnone size-full wp-image-765" src="{{site.baseurl}}/assets/2015/11/screenshot_testscope_ISE.ps1_.png" alt="screenshot_testscope_ISE.ps1" width="662" height="434"></a></p>
 <p>The problem isn't in fact because the run button works differently if you've saved the file or not. The script failed when the other user ran it because he "ran" it. He didn't load it into the ISE and click the Run button, he executed the script. The issue arises because dot-sourcing a script and running the script are not the same.</p>
-<p>To illustrate, here's what it looks like when you run the function:<br />
-<a href="https://powershellstation.com/wp-content/uploads/2014/10/screenshot_testscope_run.ps1_.png"><img class="alignnone size-full wp-image-766" src="{{site.baseurl}}/assets/2015/11/screenshot_testscope_run.ps1_.png" alt="screenshot_testscope_run.ps1" width="664" height="409"></a></p>
-<p>Notice that it failed to see that value1 had already been processed. Dot-sourcing the script works just like the Run button.<br />
-<a href="https://powershellstation.com/wp-content/uploads/2014/10/screenshot_testscope_dotsource.ps1_.png"><img class="alignnone size-full wp-image-768" src="{{site.baseurl}}/assets/2015/11/screenshot_testscope_dotsource.ps1_.png" alt="screenshot_testscope_dotsource.ps1" width="570" height="75"></a></p>
+<p>To illustrate, here's what it looks like when you run the function:</p>
+<p><a href="https://powershellstation.com/wp-content/uploads/2014/10/screenshot_testscope_run.ps1_.png"><img class="alignnone size-full wp-image-766" src="{{site.baseurl}}/assets/2015/11/screenshot_testscope_run.ps1_.png" alt="screenshot_testscope_run.ps1" width="664" height="409"></a></p>
+<p>Notice that it failed to see that value1 had already been processed. Dot-sourcing the script works just like the Run button.</p>
+<p><a href="https://powershellstation.com/wp-content/uploads/2014/10/screenshot_testscope_dotsource.ps1_.png"><img class="alignnone size-full wp-image-768" src="{{site.baseurl}}/assets/2015/11/screenshot_testscope_dotsource.ps1_.png" alt="screenshot_testscope_dotsource.ps1" width="570" height="75"></a></p>
 <p>The "bug" in the script is that the first statement doesn't include the scope modifier when it initializes the $processed variable. Since when the script is dot-sourced, that first instruction is already in the global scope, the variable is initialized as a list and it all works fine. When you run the script without dot-sourcing it, the initialization runs in the script: scope rather than the global scope and the line in the loop that is supposed to be adding the value to a list is instead concatenating the values as strings. Because of that, the -contains operator never returns true and everything gets processed every time. One more screenshot to confirm that:</p>
 <p><a href="https://powershellstation.com/wp-content/uploads/2014/10/screenshot_testscope_run_variable.ps1_.png"><img class="alignnone size-full wp-image-769" src="{{site.baseurl}}/assets/2015/11/screenshot_testscope_run_variable.ps1_.png" alt="screenshot_testscope_run_variable.ps1" width="544" height="117"></a></p>
 <p><strong>Conclusion</strong><br />
@@ -74,4 +83,5 @@ So apparently the two faces of the Run button aren't so bad. So what's the bit i
 I'm starting to think that using scope modifiers is a code smell. Not necessarily bad, but might point out that something could be done better.</p>
 <p>Thanks for sticking with me on this "longer than usual" post. Let me know what you think in the comments!</p>
 <p>-Mike</p>
-<p></body></html></p>
+
+

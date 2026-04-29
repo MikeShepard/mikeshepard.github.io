@@ -31,24 +31,32 @@ author:
   last_name: ''
 permalink: "/2017/10/04/specifying-powershell-parameter-position/"
 ---
-<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
-<html><body></p>
 <h3>Positional Parameters</h3>
 <p>Whether you know it or not, if you've used PowerShell, you've used positional parameters. In the following command the argument (c:\temp) is passed to the -Path parameter by position.</p>
-<p>[powershell]cd c:\temp[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+cd c:\temp
+</code></pre>
 <p>The other option for passing a parameter would be to pass it by name like this:</p>
-<p>[powershell]cd -path c:\temp[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+cd -path c:\temp
+</code></pre>
 <p>It makes sense for some commands to allow you to pass things by position rather than by name, especially in cases where there would be little confusion if the names of the parameters are left out (as in this example).</p>
 <p>What confuses me, however, is code that looks like this:</p>
-<p>[powershell]<br />
-function Test-Position{<br />
-[CmdletBinding()]<br />
-Param([parameter(Position=0)]$parm1,<br />
-      [parameter(Position=1)]$parm2,<br />
-      [parameter(Position=2)]$parm3,<br />
-      [parameter(Position=3)]$parm4)<br />
-}<br />
-[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+function Test-Position{
+
+[CmdletBinding()]
+
+Param([parameter(Position=0)]$parm1,
+
+      [parameter(Position=1)]$parm2,
+
+      [parameter(Position=2)]$parm3,
+
+      [parameter(Position=3)]$parm4)
+
+}
+</code></pre>
 <p>In this parameter declaration, we've explicitly assigned positions to the first four parameters, in order.</p>
 <p>Why is that confusing? Well, by default, all parameters are available by position and the default order is the order the parameters are defined. So assigning the Position like this makes no difference (or sense, for that matter).</p>
 <h3>It gets worse!</h3>
@@ -58,45 +66,64 @@ Param([parameter(Position=0)]$parm1,<br />
 <h3>What should I do?</h3>
 <p>According to the help (about_Functions_CmdletBindingAttribute), you should use the PositionalBinding optional argument to the CmdletBinding() attribute, and set it to $false. That will cause all parameters to default to not be allowed by position. Then, you can specify the Position for any (hopefully only one or two) parameters you wish to be used by position.</p>
 <p>For instance, this will only allow $parm1 to be used by position:</p>
-<p>[powershell]<br />
-function Test-Position{<br />
-[CmdletBinding(PositionalBinding=$false)]<br />
-Param([parameter(Position=0)]$parm1,<br />
-                             $parm2,<br />
-                             $parm3,<br />
-                             $parm4)<br />
-}<br />
-[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+function Test-Position{
+
+[CmdletBinding(PositionalBinding=$false)]
+
+Param([parameter(Position=0)]$parm1,
+
+                             $parm2,
+
+                             $parm3,
+
+                             $parm4)
+
+}
+</code></pre>
 <p>Looking at the help for this function we see that this is true:<br />
 <img class="alignright wp-image-1234 size-full" src="{{site.baseurl}}/assets/2017/10/positional1.png" alt="" width="1487" height="177"><br />
 Because parm1 is in brackets ([-parm1]) we know that that parameter name can be omitted. The other parameter names are not bracketed (although the entire parameters/arguments are), so they are only available by name.</p>
 <h3>But wait, it gets easier</h3>
 <p>Even though the help says that all parameters are positional by default, it turns out that using Position on one parameter means that you have to use it on any parameters you want to be accessed by position.</p>
 <p>For instance, in this version of the function I haven't specified PositionalBinding=$False in the CmdletBinding attribute, but only the first parameter is available by position.</p>
-<p>[powershell]<br />
-function Test-Position2{<br />
-[CmdletBinding()]<br />
-Param([parameter(Position=0)]$parm1,<br />
-                             $parm2,<br />
-                             $parm3,<br />
-                             $parm4)<br />
-}<br />
-[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+function Test-Position2{
+
+[CmdletBinding()]
+
+Param([parameter(Position=0)]$parm1,
+
+                             $parm2,
+
+                             $parm3,
+
+                             $parm4)
+
+}
+</code></pre>
 <p>Here's the syntax help:<br />
 <img class="alignleft size-full wp-image-1237" src="{{site.baseurl}}/assets/2017/10/positional2.png" alt="" width="1503" height="179"></p>
 <p>That's interesting to me, as it seems to contradict what's in the help.  Specifically, the help says that all parameters are positional.  It then says that in order to disable this default, you should use the PositionalBinding parameter.  This shows that you don't need to do that, unless you don't want any positional parameters.</p>
 <p>As a final example, just to make sure we understand how the Position value is used, consider the following function and syntax help:</p>
-<p>[powershell]<br />
-function Test-Position3{<br />
-[CmdletBinding()]<br />
-Param(                       $parm1,<br />
-                             $parm2,<br />
-      [parameter(Position=1)]$parm3,<br />
-      [parameter(Position=0)]$parm4)<br />
-}<br />
-[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+function Test-Position3{
+
+[CmdletBinding()]
+
+Param(                       $parm1,
+
+                             $parm2,
+
+      [parameter(Position=1)]$parm3,
+
+      [parameter(Position=0)]$parm4)
+
+}
+</code></pre>
 <p>By including Position on 2 of the parameters, we've ensured that the other two parameters are only available by name. Also, the assigned positions differ from the order that the parameters are defined in the function, and that is reflected in the syntax help.</p>
 <p><img class="alignright wp-image-1238 size-full" src="{{site.baseurl}}/assets/2017/10/positional3.png" alt="" width="1526" height="186"></p>
 <p>I don't think about parameter position a lot, but to write "professional" cmdlets, it is one of the things to consider.</p>
-<p> </p>
-<p>--Mike</body></html></p>
+<p>--Mike</p>
+
+

@@ -33,39 +33,50 @@ author:
   last_name: ''
 permalink: "/2017/10/03/missing-point-powershell-error-handling/"
 ---
-<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
-<html><body></p>
 <h3><img class="alignright wp-image-1224 size-medium" style="font-size: 16px;" src="{{site.baseurl}}/assets/2017/10/stop-sign-35069_640-300x300.png" alt="" width="300" height="300"></h3>
 <p>I've been using PowerShell for about 10 years now.  Some might think that 10 years makes me an expert.  I know that it really means I have more opportunities to learn.  One thing that has occurred to me in the last 4 or 5 months is that I've been missing the point with PowerShell error handling.</p>
-<p> </p>
 <h3>PowerShell Error Handling 101</h3>
 <p>First, PowerShell has try/catch/finally, like most imperative languages have in the last 15 years or so.  At first glance, there's not much to see. I usually give an example that looks something like this:</p>
-<p>[powershell]<br />
-try {<br />
-   #do something here<br />
-   $x=1/0<br />
-   write-verbose 'it worked'<br />
-} catch {<br />
-   $err=$_<br />
-   write-verbose "An error happened : $err"<br />
-} finally {<br />
-   write-verbose 'Time to clean up'<br />
-}<br />
-[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+try {
+
+   #do something here
+
+   $x=1/0
+
+   write-verbose &#39;it worked&#39;
+
+} catch {
+
+   $err=$_
+
+   write-verbose &quot;An error happened : $err&quot;
+
+} finally {
+
+   write-verbose &#39;Time to clean up&#39;
+
+}
+</code></pre>
 <p>Running that script with $VerbosePreference set to Continue would output<br />
 <code>VERBOSE: An error happened : Attempted to divide by zero.<br />
 VERBOSE: Time to clean up </code></p>
 <p>At this point in the explanation, most people with a development background of any kind is likely nodding their head.</p>
 <h3>And now for something completely different</h3>
 <p>The next example shows that all is not as expected:</p>
-<p>[powershell]<br />
-try {<br />
-  $results=get-wmiobject -class Win32_ComputerSystem -computername Localhost,NOSUCHCOMPUTER<br />
-} catch {<br />
-  $err=$_<br />
-  write-verbose "An error happened : $err"<br />
-}<br />
-[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+try {
+
+  $results=get-wmiobject -class Win32_ComputerSystem -computername Localhost,NOSUCHCOMPUTER
+
+} catch {
+
+  $err=$_
+
+  write-verbose &quot;An error happened : $err&quot;
+
+}
+</code></pre>
 <p>Most people are surprised to see red error text on the screen and the nice message nowhere to be found.</p>
 <p>Anyone with much experience with PowerShell knows that some (most?) PowerShell cmdlets output error records (not exceptions) in some cases, and that try/catch doesn't "catch" these error records. In PowerShell parlance, exceptions are terminating errors, and error records are non-terminating errors.</p>
 <p>My explanation for the why the PowerShell team created non-terminating errors is this:<br />
@@ -76,17 +87,25 @@ Imagine you managed a farm of 1000 computers. What would be the odds of all 1000
 <h3>Where I missed the point</h3>
 <p>What I've been teaching (and I'm not alone) is that the solution is to use the -ErrorAction common parameter to cause the non-terminating error to be a terminating error. That means that we can use try/catch, but it also means that we need to introduce a loop.</p>
 <p>Adding the try/catch and -ErrorAction, it looks something like this:</p>
-<p>[powershell]<br />
-$results=$()<br />
-foreach($comp in $computers){<br />
-   try {<br />
-     $results+=get-wmiobject -class Win32_ComputerSystem -computername $comp -ErrorAction Stop<br />
-   catch{<br />
-     $err=$_<br />
-     write-verbose "Something went wrong with $comp : $err"<br />
-   }<br />
-}<br />
-[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+$results=$()
+
+foreach($comp in $computers){
+
+   try {
+
+     $results+=get-wmiobject -class Win32_ComputerSystem -computername $comp -ErrorAction Stop
+
+   catch{
+
+     $err=$_
+
+     write-verbose &quot;Something went wrong with $comp : $err&quot;
+
+   }
+
+}
+</code></pre>
 <p>Before saying anything else, let me say this...it works.</p>
 <p>Unfortunately, it misses the point.</p>
 <h3>An aside</h3>
@@ -97,17 +116,25 @@ foreach($comp in $computers){<br />
 <p>That's not to mention the fact that now we've taken on the responsibility of adding the individual results into a collection.  Not a big deal, but anywhere you write more code is a place to have more bugs.</p>
 <h3>So what's the right way to do this?</h3>
 <p>In my opinion, a much better way to do this kind of activity would be to continue to pass the list, but use the -ErrorAction and -ErrorVariable parameters in conjunction to get the best of both worlds. It would look something like this:</p>
-<p>[powershell]<br />
-   try {<br />
-     $results=get-wmiobject -class Win32_ComputerSystem -computername $computers -ErrorAction SilentlyContinue -ErrorVariable Problems<br />
-   catch{<br />
-     $err=$_<br />
-     write-verbose "Something went wrong : $err"<br />
-   }<br />
-   foreach($errorRecord in $Problems){<br />
-     write-verbose "An error occurred here : $errorRecord"<br />
-   }</p>
-<p>[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+try {
+
+     $results=get-wmiobject -class Win32_ComputerSystem -computername $computers -ErrorAction SilentlyContinue -ErrorVariable Problems
+
+   catch{
+
+     $err=$_
+
+     write-verbose &quot;Something went wrong : $err&quot;
+
+   }
+
+   foreach($errorRecord in $Problems){
+
+     write-verbose &quot;An error occurred here : $errorRecord&quot;
+
+   }
+</code></pre>
 <p>With this construction, we're only calling get-wmiobject once, so we get the speed of parallel execution. By using -ErrorAction SilentlyContinue, we won't have any error records (non-terminating errors) written to the error stream. That means, no red text in our output. By the way, SilentlyContinue will write the error records to the $Error automatic variable. If you don't want that, you can use -ErrorAction Ignore instead.</p>
 <p>The "key" to making this technique work is -ErrorVariable Problems. This collects all of the non-terminating errors output by the command, and puts them in the variable $Problems (remember to leave the $ off when using -ErrorVariable). Since I have those in a variable, I can loop through them after I get the results and do whatever I need to with them.</p>
 <p>Finally (no pun intended), I put the cmdlet call in a try/catch in case it throws an exception (for instance, out of memory).</p>
@@ -117,4 +144,6 @@ foreach($comp in $computers){<br />
 <p>--Mike</p>
 <h3>Why WMI instead of CIM?</h3>
 <p>I use Get-WMIObject (even though WMI cmldets are deprecated) for a couple of reasons. First, my work environment doesn't have WinRM enabled on our laptops by default. I teach error handling before remoting, so at this point using CIM cmdlets with -ComputerName causes errors that are even harder to explain. Also, my first memorable exposure to non-terminating errors was with WMI cmdlets.</p>
-<p>One unfortunate problem with using WMI cmdlets is that the error records that it emits do not contain the offending computername. I filed an issue in the appropriate place, but was told that it was too late for WMI cmdlets. Once the general principle of non-terminating errors is understood, substituting CIM cmdlets is an easy sell. Also, it's a good reason for people to make the switch.</body></html></p>
+<p>One unfortunate problem with using WMI cmdlets is that the error records that it emits do not contain the offending computername. I filed an issue in the appropriate place, but was told that it was too late for WMI cmdlets. Once the general principle of non-terminating errors is understood, substituting CIM cmdlets is an easy sell. Also, it's a good reason for people to make the switch.</p>
+
+

@@ -21,16 +21,22 @@ author:
   last_name: ''
 permalink: "/2010/08/01/the-identity-function/"
 ---
-<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
-<html><body>
 <p>In mathematics, an <a title="identity function" href="http://en.wikipedia.org/wiki/Identity_function">identity function</a> is a function that returns the arguments that are passed to it unchanged.  While the concept of an identity function is quite often useful in formulating proofs, it is not something that I ever expected to use in a programming environment.   Here's the identity function written in PowerShell:<br />
-[powershell]<br />
-function identity{<br />
-    return $args<br />
-}<br />
-[/powershell]<br />
+<pre class="wp-code language-powershell"><code>
+function identity{
+
+    return $args
+
+}
+</code></pre><br />
 The surprising thing about this function is that it's actually pretty useful.  PowerShell's array literal syntax is considerably more involved than it's argument syntax.  Using this function lets us do this:<br />
-[powershell]identity arg1 arg2 arg3[/powershell]<br />
+<pre class="wp-code language-powershell"><code>
+identity arg1 arg2 arg3
+</code></pre><br />
 instead of this:<br />
-[powershell]@('arg1','arg2','arg3')[/powershell]</p>
-<p></body></html></p>
+<pre class="wp-code language-powershell"><code>
+@(&#39;arg1&#39;,&#39;arg2&#39;,&#39;arg3&#39;)
+</code></pre>
+
+
+

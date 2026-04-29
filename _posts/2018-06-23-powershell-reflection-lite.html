@@ -26,8 +26,6 @@ author:
   last_name: ''
 permalink: "/2018/06/23/powershell-reflection-lite/"
 ---
-<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
-<html><body><br />
 <img class="alignright size-medium wp-image-1284" src="{{site.baseurl}}/assets/2018/06/comic-characters-1296069_640-300x300.png" alt="hand mirror with reflection" width="300" height="300">N.B. This is just a quick note to relate something I ran into in the last couple of weeks. Not an in-depth discussion of reflection.</p>
 <h2>Reflection</h2>
 <p>Reflection is an interesting meta-programming tool. Using it, we can find (among other things) a constructor or method that matches whatever criteria we want including name, # of parameters, types of parameters, public/private, etc. As you can imagine, using reflection can be a chore.</p>
@@ -37,32 +35,39 @@ permalink: "/2018/06/23/powershell-reflection-lite/"
 <p>For instance, you can invoke an arbitrary command with arbitrary arguments with a command object (from `Get-Command`), and a hashtable of parameter/argument mappings simply using `&amp; $cmd @params`.</p>
 <p>That's crazy easy. Maybe I've missed that kind of functionality in other languages and it's been there, but I don't think so. At least not often.</p>
 <p>I had also seen that the following work fine:</p>
-<p>[powershell]<br />
-$hash=@{A=1;B=1}<br />
-$prop='A'</p>
-<p>#use the key as a property<br />
-$hash['A'] -eq $hash.A</p>
-<p>#use a variable as a property name<br />
-$hash['A'] -eq $hash.$prop</p>
-<p>#use a string literal as a property name<br />
-$hash['A'] -eq $hash.'A'<br />
-[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+$hash=@{A=1;B=1}
+
+$prop=&#39;A&#39;
+#use the key as a property
+
+$hash[&#39;A&#39;] -eq $hash.A
+#use a variable as a property name
+
+$hash[&#39;A&#39;] -eq $hash.$prop
+#use a string literal as a property name
+
+$hash[&#39;A&#39;] -eq $hash.&#39;A&#39;
+</code></pre>
 <h2>What I found</h2>
 <p>I was working on some dynamic WPF suff (posts coming this week, I promise) and needed to add an event handler to a control. The problem was that the specific event I was adding a handler for was a parameter. In case you didn't know, adding an event handler to a WPF control looks something like this (we'll use the TextChanged event):</p>
-<p>[powershell]<br />
-  $textbox.Add_ContentChanged({scriptblock})<br />
-[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+$textbox.Add_ContentChanged({scriptblock})
+</code></pre>
 <p>Or, if you prefer, you can omit the parentheses if the only parameter is a scriptblock:</p>
-<p>[powershell]<br />
-  $textbox.Add_ContentChanged{scriptblock}<br />
-[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+$textbox.Add_ContentChanged{scriptblock}
+</code></pre>
 <p>The issue was that the name of the method is different for each event. I thought "Oh, no! I'm going to have to use reflection".</p>
 <p>But then I thought...I wonder if PowerShell has already taken care of this. I tried the following:</p>
-<p>[powershell]<br />
-# $control, $eventName, and $action were parameters<br />
-$control."Add_$EventName"($action)<br />
-[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+# $control, $eventName, and $action were parameters
+
+$control.&quot;Add_$EventName&quot;($action)
+</code></pre>
 <p>I figured that the worst that could happen was that it would blow up and I'd dig out a reference on using reflection (and probably translate from C#).</p>
 <p>Instead, it worked like a charm.</p>
 <p>Chalk another win up for the PowerShell team. In case you hadn't noticed, they do good work.</p>
-<p>--Mike</body></html></p>
+<p>--Mike</p>
+
+

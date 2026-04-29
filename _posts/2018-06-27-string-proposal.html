@@ -26,8 +26,6 @@ author:
   last_name: ''
 permalink: "/2018/06/27/string-proposal/"
 ---
-<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
-<html><body><br />
 <img class="alignright size-medium wp-image-1324" src="{{site.baseurl}}/assets/2018/06/certificate-154169_640-278x300.png" alt="" width="278" height="300"></p>
 <p>If you've used the PowerShell Script Analyzer before you are probably aware that you shouldn't be using double-quoted strings if there aren't any escape characters, variables, or subexpressions in them.  The analyzer will flag unnecessary double-quotes as problems.  That is because double-quoted strings are essentially expressions that PowerShell needs to evaluate.</p>
 <p>Let me repeat that...</p>
@@ -42,5 +40,6 @@ permalink: "/2018/06/27/string-proposal/"
 <p>For those that think "why not just use double-quoted strings all the time?", I would counter: Would you use <strong>Resolve-Path</strong> against C:\?  Probably not, because it would be a waste of time.  There's nothing to do.  <strong>Resolve-Path</strong> expands wildcards and there are no wildcards there.  I guess you could use <strong>Resolve-Path</strong> with every path just to be safe...but you get the point.</p>
 <p>What do you think of this proposal?  Do "string" and "string expression" convey enough that they should be used?  Let me know in the comments.</p>
 <p>FWIW, I'm going to be using them whether you agree.  :-)</p>
-<p> </p>
-<p>--Mike</body></html></p>
+<p>--Mike</p>
+
+

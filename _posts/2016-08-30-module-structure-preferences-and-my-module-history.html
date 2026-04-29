@@ -25,8 +25,6 @@ author:
   last_name: ''
 permalink: "/2016/08/30/module-structure-preferences-and-my-module-history/"
 ---
-<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
-<html><body></p>
 <h2>Modules in the Olden Days</h2>
 <p>Back in PowerShell 1.0 days, there were no modules.  Uphill both ways.  In 1.0, we only had script files.  That means you had a couple of choices when it came to deploying functions.  Either you put a bunch of functions in a .ps1 file and dot-sourced it, or you used parameterized scripts in place of functions.  I guess you could have put a function in a .ps1 file, but you'd still need to dot-source it, right?  Personally (at work), I had a bunch of .ps1 files, each devoted to a single "subject".  I had one that dealt with db access (db_utils), one that interfaced with PeopleSoft (ps_utils), a module for scheduled tasks (schtasks_utils), and so on.  You get the idea.</p>
 <h2>PowerShell 2.0 - The Dawn of Modules</h2>
@@ -48,4 +46,5 @@ permalink: "/2016/08/30/module-structure-preferences-and-my-module-history/"
 <p>I've found that I often end up editing several functions in the same file to address issues, enhancements, etc.  I think it makes sense from a discoverability standpoint as well.  If I was looking at the source, I'd find functions which were related in the same file, rather than having to look through the directory for files with similar filenames.</p>
 <p>Anyway, it's what I'm doing.  You might be writing all scripts (no functions) and liking that.  More power to you.</p>
 <p>Let me know what you think.</p>
-<p>--Mike</body></html></p>
+<p>--Mike</p>
+

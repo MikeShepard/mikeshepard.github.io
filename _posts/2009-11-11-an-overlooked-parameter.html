@@ -25,15 +25,19 @@ author:
   last_name: ''
 permalink: "/2009/11/11/an-overlooked-parameter/"
 ---
-<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
-<html><body>
 <p>This isn't so much a post as an extended pingback.  <a title="This post" href="http://blogs.msdn.com/powershell/archive/2009/09/14/select-expandproperty-propertyname.aspx">This Post</a> by Jeffrey Snover on the <a title="PowerShell Team Blog" href="http://blogs.msdn.com/powershell/default.aspx">PowerShell Team Blog</a> explains how to use the -expandproperty parameter of the select-object cmdlet.</p>
 <p>I had never noticed that parameter and was also annoyed by writing this all the time:<br />
-[powershell]get-something | foreach {$_.SomeProperty}[/powershell]<br />
-It was an idiom that I was using a lot that felt like it didn't fit.&lt;/p&gt; &lt;p&gt;As he points out, this can be replaced with the non-looping:<br />
-[powershell]get-something | select-object -expandProperty SomeProperty[/powershell]<br />
+<pre class="wp-code language-powershell"><code>
+get-something | foreach {$_.SomeProperty}
+</code></pre><br />
+It was an idiom that I was using a lot that felt like it didn't fit.</p>
+<p>As he points out, this can be replaced with the non-looping:<br />
+<pre class="wp-code language-powershell"><code>
+get-something | select-object -expandProperty SomeProperty
+</code></pre><br />
 It's longer if you don't use aliases (and prefix-shortened parameternames), but I think it reads a lot better.</p>
 <p>Let me know what you think.  Was this a surprise to you, or have you used the -expandProperty parameter before?</p>
 <p>Mike</p>
 <p>P.S.  You should definitely follow the PowerShell Team Blog...it is always worthwhile.</p>
-<p></body></html></p>
+
+

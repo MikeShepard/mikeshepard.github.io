@@ -24,8 +24,6 @@ author:
   last_name: ''
 permalink: "/2017/05/09/2-powershell-features-surprised-love/"
 ---
-<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
-<html><body></p>
 <p>After <a href="https://powershellstation.com/2017/04/11/powershell-topics-im-ready-stop-talking/">talking about features I don't want to talk about anymore</a> I thought I would turn my attention to a couple of things in PowerShell that I initially felt were mistakes but have had a change of heart about.</p>
 <p>For the most part, I think the PowerShell team does a fantastic job in terms of language design. They have made some bold choices in a few places, but time and time again their choices seem to me like the correct choices.</p>
 <p>The two features I'm talking about today were things that, when I first heard about then, I thought "I'll never use that". Time has shown me that my reactions were in haste.</p>
@@ -37,13 +35,19 @@ permalink: "/2017/05/09/2-powershell-features-surprised-love/"
 <p>I do like to explicitly import modules (either with import-module or via the module manifest) if I'm using something unusual, though.</p>
 <h2>Collection Properties</h2>
 <p>I don't know if there's an official name for this feature.  Bruce Payette in PowerShell in Action calls this a "fallback dot operator".  The idea is that you can use dot-notation against a collection to retrieve a collection of properties of the objects in the collection.  Since that was probably as hard to read as it was to write, here's an example:</p>
-<p>[powershell]$filenames = (dir C:\temp).FullName[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+$filenames = (dir C:\temp).FullName
+</code></pre>
 <p>Clearly, an Array doesn't have a FullName property, right?  And we already had 2 ways (the "old" way and the "aha" way) to do this:<br />
-[powershell]$filenames = dir c:\temp | foreach-object {$_.FullName}<br />
-$filenames = dir c:\temp | select-object -expandProperty FullName<br />
-[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+$filenames = dir c:\temp | foreach-object {$_.FullName}
+
+$filenames = dir c:\temp | select-object -expandProperty FullName
+</code></pre>
 <p>I like being able to use dot-notation against an expression, which just considers the object which is the result of the expression and applies the dot-operator to it.  It does require that you add some parentheses, but that's a small price to pay for not having to introduce another variable.  One of my scripting maxims is that the less you write, the less you debug.  More variables means more places to make mistakes (like misspelling), so I like this approach.</p>
 <p>Using dot-notation to "fall back" from the collection to the members creates a bit of a semantic issue (or at least it messed up my head).  When you see <strong>$variable.property</strong>, you no longer know what's going on.  You can be certain that there is some kind of property reference happening, but it isn't clear whether there is collection unrolling happening at the same time.</p>
 <p>How this one has turned out is that it eliminates the need to check whether I got multiple results and now I can use the same notation for single or multiple objects.  (Side note: this is reminiscent of adding "fake" .Length and .GetEnumerator() members to objects in PowerShell 3.0).  It's very concise and reduces the use of pipelines (which helps performance).</p>
 <p>Well, those were 2 things in PowerShell I was surprised to love.  What about PowerShell delights you?  Let me know in the comments!</p>
-<p>--Mike</body></html></p>
+<p>--Mike</p>
+
+

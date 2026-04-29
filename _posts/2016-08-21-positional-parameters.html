@@ -27,21 +27,26 @@ author:
   last_name: ''
 permalink: "/2016/08/21/positional-parameters/"
 ---
-<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
-<html><body>
 <p>I mentioned in a <a href="https://powershellstation.com/2016/08/06/re-learning/">previous post</a> that I've recently changed my mind a bit about the Position parameter attribute. I guess technically it is the position parameter of the Parameter parameter attribute (i.e. there's a parameter attribute called "Parameter" and it has a parameter called position). I don't think you could come up with something much more difficult to correctly name.</p>
 <p>Anyway, I've always had a low opinion of this particular parameter. Before I explain why, let's review how it works.</p>
 <p>If you have an advanced function, say Get-Stuff, you might see something like this:</p>
-<p>[powershell]<br />
-Function Get-Stuff{<br />
-[CmdletBinding()]<br />
-Param([Parameter(Position=0)]$param1,<br />
-      [Parameter(Position=1)]$param2,<br />
-      [Parameter(Position=2)]$param3)</p>
-<p>    #body of function<br />
-    write-output @{Param1=$param1;Param2=$param2;Param3=$param3}<br />
-}<br />
-[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+Function Get-Stuff{
+
+[CmdletBinding()]
+
+Param([Parameter(Position=0)]$param1,
+
+      [Parameter(Position=1)]$param2,
+
+  [Parameter(Position=2)]$param3)
+
+    #body of function
+
+    write-output @{Param1=$param1;Param2=$param2;Param3=$param3}
+
+}
+</code></pre>
 <p>The point of the <em>Position=</em> parameter (of the Parameter parameter attribute in the <strong>Param</strong> statement) is to say that if you use positional parameters in calling the function, you can expect that <strong>$param1</strong> is in the first position (position 0), <strong>$param2</strong> is in the second position (position 1) and so on.</p>
 <p>The great part about it is that this code works the same without the Position= statements. Parameters (ignoring parameter sets) can be used in the order they're listed in the function unless the <em>PositionalBinding</em> parameter of the <strong>CmdletBinding</strong> attribute is set to <strong>$false</strong> (which it isn't, by default).</p>
 <p>I've seen a lot of code which, in a function that has 12 parameters, mechanically sets Position= from 0 to 11 in order. It's not exactly confusing, but it's certainly not clear why you would bother doing it since it's not necessary. From that observation, I decided that there was no point to using the Position= setting at all.</p>
@@ -51,4 +56,5 @@ Param([Parameter(Position=0)]$param1,<br />
 <p>I'm going to be editing my "Advanced Function" snippet to include <strong>PositionalBinding=$False</strong> and see where it takes me.</p>
 <p>What do you think?</p>
 <p>--Mike</p>
-<p></body></html></p>
+
+

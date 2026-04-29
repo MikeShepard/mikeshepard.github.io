@@ -24,117 +24,191 @@ author:
   last_name: ''
 permalink: "/2016/04/29/introducing-visiobot3000-part-2-superman/"
 ---
-<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
-<html><body></p>
 <p>In the <a href="https://powershellstation.com/2016/04/28/introducing-visiobot3000-part-1-clark-kent/">last post</a> I showed you how <a href="https://github.com/MikeShepard/VisioBot3000">VisioBot3000</a> makes drawing simple Visio diagrams simpler by wrapping the Visio COM API and providing more straight-forward cmdlets do refer to stencils and masters, and to draw shapes, containers, and connectors on the page.</p>
 <p>To be honest, that's where I was expecting to end up when I started messing with Visio.  And I was ok with that.  Anything which simplifies drawing Visio diagrams is a win in my book.  I learned quite a bit getting that far, and it works pretty well.</p>
 <p>I decided that I wanted more, though.  I'll explain the "improvements" in steps.  Because I want to you to see the improvements, I'll start with the sample code from the last post:</p>
-<p>[powershell]<br />
-Import-Module VisioBot3000 -Force</p>
-<p>#start Visio and create a new document<br />
-New-VisioApplication<br />
-New-VisioDocument C:\temp\TestVisioPrimitives.vsdx </p>
-<p>#tell Visio what Stencils I want to use and give them "nicknames"<br />
-Register-VisioStencil -Name Containers -Path C:\temp\MyContainers.vssx<br />
-Register-VisioStencil -Name Servers -Path C:\temp\SERVER_U.vssx</p>
-<p>#pick a master from one of those stencils and give it a nickname<br />
-Register-VisioShape -Name WebServer -From Servers -MasterName 'Web Server'<br />
-Register-VisioShape -Name DBServer -From Servers -MasterName 'Database Server'</p>
-<p>#pick another master (this time a container) and give it a nickname<br />
-#note that this is a different cmdlet<br />
-Register-VisioContainer -Name Domain -From Containers -MasterName 'Domain'</p>
-<p>#draw a container with two items in it<br />
-New-VisioContainer -shape (get-visioshape Domain) -name MyDomain -contents {<br />
-   New-VisioShape -master WebServer -name PrimaryServer -x 5 -y 5<br />
-   New-VisioShape -master DBServer -Name SQL01 -x 5 -y 7<br />
-}</p>
-<p>#add a connector<br />
-New-VisioConnector -from PrimaryServer -to SQL01 -name SQL -color Red -Arrow<br />
-[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+Import-Module VisioBot3000 -Force
+
+#start Visio and create a new document
+
+New-VisioApplication
+
+New-VisioDocument C:\temp\TestVisioPrimitives.vsdx 
+
+#tell Visio what Stencils I want to use and give them "nicknames"
+
+Register-VisioStencil -Name Containers -Path C:\temp\MyContainers.vssx
+
+Register-VisioStencil -Name Servers -Path C:\temp\SERVER_U.vssx
+
+#pick a master from one of those stencils and give it a nickname
+
+Register-VisioShape -Name WebServer -From Servers -MasterName 'Web Server'
+
+Register-VisioShape -Name DBServer -From Servers -MasterName 'Database Server'
+
+#pick another master (this time a container) and give it a nickname
+
+#note that this is a different cmdlet
+
+Register-VisioContainer -Name Domain -From Containers -MasterName 'Domain'
+
+#draw a container with two items in it
+
+New-VisioContainer -shape (get-visioshape Domain) -name MyDomain -contents {
+
+   New-VisioShape -master WebServer -name PrimaryServer -x 5 -y 5
+
+   New-VisioShape -master DBServer -Name SQL01 -x 5 -y 7
+
+}
+
+#add a connector
+
+New-VisioConnector -from PrimaryServer -to SQL01 -name SQL -color Red -Arrow
 <h2>Aliases</h2>
 <p>An easy "facelift" is achieved by adding a few strategic aliases. Before you yell at me for using aliases in a script, I am viewing these "diagram scripts" as something a bit different from normal PowerShell scripts.</p>
 <p>Anyway, the aliases make registering shapes, stencils, and containers much simpler.</p>
-<p>[powershell]<br />
-Import-Module VisioBot3000 -Force</p>
-<p>#start Visio and create a new document<br />
-New-VisioApplication<br />
-Diagram C:\temp\TestVisioPrimitives.vsdx </p>
-<p>#tell Visio what Stencils I want to use and give them "nicknames"<br />
-Stencil Containers -Path C:\temp\MyContainers.vssx<br />
-Stencil Servers -Path C:\temp\SERVER_U.vssx</p>
-<p>#pick a master from one of those stencils and give it a nickname<br />
-Shape -Name WebServer -From Servers -MasterName 'Web Server'<br />
-Shape -Name DBServer -From Servers -MasterName 'Database Server'</p>
-<p>#pick another master (this time a container) and give it a nickname<br />
-#note that this is a different cmdlet<br />
-Container -name Domain -From Containers -MasterName 'Domain'</p>
-<p>#draw a container with two items in it<br />
-New-VisioContainer -shape (get-visioshape Domain) -label MyDomain -contents {<br />
-   New-VisioShape -master WebServer -label PrimaryServer -x 5 -y 5<br />
-   New-VisioShape -master DBServer -label SQL01 -x 5 -y 7<br />
-}</p>
-<p>#add a connector<br />
-New-VisioConnector -from PrimaryServer -to SQL01 -label SQL -color Red -Arrow<br />
-[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+Import-Module VisioBot3000 -Force
+
+#start Visio and create a new document
+
+New-VisioApplication
+
+Diagram C:\temp\TestVisioPrimitives.vsdx 
+
+#tell Visio what Stencils I want to use and give them "nicknames"
+
+Stencil Containers -Path C:\temp\MyContainers.vssx
+
+Stencil Servers -Path C:\temp\SERVER_U.vssx
+
+#pick a master from one of those stencils and give it a nickname
+
+Shape -Name WebServer -From Servers -MasterName 'Web Server'
+
+Shape -Name DBServer -From Servers -MasterName 'Database Server'
+
+#pick another master (this time a container) and give it a nickname
+
+#note that this is a different cmdlet
+
+Container -name Domain -From Containers -MasterName 'Domain'
+
+#draw a container with two items in it
+
+New-VisioContainer -shape (get-visioshape Domain) -label MyDomain -contents {
+
+   New-VisioShape -master WebServer -label PrimaryServer -x 5 -y 5
+
+   New-VisioShape -master DBServer -label SQL01 -x 5 -y 7
+
+}
+
+#add a connector
+
+New-VisioConnector -from PrimaryServer -to SQL01 -label SQL -color Red -Arrow
 <h2>Positioning</h2>
 <p>Ok...I really hate specifying positions for the shapes I want on the page. Because of that, I include a very simple relative positioning algorithm in VisioBot3000. By default, VisioBot3000 places shapes in a single, horizontal line. That is, if you don't tell it where to put a shape, it puts it just to the right of the last shape that it drew. If you want, you can tell it to draw in columns (rather than rows) by using Set-RelativePositionDirection cmdlet.</p>
 <p>So I can simplify the "diagram" portion of the sample to be this. Note that the output isn't quite the same, but the shapes are there and connected, so I'm still happy.:</p>
-<p>[powershell]<br />
-#draw a container with two items in it<br />
-New-VisioContainer -shape (get-visioshape Domain) -label MyDomain -contents {<br />
-   Set-NextShapePosition -x 5 -y 5<br />
-   New-VisioShape -master WebServer -label PrimaryServer<br />
-   New-VisioShape -master DBServer -label SQL01<br />
-}<br />
-[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+#draw a container with two items in it
+
+New-VisioContainer -shape (get-visioshape Domain) -label MyDomain -contents {
+
+   Set-NextShapePosition -x 5 -y 5
+
+   New-VisioShape -master WebServer -label PrimaryServer
+
+   New-VisioShape -master DBServer -label SQL01
+
+}
 <p>A couple of important points to note. First, if you haven't placed any shapes yet, VisioBot will place the next shape at the top-left of the page. If you want to have it start somewhere else, you can pass coordinates to the Set-NextShapePosition cmdlet (as I did in the example).</p>
 <p>Second, the next shape is relative to the position of the previous shape, not the place the shape was dropped. If you're drawing the diagram hands-off, then there's no difference. If you put a breakpoint (or are just "drawing" from the command-line), you can move the last shape before the next shape is drawn, and the next shape will be positioned relative to the new position rather than where it was originally placed. This allows you to "guide" the drawing in order to make it a bit more beautiful (as if that's possible).</p>
 <h2>And now, the main attraction...a custom DSL</h2>
 <p>The sample code is pretty logical, in that you can easily see what's going on, and it's obvious which PowerShell cmdlets are being called to do certain things in the drawing of the diagram.</p>
 <p>Unfortunately, the "high visibility" of the PowerShell in the diagram code obscures the "diagram description" in the code. Wouldn't it be nice if you could just say this?:</p>
-<p>[powershell]<br />
-Domain MyDomain {<br />
-   WebServer PrimaryServer<br />
-   DBServer SQL01<br />
-}<br />
-[/powershell]</p>
-<p>Isn't that a much clearer "diagram description"? Of course it is. And the awesome thing is that the code above is perfectly valid PowerShell (and does exactly what the previous example did, except for the position).</p>
-<p>How is that possible? Whenever you register a shape or container (or connector, but we didn't do that), VisioBot3000 creates a function with the same name as what you register. So, when we executed "Register-VisioContainer -Name Domain ...", VisioBot3000 created a function called Domain which has the same parameters as New-VisioContainer (except for the shape, which is the Domain shape). Similarly, "Register-VisioShape -Name WebServer..." created a function called WebServer that lets you draw WebServers without using PowerShell-looking code.</p>
-<p>Here's a bigger example, along with the output. (I'll leave out the stencil and shape definitions. You can find the whole script <a href="https://github.com/MikeShepard/VisioBot3000/blob/master/Examples/VisioDSL3.ps1">here</a>):<br />
-[powershell]<br />
-Set-NextShapePosition -x 3.5 -y 7<br />
-Logical MyFarm {<br />
-    Location MyCity {<br />
-        Domain MyDomain  {<br />
-            WebServer PrimaryServer<br />
-            WebServer HotSpare</p>
-<p>        }<br />
-    }<br />
-    Location DRSite {<br />
-        Domain MyDomain -name SiteB_MyDomain {<br />
-            Set-RelativePositionDirection Vertical<br />
-		    WebServer BackupServer </p>
-<p>	    }<br />
-    }<br />
-}<br />
-SQL -From PrimaryServer -To BackupServer<br />
-[/powershell]</p>
-<p><a href="https://powershellstation.com/wp-content/uploads/2016/04/VisioBodDSL3.png"><img src="{{site.baseurl}}/assets/2016/04/VisioBodDSL3-189x300.png" alt="VisioBodDSL3" width="189" height="300" class="alignnone size-medium wp-image-986"></a></p>
-<p>A quick note.  All of my examples have been with servers, domains, etc.  There's nothing in VisioBot3000 that has anything to do with those.  It's just the topic of my diagrams.  You could just as easily have a diagram with divisions, departments, and teams, showing directors, managers, team leaders and team members.  The DSL for your diagrams would include those terms, possibly like this:<br />
-[powershell]<br />
-Division IT {<br />
-    Director "IT Director Name"<br />
-    Department HelpDesk {<br />
-           Manager "HD Manager Name"<br />
-           Team FirstLineSupport {<br />
-                TeamLead "FirstLine Team Lead Name"<br />
-                Member "Member 1"<br />
-                Member "Member 2"<br />
-           }<br />
-}<br />
-[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+Domain MyDomain {
+
+   WebServer PrimaryServer
+
+   DBServer SQL01
+
+}
+<p>Isn't that a much clearer "diagram description"? Of course it is. And the awesome thing is that the code above is perfectly valid PowerShell and does exactly what the previous example did, except for the position.</p>
+<p>How is that possible? Whenever you register a shape or container, or connector, VisioBot3000 creates a function with the same name as what you register. So, when we executed "Register-VisioContainer -Name Domain ...", VisioBot3000 created a function called Domain which has the same parameters as New-VisioContainer, except for the shape, which is the Domain shape. Similarly, "Register-VisioShape -Name WebServer..." created a function called WebServer that lets you draw WebServers without using PowerShell-looking code.</p>
+<p>Here's a bigger example, along with the output. I'll leave out the stencil and shape definitions. You can find the whole script 
+<a href="https://github.com/MikeShepard/VisioBot3000/blob/master/Examples/VisioDSL3.ps1">here</a>:</p>
+<pre class="wp-code language-powershell"><code>
+Set-NextShapePosition -x 3.5 -y 7
+
+Logical MyFarm {
+
+    Location MyCity {
+
+        Domain MyDomain {
+
+            WebServer PrimaryServer
+
+            WebServer HotSpare
+
+        }
+
+    }
+
+    Location DRSite {
+
+        Domain MyDomain -name SiteB_MyDomain {
+
+            Set-RelativePositionDirection Vertical
+
+            WebServer BackupServer
+
+        }
+
+    }
+
+}
+
+SQL -From PrimaryServer -To BackupServer
+<p>
+<a href="https://powershellstation.com/wp-content/uploads/2016/04/VisioBodDSL3.png"><img src="{{site.baseurl}}/assets/2016/04/VisioBodDSL3-189x300.png" alt="VisioBodDSL3" width="189" height="300" class="alignnone size-medium wp-image-986"></a>
+<p>A quick note. All of my examples have been with servers, domains, etc. There's nothing in VisioBot3000 that has anything to do with those. It's just the topic of my diagrams. You could just as easily have a diagram with divisions, departments, and teams, showing directors, managers, team leaders and team members. The DSL for your diagrams would include those terms, possibly like this:</p>
+<pre class="wp-code language-powershell"><code>
+Division IT {
+
+    Director "IT Director Name"
+
+    Department HelpDesk {
+
+        Manager "HD Manager Name"
+
+        Team FirstLineSupport {
+
+            TeamLead "FirstLine Team Lead Name"
+
+            Member "Member 1"
+
+            Member "Member 2"
+
+        }
+
+    }
+
+}
 <p>So the "diagram description" or DSL is completely defined by the stencils and shapes you choose.</p>
-<p>I think that's amazing.  And guess what?  There's a lot more.  I'll be blogging this week about other features in VisioBot3000 and plans I have.  If you have ideas,  I'd love to hear them. </p>
-<p>It's all still under active development (just me at this point, but if you want to jump in I'd be glad to share the load).</p>
+<p>I think that's amazing. And guess what? There's a lot more. I'll be blogging this week about other features in VisioBot3000 and plans I have. If you have ideas, I'd love to hear them.</p>
+<p>It's all still under active development, just me at this point, but if you want to jump in I'd be glad to share the load.</p>
 <p>Let me know what you think!</p>
-<p>--Mike</body></html></p>
+<p>--Mike</p>
+
+
+
+
+
+
+
+

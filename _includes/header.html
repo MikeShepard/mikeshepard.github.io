@@ -1,0 +1,14 @@
+<header id="masthead" role="banner">
+  <div class="site-branding">
+    <h1 class="site-title"><a href="{{ '/' | relative_url }}" rel="home">{{ site.title }}</a></h1>
+    <h2 class="site-description">{{ site.tagline | default: site.description }}</h2>
+  </div>
+
+  <nav id="access" role="navigation" aria-label="Primary menu">
+    <ul class="menu nav-menu">
+      {%- for item in site.navigation -%}
+        <li class="menu-item"><a href="{{ item.url }}">{{ item.title }}</a></li>
+      {%- endfor -%}
+    </ul>
+  </nav>
+</header>

@@ -21,45 +21,53 @@ author:
   last_name: ''
 permalink: "/2016/05/22/custom-objects-and-pstypename/"
 ---
-<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
-<html><body></p>
 <p>A couple of weeks ago, Adam Bertram <a href="http://www.adamtheautomator.com/building-custom-object-types-powershell-pstypename/">wrote a post</a> which got me really excited.  As an aside, if you're not following Adam you're missing out.  He posts ridiculously often and writes high quality posts about all kinds of cool stuff.  I'm writing about one such post.  </p>
 <p>Anyway, his post was about using the PSTypeName property of PSCustomObjects and the <strong>PSTypeName()</strong> parameter attribute to restrict function parameters based on a "fake" type.  By "fake", I mean that there isn't necessarily a .NET type with a matching name, and even if there was, these objects aren't those types.  An example might help:</p>
-<p>First, by including a special property called PSTypeName in the PSCustomObject, the object "becomes" that type.<br />
-[powershell]<br />
-$obj=[pscustomobject]@{PSTypeName='Mike';<br />
-                       DisplayName='My custom object'}<br />
-$obj | Get-Member<br />
-[/powershell]<br />
-<a href="https://powershellstation.com/wp-content/uploads/2016/05/PSTypeName1.png"><img src="{{site.baseurl}}/assets/2016/05/PSTypeName1-300x82.png" alt="PSTypeName1" width="300" height="82" class="alignnone size-medium wp-image-1011"></a></p>
+<p>First, by including a special property called PSTypeName in the PSCustomObject, the object "becomes" that type.</p>
+<pre class="wp-code language-powershell"><code>
+$obj=[pscustomobject]@{PSTypeName=&#39;Mike&#39;;
+
+                       DisplayName=&#39;My custom object&#39;}
+
+$obj | Get-Member
+</code></pre>
+<p><a href="https://powershellstation.com/wp-content/uploads/2016/05/PSTypeName1.png"><img src="{{site.baseurl}}/assets/2016/05/PSTypeName1-300x82.png" alt="PSTypeName1" width="300" height="82" class="alignnone size-medium wp-image-1011"></a></p>
 <p>So now we have an object which thinks it is of type "Mike".  </p>
 <p>Using the <strong>PSTypeName()</strong> parameter attribute, we can create a parameter which only accepts objects of that type!</p>
-<p>[powershell]<br />
-function Get-DisplayName{<br />
-    param([PSTypeName('Mike')]$obj)<br />
-    $obj.DisplayName<br />
- }<br />
-[/powershell]<br />
-Calling this function with our object and a string shows that it only accepted our object.</p>
+<pre class="wp-code language-powershell"><code>
+function Get-DisplayName{
+
+    param([PSTypeName(&#39;Mike&#39;)]$obj)
+
+    $obj.DisplayName
+
+ }
+</code></pre>
+<p>Calling this function with our object and a string shows that it only accepted our object.</p>
 <p><a href="https://powershellstation.com/wp-content/uploads/2016/05/PSTypeNames2-1.png"><img src="{{site.baseurl}}/assets/2016/05/PSTypeNames2-1-300x93.png" alt="PSTypeNames2" width="300" height="93" class="alignnone size-medium wp-image-1017"></a></p>
 <p>The text of the error is as follows:</p>
-<blockquote><p><em>Get-DisplayName : Cannot bind argument to parameter 'obj', because PSTypeNames of the argument do not match the PSTypeName<br />
-required by the parameter: Mike.</em></p></blockquote>
-<p>It's probably worth mentioning that we can't just put [Mike] as the parameter type.  PowerShell really wants "real" types in that situation.</p>
+<blockquote><p><em>Get-DisplayName : Cannot bind argument to parameter 'obj', because PSTypeNames of the argument do not match the PSTypeName required by the parameter: Mike.</em></p></blockquote>
+<p>It's probably worth mentioning that we can't just put [Mike] as the parameter type. PowerShell really wants "real" types in that situation.</p>
 <p>So, now we can easily create our own types of objects without dealing with C# or PowerShell classes, and still get the "type" validated in a function parameter....Sweet!</p>
-<p>But wait!  <a href="https://powershellstation.com/2009/09/15/powershell-ets-extended-type-system/">Back in 2009</a>, I wrote about modifying objects in order to get special formatting or special new members from PS1XML files, through PowerShell's awesome Extended Type System.  I did that by looking at the PSObject underlying the object (all objects in PowerShell do this), and inserting a value into the <strong>PSTypeNames</strong> array.</p>
-<p>It turns out that the <strong>PSTypeName()</strong> parameter attribute recognizes objects that are "customized" this way as well:<br />
-[powershell]<br />
-$obj2=get-service | select-object -first 1<br />
-$obj2.PSOBject.TypeNames.Insert(0,'MIKE')<br />
-$obj2 | Get-Member<br />
-[/powershell]</p>
+<p>But wait! <a href="https://powershellstation.com/2009/09/15/powershell-ets-extended-type-system/">Back in 2009</a>, I wrote about modifying objects in order to get special formatting or special new members from PS1XML files, through PowerShell's awesome Extended Type System. I did that by looking at the PSObject underlying the object, all objects in PowerShell do this, and inserting a value into the <strong>PSTypeNames</strong> array.</p>
+<p>It turns out that the <strong>PSTypeName()</strong> parameter attribute recognizes objects that are "customized" this way as well:</p>
+<pre class="wp-code language-powershell"><code>
+$obj2=get-service | select-object -first 1
+
+$obj2.PSOBject.TypeNames.Insert(0,&#39;MIKE&#39;)
+
+$obj2 | Get-Member
+</code></pre>
 <p><a href="https://powershellstation.com/wp-content/uploads/2016/05/PSTypeNames3.png"><img src="{{site.baseurl}}/assets/2016/05/PSTypeNames3-300x83.png" alt="PSTypeNames3" width="300" height="83" class="alignnone size-medium wp-image-1015"></a></p>
-<p>Now that we have the object (which is really a <strong>ServiceController</strong> object, but we told it to pretend to be a Mike), let's try it in the <strong>Get-DisplayName</strong> function we wrote above:<br />
-<a href="https://powershellstation.com/wp-content/uploads/2016/05/PSTypeNames4.png"><img src="{{site.baseurl}}/assets/2016/05/PSTypeNames4-300x19.png" alt="PSTypeNames4" width="300" height="19" class="alignnone size-medium wp-image-1016"></a></p>
+<p>Now that we have the object, which is really a <strong>ServiceController</strong> object, but we told it to pretend to be a Mike, let's try it in the <strong>Get-DisplayName</strong> function we wrote above:</p>
+<p><a href="https://powershellstation.com/wp-content/uploads/2016/05/PSTypeNames4.png"><img src="{{site.baseurl}}/assets/2016/05/PSTypeNames4-300x19.png" alt="PSTypeNames4" width="300" height="19" class="alignnone size-medium wp-image-1016"></a></p>
 <p>So, we can use the <strong>PSTypeNames()</strong> parameter attribute for any object which has had its <strong>PSTypeNames()</strong> fiddled with.  That's great for me, because I get a lot of objects from a database, so they're really DataRow objects.  I add an entry to PSTypeNames to help represent what kind of objects they came from (e.g. what table or query they came from) but until I found out about this I was stuck using ValidateScript() to check parameters.</p>
 <p>What do you think?   Is this something you can see a use for?</p>
 <p>Let me know in the comments or on social media.</p>
 <p>--Mike</p>
 <p>P.S.  Adam says that Kirk Munro was the original source  of this information.  He's awesome too, so I'm not really surprised.<br />
-P.P.S...Kirk commented below that Oisín Grehan and Jason Shirk were his sources in this.  Great teamwork in the PowerShell community!</body></html></p>
+P.P.S...Kirk commented below that Oisín Grehan and Jason Shirk were his sources in this.  Great teamwork in the PowerShell community!</p>
+
+
+
+

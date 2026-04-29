@@ -26,8 +26,6 @@ author:
   last_name: ''
 permalink: "/2015/12/09/code-smell-invoke-expression/"
 ---
-<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
-<html><body><br />
 <strong>Code Smells</strong></p>
 <p>I've mentioned code smells in this blog before, but to recap, a <em>code smell</em> is a warning sign that you might be looking at bad code (for some value of bad).  Code smells are more like red flags than errors.  Some classic example of code smells are very long functions, lots of global variables, and goto statements.  There are places where all of these make sense, but in general if you see them you wonder if the code could use some work.</p>
 <p>In most languages there is a way to take a string of characters and execute it as if it were code.  Those functions (or keywords, or methods) are generally considered to be risky, because you are giving up some control over what code is run.  If the input is somehow compromised, your program will have become an attack vector.  Not a good place to be.</p>
@@ -35,9 +33,11 @@ permalink: "/2015/12/09/code-smell-invoke-expression/"
 <p>A classic example of this is building SQL statements from input and including parameters in the string.  If you don't use SQL-language parameters, you are open to a SQL-injection attack where a malicious user puts characters in the input which cause the SQL statement you're building to include instructions you didn't intend to execute.  SQL-injection is a well-understood attack and the mitigation is also well-known.  Using real parameters instead of string building is the answer.</p>
 <p><strong>Back to PowerShell</strong></p>
 <p>The cmdlet which PowerShell includes to allow you to execute a string as code is <strong>Invoke-Expression</strong>.  It's pretty simple to show that it's vulnerable to an injection attack.  Consider the following code, where the intent is to write "hello " followed by the value of a variable.</p>
-<p>[powershell]$prm1="world';get-date #"<br />
-invoke-expression "write-host 'Hello $prm1'"<br />
-[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+$prm1=&quot;world&#39;;get-date #&quot;
+
+invoke-expression &quot;write-host &#39;Hello $prm1&#39;&quot;
+</code></pre>
 <p>You can see that the expression that is being invoked includes some quotes, but the input has been "crafted" to close the quotes early and to comment out the trailing quote.  This isn't a sophisticated example, but it should help illustrate the problem.  An attacker, by the way, wouldn't be satisfied with outputting the date either.</p>
 <p><strong>What to do instead?</strong></p>
 <p>I had been thinking about this for a while, and a few days ago someone wrote a comment on <a href="http://blogs.msdn.com/b/powershell/archive/2011/06/03/invoke-expression-considered-harmful.aspx">this post</a> about it showing the problem but not giving solutions.  To be fair the article did talk about using the call operator (&amp;) but it didn't give a lot of details.  In the remainder of this post I will give some further guidance.  I don't think that all Invoke-Expression calls can be eliminated, but this should go a long way towards a solution.</p>
@@ -47,41 +47,57 @@ invoke-expression "write-host 'Hello $prm1'"<br />
 <p>The call operator takes the name of the command, not an arbitrary string, so injection doesn't work here:</p>
 <p><a href="https://powershellstation.com/wp-content/uploads/2015/12/callOperator.png"><img class="alignnone wp-image-785 size-full" src="{{site.baseurl}}/assets/2015/12/callOperator.png" alt="callOperator" width="502" height="165"></a></p>
 <p>As noted in the help (<a href="https://technet.microsoft.com/en-us/library/hh847732.aspx">about_operators</a>), the call operator does not evaluate the string, so it can't interpret arguments.  If you need to pass arguments to parameters, you can list them after the command like this:</p>
-<p>[powershell]<br />
-PS C:\Bad Path&gt; &amp; "get-date" 10/10/10<br />
-Sunday, October 10, 2010 12:00:00 AM<br />
-[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+PS C:\Bad Path&gt; &amp; &quot;get-date&quot; 10/10/10
+
+Sunday, October 10, 2010 12:00:00 AM
+</code></pre>
 <p>You can also pass a command (the output of get-command) to the call operator, so get-command can be an easy way to "validate" the value that is being used. If get-command doesn't return anything, it's not a valid command.</p>
 <p><strong>What if I don't know what the command needs to be?</strong></p>
 <p>This is a common question.  If I don't know what command needs to be executed at the time I write the script, I can't include it, right?  Actually, there's no reason you have to know it beforehand.</p>
-<p>[powershell]$choice=read-host "Process or Service"<br />
-if ($choice -in 'process','service'){<br />
-    $cmd=get-command "get-$choice"<br />
-    &amp; $cmd<br />
-} else {<br />
-    write-host 'You entered an invalid command'<br />
-}[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+$choice=read-host &quot;Process or Service&quot;
+
+if ($choice -in &#39;process&#39;,&#39;service&#39;){
+
+    $cmd=get-command &quot;get-$choice&quot;
+
+    &amp; $cmd
+
+} else {
+
+    write-host &#39;You entered an invalid command&#39;
+
+}
+</code></pre>
 <p><strong>What if I don't know the argument values?</strong></p>
 <p>This one is simple.  Use variables.  This is bread-and-butter PowerShell.</p>
 <p><strong>What if I don't know which parameters will be receiving arguments?</strong></p>
 <p>If you don't know which parameters will be presented arguments, you might think you're stuck.  You could have a bunch of if/elseif/else statements trying to check each combination of parameters and include different command-lines with each, but that's obviously (I hope) not a maintainable solution.  A much better solution is to use <em><a href="https://technet.microsoft.com/en-us/library/jj672955.aspx">splatting</a></em>, a technique that lets you use a hashtable (or array) to supply the parameters and arguments for a command.</p>
 <p>If the command is a PowerShell command (cmdlet, function, script), you can build a hashtable with the parameters (names) and arguments (values) you need to pass.  Using a hashtable in this way is very similar to the parameter solution for SQL-injection.  Because the values are bound to parameters by the engine rather than by evaluating a string, you don't leave room for an attacker to compromise the command-line.  A simple splatting example might look like this:</p>
-<p>[powershell]<br />
-$parms=@{}<br />
-if($IncludeSubdirectories){<br />
-   $parms['Recurse']=$true<br />
-}<br />
-if($path){<br />
-    $parms['Path']=$path<br />
-}<br />
-get-childitem @parms<br />
-[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+$parms=@{}
+
+if($IncludeSubdirectories){
+
+   $parms[&#39;Recurse&#39;]=$true
+
+}
+
+if($path){
+
+    $parms[&#39;Path&#39;]=$path
+
+}
+
+get-childitem @parms
+</code></pre>
 <p>Note that when we splat the hashtable (doesn't that sound nice), we use the splat operator (@) instead of the dollar-sign ($) usually used with variables.</p>
 <p><strong>What if I don't know the command or the parameters?</strong></p>
 <p>The call operator works fine with splatting.  Feel free to combine both techniques.  Proxy functions, for example, use the call operator (against the original command) with $PSBoundParameters to "forward" arguments to the original command.</p>
-<p> </p>
 <p><strong>Conclusion.</strong></p>
 <p>With the call operator and splatting in your toolbox, there should be a lot less occasions that you're tempted to use Invoke-Expression.  PowerShell gives so many solid language features, it makes it easy to write good code.</p>
 <p>What are your thoughts?  Can you think of circumstances that would still require Invoke-Expression?  Let me know in the comments.</p>
-<p> </p>
-<p>--Mike</body></html></p>
+<p>--Mike</p>
+
+

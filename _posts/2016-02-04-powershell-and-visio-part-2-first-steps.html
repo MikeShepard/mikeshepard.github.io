@@ -23,30 +23,47 @@ author:
   last_name: ''
 permalink: "/2016/02/04/powershell-and-visio-part-2-first-steps/"
 ---
-<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
-<html><body><br />
-<a href="https://powershellstation.com/2016/01/20/powershell-and-visio-1/">Last time</a> I talked about Visio and PowerShell and told you (in broad strokes) what I wanted to get done.  Now we’ll actually get started!</p>
+<p><a href="https://powershellstation.com/2016/01/20/powershell-and-visio-1/">Last time</a> I talked about Visio and PowerShell and told you, in broad strokes, what I wanted to get done. Now we’ll actually get started.</p>
+
 <h1>Starting Visio from PowerShell</h1>
-<p>To open the Visio application from PowerShell in order to start manipulating it, you need to use the appropriate COM class.  The code looks like this:</p>
-<p>[powershell]New-Object -ComObject Visio.Application[/powershell]</p>
-<p>The New-Object cmdlet returns a reference to the new instance of Visio that’s running.  If you ran that line by itself, you’d see a bunch of properties of the new Visio.Application object and you’d see that Visio started, but without putting the object in a variable you’d be kind of stuck.  So…</p>
-<p>[powershell]$Visio=New-Object -ComObject Visio.Application[/powershell]</p>
+<p>To open the Visio application from PowerShell in order to start manipulating it, you need to use the appropriate COM class. The code looks like this:</p>
+<pre class="wp-code language-powershell"><code>
+New-Object -ComObject Visio.Application
+<p>The New-Object cmdlet returns a reference to the new instance of Visio that’s running. If you ran that line by itself, you’d see a bunch of properties of the new Visio.Application object and you’d see that Visio started, but without putting the object in a variable you’d be kind of stuck. So...</p>
+<pre class="wp-code language-powershell"><code>
+$Visio=New-Object -ComObject Visio.Application
 <p>Now, we can use that reference to do fun stuff.</p>
 <h1>Opening a Visio Document</h1>
-<p>To open an existing document, use the Add method of the Documents property (a collection) of the $Visio object.  Just like the last time, this outputs an object that we’ll want to capture.  For example, opening the Visio diagram stored in c:\temp\SampleVisio.vsdx you’d do this:</p>
-<p>[powershell]$doc=$Visio.Documents.Add(‘c:\temp\SampleVisio.vsdx’)[/powershell]<br />
-<a href="https://powershellstation.com/wp-content/uploads/2016/02/sampleVisio-2.png" rel="attachment wp-att-890"><img src="{{site.baseurl}}/assets/2016/02/sampleVisio-2-150x150.png" alt="sampleVisio" width="150" height="150" class="alignnone size-thumbnail wp-image-890"></a></p>
+<p>To open an existing document, use the Add method of the Documents property, a collection, of the $Visio object. Just like the last time, this outputs an object that we’ll want to capture. For example, opening the Visio diagram stored in c:\temp\SampleVisio.vsdx you’d do this:</p>
+<pre class="wp-code language-powershell"><code>
+$doc=$Visio.Documents.Add('c:\temp\SampleVisio.vsdx')
+<p>
+<a href="https://powershellstation.com/wp-content/uploads/2016/02/sampleVisio-2.png" rel="attachment wp-att-890"><img src="{{site.baseurl}}/assets/2016/02/sampleVisio-2-150x150.png" alt="sampleVisio" width="150" height="150" class="alignnone size-thumbnail wp-image-890"></a>
 <p>Documents are made of pages:</p>
-<p>[powershell]$doc.Pages | select-object –property Name[/powershell]</p>
-<p>This document only has one page, named (by default) ‘Page-1’.  We can either refer to it by name ($doc.Pages(‘Page-1’) or by number ($doc.Pages(1)).</p>
-<p>[powershell]$page=$doc.Pages(1)[/powershell]</p>
+<pre class="wp-code language-powershell"><code>
+$doc.Pages | Select-Object -Property Name
+<p>This document only has one page, named by default, Page-1. We can either refer to it by name, $doc.Pages('Page-1'), or by number, $doc.Pages(1).</p>
+<pre class="wp-code language-powershell"><code>
+$page=$doc.Pages(1)
 <p>Once we’ve got the page, we can see the shapes that are found on the page:</p>
-<p>[powershell]$page.Shapes | select-object –Property Name,Text[/powershell]</p>
-<p><a href="https://powershellstation.com/wp-content/uploads/2016/02/shapes.png" rel="attachment wp-att-885"><img class="alignnone size-full wp-image-885" src="{{site.baseurl}}/assets/2016/02/shapes.png" alt="shapes" width="265" height="107"></a></p>
-<p>Visio objects are interesting to work with, and the properties you want might be hard to find, but they’re probably there.  For instance, to find the location (in the current unit of the document) of a shape you have to do this:</p>
-<p>[powershell]$x=$shape.Cells(‘PinX’).ResultIU<br />
-$y=$shape.Cells(‘PinY’).ResultIU[/powershell]</p>
-<p>That should get you started looking at Visio with PowerShell.  In the next post we'll work on dropping shapes on the page and connecting them.</p>
-<p>A reference that will help immensely is the VBA Object model reference for Visio found <a href="https://msdn.microsoft.com/en-us/library/office/ff765377.aspx">here</a>.</p>
-<p>Let me know if you have questions about this.  </p>
-<p>--Mike</body></html></p>
+<pre class="wp-code language-powershell"><code>
+$page.Shapes | Select-Object -Property Name,Text
+<p>
+<a href="https://powershellstation.com/wp-content/uploads/2016/02/shapes.png" rel="attachment wp-att-885"><img class="alignnone size-full wp-image-885" src="{{site.baseurl}}/assets/2016/02/shapes.png" alt="shapes" width="265" height="107"></a>
+<p>Visio objects are interesting to work with, and the properties you want might be hard to find, but they’re probably there. For instance, to find the location, in the current unit of the document, of a shape you have to do this:</p>
+<pre class="wp-code language-powershell"><code>
+$x=$shape.Cells('PinX').ResultIU
+$y=$shape.Cells('PinY').ResultIU
+<p>That should get you started looking at Visio with PowerShell. In the next post we'll work on dropping shapes on the page and connecting them.</p>
+<p>A reference that will help immensely is the VBA Object Model reference for Visio found 
+<a href="https://msdn.microsoft.com/en-us/library/office/ff765377.aspx">here</a>.</p>
+<p>Let me know if you have questions about this.</p>
+<p>--Mike</p>
+
+
+
+
+
+
+
+

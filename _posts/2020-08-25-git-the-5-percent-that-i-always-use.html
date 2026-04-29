@@ -29,8 +29,6 @@ author:
   last_name: ''
 permalink: "/2020/08/25/git-the-5-percent-that-i-always-use/"
 ---
-<p><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><br />
-<html><body></p>
 <p><img class="size-medium wp-image-1435 alignright" src="{{site.baseurl}}/assets/2020/08/320px-Git-logo.svg_-300x126.png" alt="" width="300" height="126">One of the reasons I got into IT was that I really enjoy learning new things. Unfortunately, there are so many things to learn that it's easy to get overwhelmed. Does it make sense to do a deep-dive into each technology that you use, or does it sometimes make sense to skim the cream off the top and move on to the next technology?</p>
 <p>In this post, I'm talking about git, the distributed source control system that is used in GitHub, Azure DevOps Repos, GitLab, and countless other places.  Git can be really complicated, and intimidating, so I'm going to try to convey the tiny fragment of git which allows me to get my work done.</p>
 <h2>Just Eight Commands</h2>
@@ -97,7 +95,6 @@ permalink: "/2020/08/25/git-the-5-percent-that-i-always-use/"
 <p><strong>git push</strong></p>
 <p>Git will reply with an error message because it doesn't know what remote branch to push it to.</p>
 <p>In the error message, though, it tells me how to do what I want:</p>
-<p> </p>
 <p><img class="alignnone size-medium wp-image-1433" src="{{site.baseurl}}/assets/2020/08/gitpush-1-300x57.png" alt="" width="300" height="57"></p>
 <p>In this case, it's </p>
 <p><strong>git push --set upstream origin TEst </strong>   (and yes, branch names are case-sensitive)</p>
@@ -126,7 +123,6 @@ permalink: "/2020/08/25/git-the-5-percent-that-i-always-use/"
 <p>Note: This is exactly what we did at the beginning, just with a temporary branch name of Next.</p>
 <p>When I'm ready to work on a real set of changes, I can rename the branch with</p>
 <p> <strong>git branch -m NewBranchName</strong></p>
-<p> </p>
 <h2>Summary</h2>
 <p>That probably seemed like a lot, but here are all of the commands (with some obvious placeholders)</p>
 <ul>
@@ -145,6 +141,6 @@ permalink: "/2020/08/25/git-the-5-percent-that-i-always-use/"
 <h2>Bonus command - git stash</h2>
 <p>If I find I've made changes in master,<strong> git stash</strong> will shelve the changes.  I can then get on the right branch and do a<strong> git stash pop</strong> to get the changes back.</p>
 <p>With the adoption of the <strong>git checkout -b Next</strong> protocol, though, I don't find myself needing this very often.</p>
-<p> </p>
 <p>What do you think?  Does this help you get your head around using git?</p>
-<p></body></html></p>
+
+

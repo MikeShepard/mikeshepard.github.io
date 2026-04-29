@@ -1,0 +1,53 @@
+<div id="secondary" class="widget-area" role="complementary">
+  <aside id="search-4" class="widget widget_search">
+    <form role="search" method="get" id="searchform" class="searchform" action="https://www.google.com/search">
+      <label class="assistive-text" for="s">Search for:</label>
+      <input type="search" class="field" name="q" id="s" placeholder="Search" value="">
+      <input type="hidden" name="sitesearch" value="{{ site.search_domain | default: site.url | replace: 'https://', '' | replace: 'http://', '' }}">
+      <input type="submit" class="submit" id="searchsubmit" value="Search">
+    </form>
+  </aside>
+
+  <aside id="archives-2" class="widget widget_archive">
+    <h3 class="widget-title">Archives</h3>
+    <ul>
+      {%- assign posts_by_month = site.posts | group_by_exp: 'post', 'post.date | date: "%B %Y"' -%}
+      {%- for month in posts_by_month -%}
+        {%- assign month_id = month.items.first.date | date: '%Y-%m' -%}
+        <li>
+          <a href="{{ '/archives/' | relative_url }}#{{ month_id }}">{{ month.name }}</a> ({{ month.items | size }})
+        </li>
+      {%- endfor -%}
+    </ul>
+  </aside>
+
+  <aside id="categories-1" class="widget widget_categories">
+    <h3 class="widget-title">Categories</h3>
+    <ul>
+      {%- assign sorted_categories = site.categories | sort -%}
+      {%- for category in sorted_categories -%}
+        <li><a href="{{ '/categories/' | relative_url }}#{{ category[0] | slugify }}">{{ category[0] }}</a> ({{ category[1] | size }})</li>
+      {%- endfor -%}
+    </ul>
+  </aside>
+
+  <aside id="tag_cloud-5" class="widget widget_tag_cloud">
+    <h3 class="widget-title">Tags</h3>
+    <div class="tagcloud">
+      {%- assign sorted_tags = site.tags | sort -%}
+      {%- for tag in sorted_tags -%}
+        <a class="tag-cloud-link" href="{{ '/tags/' | relative_url }}#{{ tag[0] | slugify }}">{{ tag[0] }} ({{ tag[1] | size }})</a>
+      {%- endfor -%}
+    </div>
+  </aside>
+
+  <aside id="site-links-1" class="widget widget_meta">
+    <h3 class="widget-title">Site Links</h3>
+    <ul>
+      <li><a href="{{ '/about-2/' | relative_url }}">About</a></li>
+      <li><a href="{{ '/archives/' | relative_url }}">Archives</a></li>
+      <li><a href="{{ '/feed.xml' | relative_url }}">Entries feed</a></li>
+      <li><a href="{{ '/downloads/' | relative_url }}">Downloads</a></li>
+    </ul>
+  </aside>
+</div>
